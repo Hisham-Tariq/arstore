@@ -1,0 +1,56 @@
+<div class="group cursor-pointer relative p-4 border-r border-b border-gray-200 sm:p-6" (click)="onProductClick()">
+  <div class="rounded-lg overflow-hidden bg-gray-200 aspect-w-1 aspect-h-1 group-hover:opacity-75">
+    <div #imgLoading style="all: unset !important;" >
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="h-20 w-20 rounded-full">
+          <img src="assets/svg/dark-loading.svg" class="h-full w-full" alt="">
+        </div>
+      </div>
+    </div>
+    <img (onStateChange)="imageLoadingState($event,productImg, imgLoading)" #productImg src="assets/dark-loading.gif" [lazyLoad]="this.product.thumbnail" alt="{{this.product.name}} Image" class="w-full h-full object-center object-cover invisible">
+  </div>
+
+  <div class="pt-10 pb-4 text-center">
+    <h3 class="text-sm font-medium text-black">
+      <a class="font-bold text-black text-lg no-underline">
+        <span aria-hidden="true" class="absolute inset-0 no-underline">
+        </span>
+        {{this.product.name}}
+      </a>
+    </h3>
+    <div class="mt-3 flex flex-col items-center">
+      <div class="flex flex-row w-full justify-between items-center">
+        <div>
+          <p class="sr-only">{{product.totalRating / product.ratedBy}} out of 5 stars</p>
+          <div class="flex items-center">
+            <bar-rating [readOnly]="true" [rate]="getAverageRating(product)" [max]="5" class="my-4">
+              <ng-template ratingActive>
+                <i class="fa-solid fa-star text-primary"></i>
+              </ng-template>
+              <ng-template ratingInactive>
+                <i class="fa-regular fa-star"></i>
+              </ng-template>
+              <ng-template ratingFraction>
+                <i class="fa-solid fa-star-half-stroke text-primary"></i>
+              </ng-template>
+            </bar-rating>
+          </div>
+        </div>
+        <p class="mt-1 text-sm text-gray-500">{{product.ratedBy}} reviews</p>
+      </div>
+    </div>
+    <div class="w-full flex flex-row justify-center items-center space-x-2">
+      <div *ngFor="let color of product.colors" class="h-4 w-4 rounded-full border border-black" [ngStyle]="{'background-color': color}">
+      </div>
+    </div>
+    <div class="flex justify-between">
+      <p class="mt-4 text-sm font-medium text-gray-900">Starts From</p>
+      <p *ngIf="this.product.discount == 0" class="mt-4 text-base font-medium text-gray-900">RS. {{retailPrice}}</p>
+      <p *ngIf="this.product.discount != 0" class="mt-4 text-base font-medium text-gray-900"><span class="font-bold"> RS. {{discountedPrice}}</span> &nbsp; <del>RS. {{retailPrice}}</del></p>
+    </div>
+    <div class="mt-6">
+      <a (click)="onProductClick()" class="!no-underline relative flex primary-button text-black border border-transparent rounded-md py-2 px-8 items-center justify-center text-sm font-medium cursor-pointer">View Product<span
+        class="sr-only">{{product.name}}</span></a>
+    </div>
+  </div>
+</div>

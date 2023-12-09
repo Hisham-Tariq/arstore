@@ -1,0 +1,16 @@
+.full-width-table {
+  width: 100%;
+}
+
+
+.pending-pill{
+  @apply bg-primary rounded-full px-2 py-1 text-black hover:bg-primary-400 text-xs transition-all;
+}
+
+.success-color{
+  background-color: #4CAF50;
+}
+
+//.pending-pill:hover{
+//  @apply bg-primary-500
+//}

@@ -1,0 +1,240 @@
+<!-- This example requires Tailwind CSS v2.0+ -->
+<div style="z-index: 999" id="cartDrawer" #cartDrawer class="hidden fixed inset-0 z-999 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+  <div class="absolute inset-0 overflow-hidden">
+    <div
+      [ngClass]="{
+      'animate__fadeIn': isCartOpen,
+      'animate__fadeOut': !isCartOpen
+      }"
+      (click)="closeCartDrawer()"
+      class="animate__animated animate__faster absolute inset-0 dark-overlay transition-opacity" aria-hidden="true"></div>
+
+    <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+
+      <div
+        [ngClass]="{
+        'animate__slideInRight': isCartOpen,
+        'animate__slideOutRight': !isCartOpen
+        }"
+        class="animate__animated animate__faster pointer-events-auto w-screen max-w-md">
+        <div class="flex h-full flex-col overflow-y-scroll bg-white shadow-xl">
+          <div class="flex-1 overflow-y-auto py-6 px-4 sm:px-6">
+            <div class="flex items-start justify-between">
+              <h2 class="text-lg font-medium text-gray-900" id="slide-over-title">Shopping cart</h2>
+              <div class="ml-3 flex h-7 items-center">
+                <button type="button" class="-m-2 p-2 text-gray-400 hover:text-gray-500">
+                  <span class="sr-only">Close panel</span>
+                  <!-- Heroicon name: outline/x -->
+                  <svg (click)="closeCartDrawer()" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="cartProducts.length > 0" class="mt-8">
+              <div class="flow-root">
+                <ul role="list" class="-my-6 divide-y divide-gray-200">
+                  <li *ngFor="let item of cartProducts" class="">
+                   <app-cart-item-card (reCheckCartState)="this.checkCartState()" [product]="item"></app-cart-item-card>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div *ngIf="cartProducts.length == 0" class="h-full flex justify-center items-center">
+              <h1 class="text-center">
+                No items in cart
+              </h1>
+            </div>
+
+          </div>
+
+          <div class="border-t border-gray-200 py-6 px-4 sm:px-6">
+            <div class="flex justify-between text-base font-medium text-gray-900">
+              <p>Subtotal</p>
+              <p>RS. {{totalCartPrice}}.00</p>
+            </div>
+            <p class="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
+            <div class="mt-6">
+              <button [disabled]="cartProducts.length == 0 || !this.isCartProductsValid"
+                (click)="gotToCheckout()"
+                 class="w-full cursor-pointer !no-underline primary-button flex items-center justify-center rounded-md border border-transparent bg-primary px-6 py-3 text-base font-medium shadow-sm">Checkout</button>
+            </div>
+            <div class="mt-6 flex justify-center text-center text-sm text-gray-500">
+              <p>
+                or
+                <button (click)="gotToProducts()" type="button" class="cursor-pointer font-medium text-primary-600 hover:text-primary-600">Continue Shopping<span aria-hidden="true"> &rarr;</span></button>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<header class="relative z-10">
+  <nav aria-label="Top">
+    <!-- Top navigation -->
+    <div class="bg-black bg-opacity-50">
+      <div class="max-w-7xl mx-auto h-10 px-4 flex items-center justify-between sm:px-6 lg:px-8">
+        <div class="flex items-center space-x-6">
+          <mat-icon class="text-white w-4 h-4" svgIcon="heroicons_outline:phone"></mat-icon>
+          <a style="margin-left: 6px !important;" class="text-sm font-medium text-white hover:text-gray-100">+92 320 8041633</a>
+        </div>
+        <!-- Currency selector -->
+        <form class="invisible">
+          <div>
+            <label for="desktop-currency" class="sr-only">Currency</label>
+            <div class="-ml-2 group relative bg-black border-transparent rounded-md focus-within:ring-1 focus-within:ring-white">
+              <select id="desktop-currency" name="currency"
+                      class="bg-none bg-gray-900 border-transparent rounded-md py-0.5 pl-2 pr-5 flex items-center text-sm font-medium text-white group-hover:text-gray-100 focus:outline-none focus:ring-0 focus:border-transparent">
+                <option>CAD</option>
+
+                <option>USD</option>
+
+                <option>AUD</option>
+
+                <option>EUR</option>
+
+                <option>GBP</option>
+              </select>
+              <div class="absolute right-0 inset-y-0 flex items-center pointer-events-none">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" class="w-5 h-5 text-gray-300">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 8l4 4 4-4"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <div class="flex items-center space-x-6" *ngIf="!isUserLoggedIn">
+          <mat-icon class="text-white w-4 h-4" svgIcon="heroicons_outline:login"></mat-icon>
+          <a (click)="openSignInDialog()" style="margin-left: 6px !important;" class="text-sm font-medium text-white hover:text-gray-100 cursor-pointer">Sign in</a>
+          <mat-icon class="text-white w-4 h-4" svgIcon="heroicons_outline:user"></mat-icon>
+          <a (click)="openSignUpDialog()" style="margin-left: 6px !important;" class="text-sm font-medium text-white hover:text-gray-100 cursor-pointer">Create an account</a>
+        </div>
+
+        <div class="flex items-center space-x-6" *ngIf="!isUserAdmin && isUserLoggedIn">
+          <span class="font-bold text-white">Welcome back <span class="text-primary">{{currentUserName}}</span></span>
+          <mat-icon class="text-white w-4 h-4" svgIcon="heroicons_outline:user"></mat-icon>
+          <a (click)="goToProfile()" style="margin-left: 6px !important;" class="text-sm font-medium text-white hover:text-gray-100 cursor-pointer">Profile</a>
+
+          <mat-icon class="text-white w-4 h-4" svgIcon="heroicons_outline:logout"></mat-icon>
+          <a (click)="logout()" style="margin-left: 6px !important;" class="text-sm font-medium text-white hover:text-gray-100 cursor-pointer">Logout</a>
+        </div>
+
+        <div class="flex items-center space-x-6" *ngIf="isUserAdmin && isUserLoggedIn">
+          <mat-icon class="text-white w-4 h-4" svgIcon="heroicons_outline:desktop-computer"></mat-icon>
+          <a (click)="goToDashboard()" style="margin-left: 6px !important;" class="text-sm font-medium text-white hover:text-gray-100 cursor-pointer">Dashboard</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary navigation -->
+    <div class="backdrop-blur-md backdrop-filter bg-opacity-10 bg-white" #myHeader [ngClass]="{
+    'bg-white bg-opacity-10': this.isHomePage,
+    'bg-black': !this.isHomePage
+    }">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div>
+          <div class="h-16 flex items-center justify-between">
+            <!-- Logo (lg+) -->
+            <div class="hidden lg:flex lg:flex lg:items-center">
+              <a href="#">
+                <span class="sr-only">Reflection Store</span>
+                <img class="h-12 w-auto cursor-pointer" src="../../../assets/images/logo/ReflectionRLogo.svg" alt="" routerLink="/home">
+              </a>
+            </div>
+
+            <div class="hidden lg:flex flex-row w-full justify-center items-center mx-4">
+              <div *ngFor="let item of navigations;">
+                <basic-horizontal-nav-item *ngIf="item.type === 'basic'" [item]="item"></basic-horizontal-nav-item>
+                <collapsable-horizontal-nav-item *ngIf="item.type === 'collapsable'" [item]="item">
+                </collapsable-horizontal-nav-item>
+              </div>
+            </div>
+
+            <!-- Mobile menu and search (lg-) -->
+            <div class="flex-1 flex items-center lg:hidden">
+              <!-- Mobile menu toggle, controls the 'mobileMenuOpen' state. -->
+
+              <button (click)="verticalNavigation.toggle()" type="button" class="-ml-2 p-2 text-white">
+                <span class="sr-only">Open menu</span>
+                <!-- Heroicon name: outline/menu -->
+                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+              </button>
+
+              <!-- Search -->
+              <a href="#" class="ml-2 p-2 text-white">
+
+<!--                <span class="sr-only">Search</span>-->
+<!--                &lt;!&ndash; Heroicon name: outline/search &ndash;&gt;-->
+<!--                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">-->
+<!--                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>-->
+<!--                </svg>-->
+              </a>
+            </div>
+
+            <!-- Logo (lg-) -->
+            <a href="#" class="lg:hidden">
+              <span class="sr-only">Reflection Store</span>
+              <img src="../../../assets/images/logo/ReflectionRLogo.svg" alt="" class="h-8 w-auto cursor-pointer" routerLink="/home">
+            </a>
+
+            <div class="flex-1 flex items-center justify-end">
+
+
+<!--              <a (click)="openSearchDialog()"  class="cursor-pointer hidden text-sm font-medium text-white lg:block"> Search</a>-->
+
+              <div class="flex items-end ">
+                <mat-icon (click)="gotToProducts()" [svgIcon]="'heroicons_outline:search'" class="text-white cursor-pointer"></mat-icon>
+                <!-- Cart -->
+                <div class="ml-4 flow-root lg:ml-8 relative cart-icon cursor-pointer" (click)="onCartClicked()">
+                  <a class="group -m-2 p-2 flex items-center">
+                    <!-- Heroicon name: outline/shopping-bag -->
+                    <svg class="flex-shrink-0 h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                    <span class="ml-2 text-sm font-medium text-white">{{this.cartTotal}}</span>
+                    <span class="sr-only">items in cart, view bag</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+
+<reflection-drawer transparentOverlay="false" [mode]="'over'"
+                   [name]="'verticalNavigation'" position="left" #verticalNavigation>
+  <div class="flex flex-col w-full h-full justify-start bg-black">
+    <!--  Header  -->
+    <div class="mt-6 flex justify-center items-center">
+      <img src="assets/images/logo/ReflectionRLogo.svg" class="w-30" alt="">
+    </div>
+    <!-- Header End  -->
+    <div class="h-12"></div>
+    <!--  Navigation  -->
+    <div *ngFor="let item of navigations;">
+      <ng-container *ngIf="item.type === 'basic'">
+        <basic-vertical-nav-item (onItemClicked)="verticalNavigation.toggle()" [item]="item"></basic-vertical-nav-item>
+      </ng-container>
+      <ng-container *ngIf="item.type === 'collapsable'">
+        <collapsable-vertical-nav-item (onItemClicked)="verticalNavigation.toggle()" [item]="item">
+        </collapsable-vertical-nav-item>
+      </ng-container>
+    </div>
+    <!-- Navigation End  -->
+    <!--  Footer  -->
+    <!-- Footer End  -->
+  </div>
+</reflection-drawer>
+

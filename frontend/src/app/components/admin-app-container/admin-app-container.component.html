@@ -1,0 +1,86 @@
+<div class="flex flex-col h-full w-full">
+  <div class="lg:hidden flex flex-row h-16 items-center px-8 flex-auto w-full bg-black print:hidden">
+    <mat-icon (click)="verticalNavigation.toggle()" class="block lg:hidden cursor-pointer text-white" svgIcon="heroicons_outline:menu">
+    </mat-icon>
+    <div class="block lg:hidden w-2"></div>
+    <img routerLink="/" src="assets/images/logo/ReflectionRLogo.svg" class="block lg:hidden h-8" alt="">
+  </div>
+  <div class="fixed left-0 inset-y-0 z-10 w-[20rem] hidden lg:inline-block">
+    <ng-container *ngTemplateOutlet="adminNavigation"></ng-container>
+  </div>
+  <div class="h-full lg:ml-[20rem]">
+    <div class="h-full">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+  <!--  <div class="flex flex-row h-full w-full">-->
+  <!--    -->
+  <!--  </div>-->
+</div>
+
+<reflection-drawer transparentOverlay="false" class="w-10/12 md:w-100 md:min-w-100" [mode]="'over'"
+                   [name]="'verticalNavigation'" position="left" #verticalNavigation>
+  <ng-container *ngTemplateOutlet="adminNavigation"></ng-container>
+</reflection-drawer>
+
+
+<ng-template #adminNavigation>
+  <perfect-scrollbar class="flex flex-col w-full max-h-screen h-full justify-start bg-black">
+    <!--  Header  -->
+    <div class="mt-6 flex justify-center items-center">
+      <img routerLink="/" src="assets/images/logo/ReflectionRLogo.svg" class="w-30 cursor-pointer" alt="">
+    </div>
+    <!-- Header End  -->
+    <!--  Navigation  -->
+    <!-- User account dropdown -->
+    <div class="group w-full px-3 relative inline-block text-left">
+      <div class="group-hover:peer">
+        <button type="button" class="group w-full pl-8 pr-8 pt-8 text-sm text-left font-medium text-white " id="options-menu-button" aria-expanded="false" aria-haspopup="true">
+          <span class="flex w-full justify-between items-center">
+            <span class="flex min-w-0 items-center justify-between space-x-3">
+<!--              <img class="w-10 h-10 bg-gray-300 rounded-full flex-shrink-0"-->
+<!--                   src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80" alt=""/>-->
+          <span class="flex-1 flex flex-col min-w-0">
+            <span class="text-white text-sm font-medium truncate">{{authService.user.firstName}} {{authService.user.lastName}}</span>
+            <span class="text-gray-500 text-sm truncate">{{authService.user.email}}</span>
+          </span>
+        </span>
+            <!-- Heroicon name: solid/selector -->
+        <svg class="flex-shrink-0 h-5 w-5 text-white group-hover:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd"
+                d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                clip-rule="evenodd"/>
+        </svg>
+      </span>
+        </button>
+      </div>
+
+      <div
+        class="group-hover:block hidden w-4/5 z-10 mx-3 origin-top absolute right-50 left-50 -translate-x-1/2 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-200 focus:outline-none"
+        role="menu" aria-orientation="vertical" aria-labelledby="options-menu-button" tabindex="-1">
+        <div class="py-1" role="none">
+          <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+          <button routerLink="/admin/admin-profile" class="text-gray-700 block px-4 py-2 text-sm cursor-pointer" role="menuitem" tabindex="-1" id="options-menu-item-0">View profile</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar Search -->
+<!--    <div class="px-3 mt-5">-->
+<!--      <label for="search" class="sr-only">Search</label>-->
+<!--      <div class="mt-1 p-4 relative rounded-md shadow-sm">-->
+<!--        <input type="text" name="search" id="search" class="focus:ring-amber-500 focus:border-amber-500 block w-full pl-9 sm:text-sm border-gray-300 rounded-md"-->
+<!--               placeholder="Search"/>-->
+<!--      </div>-->
+<!--    </div>-->
+    <div class="mt-10"></div>
+    <div *ngFor="let item of navigations;" >
+      <ng-container *ngIf="item.type === 'basic'">
+        <basic-vertical-nav-item (onItemClicked)="verticalNavigation.close()" [item]="item" class="text-md"></basic-vertical-nav-item>
+      </ng-container>
+      <ng-container *ngIf="item.type === 'collapsable'">
+        <collapsable-vertical-nav-item (onItemClicked)="verticalNavigation.close()" [item]="item" class="text-md"></collapsable-vertical-nav-item>
+      </ng-container>
+    </div>
+  </perfect-scrollbar>
+</ng-template>

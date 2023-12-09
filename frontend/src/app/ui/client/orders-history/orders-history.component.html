@@ -1,0 +1,30 @@
+<div class="bg-gray-50">
+
+  <main class="py-12">
+    <div class="max-w-7xl mx-auto sm:px-2 lg:px-8 ">
+      <div class="max-w-2xl mx-auto px-4 lg:max-w-4xl lg:px-0">
+        <h1 class="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">Order history</h1>
+        <p class="mt-2 text-sm text-gray-500">Check the status of recent orders, manage returns, and discover similar products.</p>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto sm:px-2 lg:px-8 form mt-4">
+      <div class="max-w-2xl mx-auto px-4 lg:max-w-4xl lg:px-0">
+        <div class="icon-field md:w-60">
+          <input placeholder="REF-121314" [(ngModel)]="searchKey" autocomplete="off" (ngModelChange)="applyFilter()" type="search" class="placeholder:!text-gray-400 leading-icon peer">
+          <mat-icon class="leading peer-focus:text-primary" svgIcon="heroicons_outline:search"></mat-icon>
+        </div>
+      </div>
+
+    </div>
+
+    <section aria-labelledby="recent-heading" class="mt-8">
+      <h2 id="recent-heading" class="sr-only">Recent orders</h2>
+      <div class="w-full sm:px-2 lg:px-8 ">
+        <div class="max-w-3xl mx-auto space-y-8 sm:px-4 lg:max-w-4xl lg:px-0">
+          <app-order-card [order]="order" [isOdd]="i % 2 == 1" *ngFor="let order of filteredOrders; let i = index"></app-order-card>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

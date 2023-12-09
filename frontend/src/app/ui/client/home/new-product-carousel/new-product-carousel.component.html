@@ -1,0 +1,9 @@
+<div class="w-full h-180 flex flex-col bg-white">
+  <div>
+    <p class="flex justify-center mt-12 text-5xl font-extrabold">Our Most Loved Frames And Lenses</p>
+  </div>
+
+  <drag-scroll class="h-full -mx-px border border-gray-100 mt-8">
+    <product-card class="w-72" drag-scroll-item *ngFor="let product of this.products" [product]="product"></product-card>
+  </drag-scroll>
+</div>

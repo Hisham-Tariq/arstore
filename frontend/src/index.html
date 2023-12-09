@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en" style="overflow-x: hidden;">
+
+<head>
+  <title>Reflection</title>
+  <meta charset="utf-8">
+  <meta name="description" content="E-Commerce store based whose moto is Try before you buy using Augmented Reality">
+  <meta name="keywords" content="AR,Augmented Reality,Glasses,Lens,online shopping,">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
+
+  <base href="/">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="assets/images/favicon-16x16.png">
+  <link rel="icon" type="image/x-icon" href="assets/images/favicon-32x32.png">
+  <!-- Fonts -->
+  <link href="assets/fonts/gilroy/gilroy.css" rel="stylesheet"/>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Splash Screen Style -->
+  <link type="text/stylesheet" href="assets/styles/splash-screen.css" rel="stylesheet">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+  <script id="stripe-script" src="assets/js/stripe.js"></script>
+<!--  <script id="stripe-script" src="https://checkout.stripe.com/checkout.js"></script>-->
+<!--  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
+
+</head>
+
+<style>
+  body reflection-splash-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #000;
+    color: #F9FAFB;
+    z-index: 999999;
+    pointer-events: none;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body reflection-splash-screen img {
+    width: 200px;
+  }
+
+  body reflection-splash-screen .spinner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    width: 56px;
+  }
+
+  body reflection-splash-screen .spinner > div {
+    width: 12px;
+    height: 12px;
+    background-color: #fff;
+    border-radius: 100%;
+    display: inline-block;
+    -webkit-animation: reflection-bouncedelay 1s infinite ease-in-out both;
+    animation: reflection-bouncedelay 1s infinite ease-in-out both;
+  }
+
+  body reflection-splash-screen .spinner .bounce1 {
+    -webkit-animation-delay: -0.32s;
+    animation-delay: -0.32s;
+  }
+
+  body reflection-splash-screen .spinner .bounce2 {
+    -webkit-animation-delay: -0.16s;
+    animation-delay: -0.16s;
+  }
+
+  @-webkit-keyframes reflection-bouncedelay {
+    0%, 80%, 100% {
+      -webkit-transform: scale(0)
+    }
+    40% {
+      -webkit-transform: scale(1.0)
+    }
+  }
+
+  @keyframes reflection-bouncedelay {
+    0%, 80%, 100% {
+      -webkit-transform: scale(0);
+      transform: scale(0);
+    }
+    40% {
+      -webkit-transform: scale(1.0);
+      transform: scale(1.0);
+    }
+  }
+
+  body:not(.reflection-splash-screen-hidden) {
+    overflow: hidden;
+  }
+
+  body.reflection-splash-screen-hidden reflection-splash-screen {
+    visibility: hidden;
+    opacity: 0;
+  }
+</style>
+
+<body>
+
+<reflection-splash-screen id="splash-screen">
+  <img
+    src="assets/images/logo/ReflectionRLogo.svg"
+    alt="Reflection logo">
+  <div class="spinner">
+    <div class="bounce1"></div>
+    <div class="bounce2"></div>
+    <div class="bounce3"></div>
+  </div>
+</reflection-splash-screen>
+
+<app-root></app-root>
+
+</body>
+<!--<script src="https://unpkg.com/@tensorflow/tfjs-core@3.16.0/dist/tf-core.js"></script>-->
+<!--<script src="https://unpkg.com/@tensorflow/tfjs-converter@3.16.0/dist/tf-converter.js"></script>-->
+<!--<script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@3.16.0/dist/tf-backend-webgl.js"></script>-->
+<!--<script src="https://unpkg.com/@tensorflow-models/face-landmarks-detection@1.0.1/dist/face-landmarks-detection.js"></script>-->
+
+</html>

@@ -1,0 +1,211 @@
+<div #deleteConfirmationModal class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+    <div
+      [ngClass]="{
+      'animate__fadeIn': isAskingForConfirmation,
+      'animate__fadeOut': !isAskingForConfirmation
+      }"
+      (click)="closeDeleteModal()"
+      class="animate__faster animate__animated fixed inset-0 dark-overlay transition-opacity" aria-hidden="true"></div>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <div
+      [ngClass]="{
+      'animate__zoomIn': isAskingForConfirmation,
+      'animate__zoomOut': !isAskingForConfirmation
+      }"
+      class="animate__animated animate__faster relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+            <!-- Heroicon name: outline/exclamation -->
+            <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Delete Product</h3>
+            <div class="mt-2">
+              <p class="text-sm text-gray-500">Are you sure you want to delete Product? This action cannot be undone.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button (click)="onDeleteProduct()" type="button" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 !bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">Delete</button>
+        <button (click)="closeDeleteModal()" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="w-full px-12 grid grid-cols-12">
+  <!-- Alert -->
+  <reflection-alert class="col-span-full py-4 mt-8 -mb-4" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="true"
+                    [type]="alert.type" [@shake]="alert.type === 'error'" [dismissible]="true">
+    {{alert.message}}
+  </reflection-alert>
+
+  <!-- Page Title -->
+  <div class="col-span-full w-full justify-start font-extrabold text-5xl py-4">
+    <span>Products List</span>
+  </div>
+
+
+  <div class="grid grid-cols-12 col-span-full form gap-x-2">
+
+    <div class="col-span-3 flex flex-col">
+      <ng-container *ngTemplateOutlet="MainCategoryFilter"></ng-container>
+    </div>
+    <div class="col-span-3 flex flex-col">
+      <ng-container *ngTemplateOutlet="PriceFilter"></ng-container>
+    </div>
+    <div class="col-span-3 grid grid-cols-2">
+
+      <div class="flex flex-col">
+        <span class="label">Active</span>
+        <div class="flex w-full h-full">
+
+          <label for="StatusToggle" class="flex items-center justify-center cursor-pointer">
+            <!-- toggle -->
+            <div class="relative">
+              <!-- input -->
+              <input type="checkbox" id="StatusToggle" (change)="applyFilter()" [(ngModel)]="activeFilter" class="sr-only peer">
+              <!-- line -->
+              <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+              <!-- dot -->
+              <div class="peer-checked:bg-primary dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Box -->
+    <div class="col-span-3 flex flex-col">
+      <span class="label">Search</span>
+      <div class="icon-field">
+        <input [(ngModel)]="searchKey" autocomplete="off" (keyup)="applyFilter()" type="search" class="leading-icon peer">
+        <mat-icon class="leading peer-focus:text-primary" svgIcon="heroicons_outline:search"></mat-icon>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-span-12 my-2"></div>
+
+  <!--  Product Table  -->
+  <div class="col-span-12">
+    <ng-container *ngTemplateOutlet="ProductDataTable"></ng-container>
+  </div>
+</div>
+
+<ng-template #ProductDataTable>
+  <div class="table-wrapper">
+    <table mat-table class="w-full" matSort aria-label="Elements">
+      <!-- Id Column -->
+      <ng-container matColumnDef="image">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header></th>
+        <td mat-cell *matCellDef="let row">
+          <img class="w-10 h-10" src="{{getProductFirstColorThumbnail(row)}}" alt="product-thumnail">
+        </td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+        <td mat-cell *matCellDef="let row">{{row.name}}</td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <td mat-cell *matCellDef="let row">
+        <span [ngClass]="{
+        'bg-primary': row.status === 'active',
+        'bg-red-200': row.status === 'inactive',
+        'bg-blue-300': row.status === 'dependent inactive'
+        }" class="bg-green-200 text-black rounded-full px-2 py-1">
+          {{row.status}}
+        </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="active">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>active</th>
+        <td mat-cell *matCellDef="let row">
+          <label for="{{row.id}}" class="flex items-center cursor-pointer">
+            <!-- toggle -->
+            <div class="relative">
+              <!-- input -->
+              <input [disabled]="row.status === 'dependent inactive'" [checked]="row.status === 'active'" #statusToggle type="checkbox" id="{{row.id}}" (change)="setProductStatus(row, statusToggle.checked)" class="sr-only peer">
+              <!-- line -->
+              <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+              <!-- dot -->
+              <div class="peer-checked:bg-primary dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+            </div>
+          </label>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let row">
+          <mat-icon (click)="onUpdateProduct(row)" class="material-icons update-color cursor-pointer" svgIcon="heroicons_outline:pencil"></mat-icon>
+<!--          <mat-icon (click)="confirmForDelete(row)" class="ml-4 material-icons delete-color cursor-pointer" svgIcon="heroicons_outline:trash">-->
+<!--          </mat-icon>-->
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+
+  <!--  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>-->
+
+  <mat-paginator #paginator [length]="data?.data.length" [pageIndex]="0" [pageSize]="10"
+                 [pageSizeOptions]="[5, 10, 20]" aria-label="Select page">
+  </mat-paginator>
+</ng-template>
+
+
+<ng-template #MainCategoryFilter>
+  <span class="label w-full">Main Category</span>
+  <ng-select [clearable]="false"  dropdownPosition="auto" name="main_category_selector" (change)="applyFilter()" [(ngModel)]="selectedMainCategory">
+    <ng-option *ngFor="let category of this.mainCategories" [value]="category.id">{{category.name}}</ng-option>
+    <ng-option [value]="'null'">None</ng-option>
+  </ng-select>
+</ng-template>
+
+<ng-template #PriceFilter>
+  <span class="label w-full">Price</span>
+    <reflection-menu  class="w-full">
+      <div reflectionMenuButton class="cursor-pointer hover:bg-gray-100 flex items-center justify-center relative min-h-[44px] w-full bg-white border-gray-300 border-2 rounded-md">
+        <span class="w-full text-center text-gray-600 font-semibold">{{minPriceFilter}} - {{maxPriceFilter}}</span>
+        <mat-icon class="w-4 h-4 absolute right-0 mr-3" svgIcon="heroicons_solid:chevron-down"></mat-icon>
+      </div>
+      <div reflectionMenuItems class="border rounded-b-sm w-full flex flex-col">
+        <div class="w-full">
+          <div class="icon-field">
+            <input type="number" value="0" min="0" max="{{maxPriceFilter}}" (ngModelChange)="applyFilter()" (keyup)="applyFilter()" [(ngModel)]="minPriceFilter" class="border-0 leading-icon peer text-center">
+            <span class="leading text-gray-600 font-bold">Min</span>
+          </div>
+        </div>
+        <div class="my-1 border-b border-gray-100"></div>
+        <div class="w-full">
+          <div class="icon-field">
+            <input type="number" value="0" min="{{minPriceFilter}}" (ngModelChange)="applyFilter()" (keyup)="applyFilter()" [(ngModel)]="maxPriceFilter" class="border-0 leading-icon peer text-center">
+            <span class="leading text-gray-600 font-bold">Max</span>
+          </div>
+        </div>
+        <div class="w-full my-2 px-2">
+          <button (click)="minPriceFilter =0; maxPriceFilter = 999999; applyFilter()" class="primary-button w-full">Reset</button>
+        </div>
+      </div>
+    </reflection-menu>
+</ng-template>
+
+

@@ -1,0 +1,223 @@
+<div #reviewModal class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+
+    <div
+      [ngClass]="{
+      'animate__fadeIn': isUserReviewing,
+      'animate__fadeOut': !isUserReviewing
+      }"
+      (click)="closeReviewModal()"
+      class="animate__faster animate__animated fixed inset-0 dark-overlay transition-opacity" aria-hidden="true"></div>
+
+    <!-- This element is to trick the browser into centering the modal contents. -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <div
+      [ngClass]="{
+      'animate__zoomIn': isUserReviewing,
+      'animate__zoomOut': !isUserReviewing
+      }"
+      class="animate__animated animate__faster inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 transform transition-all sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+      <div>
+        <div class="mx-auto flex items-center justify-center h-24 w-24 rounded-full bg-gray-100">
+          <!-- Heroicon name: outline/check -->
+          <!--          <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">-->
+          <!--            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />-->
+          <!--          </svg>-->
+          <img #rProductImage src="" alt="">
+        </div>
+        <div class="mt-3 text-center sm:mt-5">
+          <h3 #rProductName class="text-lg leading-6 font-medium text-gray-900" id="modal-title"></h3>
+          <form class="mt-2 form flex flex-col items-center">
+            <!--            <ngx-star-rating [formControlName]="'rating'" [id]="'rating'" ></ngx-star-rating>-->
+            <!--            <ngx-star-rating (ratechange)="onRateChange($event)"></ngx-star-rating>-->
+            <bar-rating [(rate)]="currentRating" [max]="5" class="my-4">
+              <ng-template ratingActive>
+                <svg style="fill: #f3cb21" class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                  <path
+                    d="M381.2 150.3L524.9 171.5C536.8 173.2 546.8 181.6 550.6 193.1C554.4 204.7 551.3 217.3 542.7 225.9L438.5 328.1L463.1 474.7C465.1 486.7 460.2 498.9 450.2 506C440.3 513.1 427.2 514 416.5 508.3L288.1 439.8L159.8 508.3C149 514 135.9 513.1 126 506C116.1 498.9 111.1 486.7 113.2 474.7L137.8 328.1L33.58 225.9C24.97 217.3 21.91 204.7 25.69 193.1C29.46 181.6 39.43 173.2 51.42 171.5L195 150.3L259.4 17.97C264.7 6.954 275.9-.0391 288.1-.0391C300.4-.0391 311.6 6.954 316.9 17.97L381.2 150.3z"/>
+                </svg>
+              </ng-template>
+              <ng-template ratingInactive>
+                <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                  <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+                  <path
+                    d="M287.9 0C297.1 0 305.5 5.25 309.5 13.52L378.1 154.8L531.4 177.5C540.4 178.8 547.8 185.1 550.7 193.7C553.5 202.4 551.2 211.9 544.8 218.2L433.6 328.4L459.9 483.9C461.4 492.9 457.7 502.1 450.2 507.4C442.8 512.7 432.1 513.4 424.9 509.1L287.9 435.9L150.1 509.1C142.9 513.4 133.1 512.7 125.6 507.4C118.2 502.1 114.5 492.9 115.1 483.9L142.2 328.4L31.11 218.2C24.65 211.9 22.36 202.4 25.2 193.7C28.03 185.1 35.5 178.8 44.49 177.5L197.7 154.8L266.3 13.52C270.4 5.249 278.7 0 287.9 0L287.9 0zM287.9 78.95L235.4 187.2C231.9 194.3 225.1 199.3 217.3 200.5L98.98 217.9L184.9 303C190.4 308.5 192.9 316.4 191.6 324.1L171.4 443.7L276.6 387.5C283.7 383.7 292.2 383.7 299.2 387.5L404.4 443.7L384.2 324.1C382.9 316.4 385.5 308.5 391 303L476.9 217.9L358.6 200.5C350.7 199.3 343.9 194.3 340.5 187.2L287.9 78.95z"/>
+                </svg>
+              </ng-template>
+            </bar-rating>
+            <textarea [(ngModel)]="currentReview" name="review" class="field h-50 w-full"></textarea>
+          </form>
+        </div>
+      </div>
+      <div class="mt-5 sm:mt-6">
+        <button
+          [disabled]="isAddingReview"
+          [ngClass]="{
+              '!bg-gray-500': isAddingReview
+              }"
+          (click)="sendReview()" type="button" class="primary-button w-full">
+          <span *ngIf="!isAddingReview">Send Review</span>
+          <div class="flex justify-center items-center" *ngIf="isAddingReview">
+            <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'">
+            </mat-progress-spinner>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div [ngClass]="{
+'bg-gray-100': isOdd,
+'bg-white': !isOdd
+}" class=" border-t border-b border-gray-200 shadow-sm sm:rounded-lg sm:border my-4">
+  <h3 class="sr-only">Order placed on
+    <time>{{order.date.seconds * 1000 | date:'fullDate'}}</time>
+  </h3>
+
+  <div class="flex items-center p-4 border-b border-gray-200 sm:p-6 sm:grid sm:grid-cols-4 sm:gap-x-6">
+    <dl class="flex-1 grid grid-cols-2 gap-x-6 text-sm sm:col-span-3 sm:grid-cols-3 lg:col-span-2">
+      <div>
+        <dt class="font-medium text-gray-900">Order number</dt>
+        <dd class="mt-1 text-gray-500">{{order.id}}</dd>
+      </div>
+      <div class="hidden sm:block">
+        <dt class="font-medium text-gray-900">Date placed</dt>
+        <dd class="mt-1 text-gray-500">
+          <time>{{order.date.seconds * 1000 | date:'fullDate'}}</time>
+        </dd>
+      </div>
+      <div>
+        <dt class="font-medium text-gray-900">Total amount</dt>
+        <dd class="mt-1 font-medium text-gray-900">RS. {{order.totalPrice}}.00</dd>
+      </div>
+    </dl>
+
+    <div class="relative group flex justify-end lg:hidden">
+      <div class="hidden group-hover:block origin-bottom-right absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+           role="menu" aria-orientation="vertical" aria-labelledby="menu-0-button" tabindex="-1">
+        <div class="py-1" role="none">
+          <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
+          <a class="text-gray-700 block px-4 py-2 text-sm hidden" role="menuitem" tabindex="-1" id="menu-0-item-0"> View </a>
+          <a (click)="showInvoice()" class="!no-underline cursor-pointer text-gray-700 block px-4 py-2 text-sm" role="menuitem" tabindex="-1" id="menu-0-item-1"> Invoice </a>
+        </div>
+      </div>
+
+      <div class="flex items-center ">
+        <button type="button" class="-m-2 p-2 flex items-center text-gray-400 hover:text-gray-500" id="menu-0-button" aria-expanded="false" aria-haspopup="true">
+          <span class="sr-only">Options for order {{order.id}}</span>
+          <!-- Heroicon name: outline/dots-vertical -->
+          <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+          </svg>
+        </button>
+      </div>
+
+
+    </div>
+
+    <div class="hidden lg:col-span-2 lg:flex lg:flex-row lg:items-center lg:justify-end lg:space-x-4">
+      <a
+        class="hidden flex items-center justify-center bg-white py-2 px-2.5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <span>View Order</span>
+        <span class="sr-only">{{order.id}}</span>
+      </a>
+      <a (click)="showInvoice()"
+         class="flex !no-underline cursor-pointer items-center justify-center bg-white py-2 px-2.5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <span>View Invoice</span>
+        <span class="sr-only">for order {{order.id}}</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Products -->
+  <h4 class="sr-only">Items</h4>
+  <ul role="list" class="divide-y divide-gray-200">
+    <li *ngFor="let product of order.products; let i = index" class="p-4 sm:p-6">
+      <div class="flex items-center sm:items-start">
+        <div class="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg overflow-hidden sm:w-40 sm:h-40">
+          <img src="{{product.thumbnail}}" alt="" class="w-full h-full object-center object-cover">
+        </div>
+        <div class="flex-1 ml-6 text-sm flex flex-col">
+          <div>
+            <div class="font-medium text-gray-900 sm:flex sm:justify-between">
+              <h5>{{product.name}}</h5>
+              <p class="mt-2 sm:mt-0">{{product.quantity}} x {{product.price}}.00</p>
+            </div>
+            <p class="hidden text-gray-500 sm:block sm:mt-2"></p>
+          </div>
+          <div class="flex flex-row justify-between">
+            <div class="font-medium text-gray-900 flex">
+              <h5>Qty: </h5>
+              <p>{{product.quantity}}</p>
+            </div>
+            <p class="font-medium text-gray-900 mt-2">
+              {{product.quantity * product.price}}.00
+            </p>
+          </div>
+
+        </div>
+      </div>
+      <div class="mt-6 sm:flex sm:justify-between">
+        <div *ngIf="product.rating == 0 && order.status == 'pending'"></div>
+        <button *ngIf="product.rating == 0 && order.status == 'delivered'" (click)="openReviewModal(product)"
+                class="flex items-center transition-all rounded-full p-2 bg-gray-50 cursor-pointer">
+          <!-- Heroicon name: solid/check-circle -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+          <p class="ml-2 text-sm font-medium text-gray-500">Give Review</p>
+        </button>
+
+        <div *ngIf="product.rating != 0" class="flex items-center ">
+          <!-- Heroicon name: solid/check-circle -->
+          <svg style="fill: #f3cb21" class="h-5 w-5" *ngFor="let i of range(0, product.rating)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+            <path
+              d="M381.2 150.3L524.9 171.5C536.8 173.2 546.8 181.6 550.6 193.1C554.4 204.7 551.3 217.3 542.7 225.9L438.5 328.1L463.1 474.7C465.1 486.7 460.2 498.9 450.2 506C440.3 513.1 427.2 514 416.5 508.3L288.1 439.8L159.8 508.3C149 514 135.9 513.1 126 506C116.1 498.9 111.1 486.7 113.2 474.7L137.8 328.1L33.58 225.9C24.97 217.3 21.91 204.7 25.69 193.1C29.46 181.6 39.43 173.2 51.42 171.5L195 150.3L259.4 17.97C264.7 6.954 275.9-.0391 288.1-.0391C300.4-.0391 311.6 6.954 316.9 17.97L381.2 150.3z"/>
+          </svg>
+          <svg class="h-5 w-5" *ngFor="let i of range(product.rating, 5)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+            <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+            <path
+              d="M287.9 0C297.1 0 305.5 5.25 309.5 13.52L378.1 154.8L531.4 177.5C540.4 178.8 547.8 185.1 550.7 193.7C553.5 202.4 551.2 211.9 544.8 218.2L433.6 328.4L459.9 483.9C461.4 492.9 457.7 502.1 450.2 507.4C442.8 512.7 432.1 513.4 424.9 509.1L287.9 435.9L150.1 509.1C142.9 513.4 133.1 512.7 125.6 507.4C118.2 502.1 114.5 492.9 115.1 483.9L142.2 328.4L31.11 218.2C24.65 211.9 22.36 202.4 25.2 193.7C28.03 185.1 35.5 178.8 44.49 177.5L197.7 154.8L266.3 13.52C270.4 5.249 278.7 0 287.9 0L287.9 0zM287.9 78.95L235.4 187.2C231.9 194.3 225.1 199.3 217.3 200.5L98.98 217.9L184.9 303C190.4 308.5 192.9 316.4 191.6 324.1L171.4 443.7L276.6 387.5C283.7 383.7 292.2 383.7 299.2 387.5L404.4 443.7L384.2 324.1C382.9 316.4 385.5 308.5 391 303L476.9 217.9L358.6 200.5C350.7 199.3 343.9 194.3 340.5 187.2L287.9 78.95z"/>
+          </svg>
+          <span class="ml-1 text-sm font-medium">{{product.rating}}</span>
+          <p class="ml-2 text-sm font-medium text-gray-500">Thanks for review</p>
+        </div>
+
+        <div class="mt-6 border-t border-gray-200 pt-4 flex items-center space-x-4 divide-x divide-gray-200 text-sm font-medium sm:mt-0 sm:ml-4 sm:border-none sm:pt-0">
+          <div class="flex-1 flex justify-center">
+            <a (click)="onViewProduct(product.productId)" class="text-primary-600 whitespace-nowrap hover:text-amber-500 cursor-pointer">View product</a>
+          </div>
+          <div class="flex-1 pl-4 flex justify-center">
+            <a (click)="onBugAgain(i)" class="text-primary-600 whitespace-nowrap hover:text-amber-500 cursor-pointer">Buy again</a>
+          </div>
+        </div>
+      </div>
+    </li>
+    <li class="p-4 sm:p-6">
+      <div *ngIf="order.status == 'pending'" class="flex items-center">
+        <!-- Heroicon name: solid/check-circle -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+        </svg>
+        <p class="ml-2 text-sm font-medium text-gray-500">Order on the way</p>
+      </div>
+      <div *ngIf="order.status == 'delivered'" class="flex items-center">
+        <!-- Heroicon name: solid/check-circle -->
+        <svg class="w-5 h-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clip-rule="evenodd"/>
+        </svg>
+        <p class="ml-2 text-sm font-medium text-gray-500">Delivered on
+          <time>{{order.deliveryDate.seconds * 1000 | date:'medium'}}</time>
+        </p>
+      </div>
+    </li>
+  </ul>
+</div>

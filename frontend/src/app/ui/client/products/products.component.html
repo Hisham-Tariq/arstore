@@ -1,0 +1,192 @@
+
+<style>
+  .section {
+    padding: 0 1.5rem;
+  }
+</style>
+
+<div class="flex flex-row w-full mt-4 mb-4">
+  <div class=" h-full w-120 hidden md:flex flex-col">
+    <ng-container *ngTemplateOutlet="ProductFilter"></ng-container>
+  </div>
+
+
+  <div class="flex flex-col w-full px-4">
+    <div class="flex flex-col h-30 w-full">
+      <div class="form">
+        <div class="icon-field">
+          <input [(ngModel)]="searchKey" autocomplete="off" (ngModelChange)="applyFilter()" (keyup)="applyFilter()" type="search" class="leading-icon peer">
+          <mat-icon class="leading peer-focus:text-primary" svgIcon="heroicons_outline:search"></mat-icon>
+        </div>
+      </div>
+      <div class="flex md:hidden flex-row justify-end items-center mt-4">
+        <div [matMenuTriggerFor]="menu"
+             class="cursor-pointer rounded-full bg-transparent border-2 border-gray-300 px-3 py-2">
+          <mat-menu #menu="matMenu" class="rounded-lg">
+            <button (click)="sortBy='popular'; applySorting()" mat-menu-item>Popular</button>
+            <button (click)="sortBy='newest'; applySorting()" mat-menu-item>Newest</button>
+            <button (click)="sortBy='oldest'; applySorting()" mat-menu-item>Oldest</button>
+            <button (click)="priceSort='asc';sortBy='price'; applySorting()" mat-menu-item>Price: low to high</button>
+            <button (click)="priceSort='desc';sortBy='price'; applySorting()" mat-menu-item>Price: high to low</button>
+          </mat-menu>
+          Sort
+          <svg xmlns="http://www.w3.org/2000/svg" class="inline h-4 w-4" fill="none" viewBox="0 0 24 24"
+               stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+        <!--TODO: Add Drawer Toggle-->
+        <div (click)="filterDrawer.toggle()"
+             class="ml-2 cursor-pointer rounded-full bg-transparent border-2 border-gray-300 px-3 py-2">
+          Filter
+          <svg xmlns="http://www.w3.org/2000/svg" class="inline h-4 w-4" fill="none" viewBox="0 0 24 24"
+               stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+          </svg>
+        </div>
+
+      </div>
+      <div class="hidden md:flex flex-row items-center mt-4">
+        <span class="font-gray-400 font-medium  text-xl">Sort</span>
+        <div [ngClass]="{'active': sortBy == 'popular'}" (click)="sortBy='popular'; applySorting()" class="sort-item">
+          Popular
+        </div>
+        <div [ngClass]="{'active': sortBy == 'newest'}" (click)="sortBy='newest'; applySorting()" class="sort-item">
+          Newest
+        </div>
+        <div [ngClass]="{'active': sortBy == 'oldest'}" (click)="sortBy='oldest'; applySorting()" class="sort-item">
+          Oldest
+        </div>
+        <div [ngClass]="{'active': sortBy == 'price'}" [matMenuTriggerFor]="priceMenu"
+             class="sort-item">
+          <mat-menu #priceMenu="matMenu" class="rounded-lg">
+            <button (click)="priceSort='asc';sortBy='price'; applySorting()" mat-menu-item>Low to High</button>
+            <button (click)="priceSort='desc';sortBy='price'; applySorting()" mat-menu-item>High to Low</button>
+          </mat-menu>
+          Price
+          <svg xmlns="http://www.w3.org/2000/svg" class="inline h-4 w-4" fill="none" viewBox="0 0 24 24"
+               stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white">
+      <div class="max-w-7xl mx-auto overflow-hidden ">
+        <h2 class="sr-only">Products</h2>
+        <div *ngIf="this.filteredProducts.length > 0" class="-mx-px border border-gray-100 grid grid-cols-2 sm:mx-0 md:grid-cols-3 lg:grid-cols-4">
+          <product-card *ngFor="let i of getCurrentPageIndexes" [product]="filteredProducts[i]"></product-card>
+        </div>
+        <div *ngIf="this.filteredProducts.length == 0">
+          <h1 class="text-center text-lg font-medium mt-8">No Products found</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-center items center h-12 relative" *ngIf="filteredProducts.length > 0">
+      <div class="h-full bg-white flex flex-row border border-gray-300 rounded-md">
+        <div (click)="goToPrev()" class="pagination-item" [ngClass]="{'disabled' : currentPage === 1}">
+          <span class="sr-only">Previous</span>
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                  clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <div (click)="goToPage(page)" *ngFor="let page of getPaginationNumbers" class="pagination-item" [ngClass]="{'active': currentPage === page}">
+          {{page}}
+        </div>
+        <div (click)="goToNext()" class="pagination-item" [ngClass]="{'disabled': currentPage === maxPage}">
+          <span class="sr-only">Next</span>
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd"
+                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                  clip-rule="evenodd"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="absolute right-0 top-0 bottom-0">
+        <select #itemsPerPageSelector (change)="onItemsPerPageChange(itemsPerPageSelector.value)">
+          <option *ngFor="let op of itemsPerPageOptions" value="{{op}}">{{op}}</option>
+        </select>
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+
+<!--TODO: Add Material Side Nav-->
+<reflection-drawer transparentOverlay="false" class="w-10/12 md:w-100 md:min-w-100" [mode]="'over'" [name]="'filterDrawer'"
+                   position="right" #filterDrawer>
+
+  <div class="flex flex-col w-full overflow-auto bg-card">
+    <ng-container *ngTemplateOutlet="ProductFilter"></ng-container>
+  </div>
+</reflection-drawer>
+
+
+<ng-template #ProductFilter>
+  <h2 class="font-bold text-xl section mt-12">Filter</h2>
+  <div style="height: 1px" class="bg-gray-200 my-2"></div>
+  <form [formGroup]="form">
+    <div class="flex flex-col my-2 section">
+      <h2 class="font-bold text-xl mt-2 ">Categories</h2>
+      <div class="inline-flex items-end justify-between w-full mt-3 my-1.5">
+        <mat-checkbox [formControlName]="'glasses'" (change)="applyFilter()" id="glasses" class="font-bold text-gray-600" [color]="'primary'">
+          Glasses
+        </mat-checkbox>
+      </div>
+      <div class="inline-flex items-end justify-between w-full my-1.5">
+        <mat-checkbox [formControlName]="'lenses'" (change)="applyFilter()" id="lenses" class="font-bold text-gray-600" [color]="'primary'">
+          Lens
+        </mat-checkbox>
+      </div>
+    </div>
+    <div class="flex flex-col my-2 section">
+      <h2 class="font-bold text-xl mt-2 ">Gender</h2>
+      <div class="inline-flex items-end justify-between w-full mt-3 my-1.5">
+        <mat-checkbox [formControlName]="'male'" (change)="applyFilter()" class="font-bold text-gray-600" [color]="'primary'">
+          Male
+        </mat-checkbox>
+      </div>
+      <div class="inline-flex items-end justify-between w-full my-1.5">
+        <mat-checkbox [formControlName]="'female'" (change)="applyFilter()"  class="font-bold text-gray-600" [color]="'primary'">
+          Female
+        </mat-checkbox>
+      </div>
+    </div>
+    <div style="height: 1px" class="bg-gray-200 my-2"></div>
+    <div class="flex flex-col my-2 section">
+      <h2 class="font-bold text-xl mt-12">Price Range</h2>
+      <div class="flex flex-row w-full mt-3 my-1.5">
+        <div
+          class="rounded-md bg-gray-300 border border-gray-200 bg-opacity-10 w-24 h-10 flex items-center justify-center text-gray-800">
+          Min
+        </div>
+        <div
+          class="pl-2 rounded-md bg-white border border-gray-200 bg-opacity-10 w-48 h-10 flex items-center justify-center text-black font-bold">
+          RS.<input [formControlName]="'minPrice'" (keyup)="applyFilter()" (change)="applyFilter()" class="ml-2 bg-transparent w-full h-full font-bold" type="number">
+        </div>
+      </div>
+      <div class="flex flex-row w-full mt-3 my-1.5">
+        <div
+          class="rounded-md bg-gray-300 border border-gray-200 bg-opacity-10 w-24 h-10 flex items-center justify-center text-gray-800">
+          Max
+        </div>
+        <div
+          class="pl-2 rounded-md bg-white border border-gray-200 bg-opacity-10 w-48 h-10 flex items-center justify-center text-black font-bold">
+          RS.<input [formControlName]="'maxPrice'" (keyup)="applyFilter()" (change)="applyFilter()" class="ml-2 bg-transparent w-full h-full font-bold" type="number">
+        </div>
+      </div>
+      <div class="flex justify-center items-center w-full mt-3">
+        <button (click)="resetPriceFilter()" class="w-full h-10 rounded-md bg-primary text-on-primary font-medium text-lg">Price</button>
+      </div>
+    </div>
+    <div style="height: 1px" class="bg-gray-200 my-2"></div>
+  </form>
+
+</ng-template>

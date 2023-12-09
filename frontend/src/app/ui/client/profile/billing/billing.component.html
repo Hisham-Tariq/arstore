@@ -1,0 +1,183 @@
+<div #savingLoader class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div style="display: flex; justify-content: center; align-items: center; height: 100%" class=" pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div
+      [ngClass]="{
+      'animate__fadeIn': isShowingLoading,
+      'animate__fadeOut': !isShowingLoading
+      }"
+      (click)="closeLoadingModal()"
+      class="animate__faster animate__animated fixed inset-0 dark-overlay transition-opacity" aria-hidden="true"></div>
+
+    <!-- This element is to trick the browser into centering the modal contents. -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <div [ngClass]="{
+      'animate__fadeIn': isShowingLoading,
+      'animate__fadeOut': !isShowingLoading
+      }" class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full sm:p-6">
+
+      <!--   A Loading to show that user is being subscribed   -->
+      <div [ngClass]="{'hidden': !isSaving}" class="flex items-center justify-center">
+        <div class="text-center">
+          <div class="text-3xl text-gray-900">
+            <!--            <i class="fas fa-spinner fa-spin"></i>-->
+            <div class="flex justify-center">
+              <img class="h-20" src="assets/svg/dark-loading-white.svg" alt="">
+            </div>
+          </div>
+          <p class="mt-2 text-gray-600">
+            Saving your billing info...
+          </p>
+        </div>
+      </div>
+
+      <div [ngClass]="{'hidden': isSaving}">
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+          <!-- Heroicon name: outline/check -->
+          <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div class="mt-3 text-center sm:mt-5">
+          <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Successfully Saved</h3>
+          <div class="mt-2">
+            <p class="text-sm text-gray-500">Your billing information has been successfully been saved</p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-5 sm:mt-6" [ngClass]="{'hidden': isSaving}">
+        <button type="button" class="primary-button w-full" (click)="closeLoadingModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section aria-labelledby="payment-details-heading">
+  <form class="form" [formGroup]="form">
+    <div class="shadow sm:rounded-md sm:overflow-hidden">
+      <div class="bg-white py-6 px-4 sm:p-6">
+        <div>
+          <h2 id="payment-details-heading" class="text-lg leading-6 font-medium text-gray-900">Billing details</h2>
+          <p class="mt-1 text-sm text-gray-500">Update your billing information.</p>
+        </div>
+
+        <div class="mt-6 grid grid-cols-4 gap-6">
+          <div class="col-span-4 sm:col-span-2">
+            <label for="first-name" class="block text-sm font-medium text-gray-700">First name</label>
+            <input readonly [formControlName]="'firstName'" type="text" name="first-name" id="first-name" class="field w-full">
+          </div>
+
+          <div class="col-span-4 sm:col-span-2">
+            <label for="last-name" class="block text-sm font-medium text-gray-700">Last name</label>
+            <input readonly [formControlName]="'lastName'" type="text" name="last-name" id="last-name" class="field w-full">
+          </div>
+
+          <div class="col-span-4">
+            <label for="email-address" class="block text-sm font-medium text-gray-700">Email address</label>
+            <input readonly [formControlName]="'email'" type="text" id="email-address" autocomplete="email" class="field w-full">
+          </div>
+
+
+          <div class="col-span-4">
+            <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+            <input [formControlName]="'address'" type="text" id="address" class="field w-full">
+            <span class="field-error" *ngIf="address.hasError('required') && address.touched">
+                  Address is required
+          </span>
+          </div>
+
+          <div class="col-span-4 sm:col-span-2">
+            <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+            <input [formControlName]="'phone'" type="text" id="phone" class="field w-full">
+            <span class="field-error" *ngIf="phone.hasError('required') && phone.touched">
+                  Phone is required
+                </span>
+            <span class="field-error" *ngIf="phone.hasError('pattern') && phone.touched">
+                  Phone No. must be in the format: 03XX-XXXXXXX
+                </span>
+          </div>
+
+          <div class="col-span-4 sm:col-span-2">
+            <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+            <input [formControlName]="'city'" type="text" id="city" autocomplete="city" class="field w-full">
+            <span class="field-error" *ngIf="city.hasError('required') && city.touched">
+                  City is required
+              </span>
+          </div>
+
+          <div class="col-span-4 sm:col-span-2">
+            <label for="state" class="block text-sm font-medium text-gray-700">State</label>
+            <input [formControlName]="'state'" type="text" id="state" autocomplete="state" class="field w-full">
+            <span class="field-error" *ngIf="state.hasError('required') && state.touched">
+                  State is required
+              </span>
+
+          </div>
+
+          <div class="col-span-4 sm:col-span-2">
+            <label for="postal-code" class="block text-sm font-medium text-gray-700">ZIP / Postal code</label>
+            <input [formControlName]="'zip'" type="text" id="postal-code" autocomplete="postal-code" class="field w-full">
+            <span class="field-error" *ngIf="zip.hasError('required') && zip.touched">
+                  ZIP / Postal Code is required.
+            </span>
+          </div>
+
+          <!--          <div class="col-span-4 sm:col-span-2">-->
+          <!--            <label for="postal-code" class="block text-sm font-medium text-gray-700">ZIP / Postal code</label>-->
+          <!--            <input type="text" name="postal-code" id="postal-code" autocomplete="postal-code" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-gray-900 focus:border-gray-900 sm:text-sm">-->
+          <!--          </div>-->
+        </div>
+      </div>
+      <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+        <button (click)="saveBillingInfo()" class="primary-button w-40">Save</button>
+      </div>
+    </div>
+  </form>
+</section>
+
+<!-- Billing history -->
+<section aria-labelledby="billing-history-heading">
+  <div class="bg-white pt-6 shadow sm:rounded-md sm:overflow-hidden">
+    <div class="px-4 sm:px-6">
+      <h2 id="billing-history-heading" class="text-lg leading-6 font-medium text-gray-900">Billing history</h2>
+    </div>
+    <div class="mt-6 flex flex-col">
+      <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+          <div class="overflow-hidden border-t border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <!--
+                  `relative` is added here due to a weird bug in Safari that causes `sr-only` headings to introduce overflow on the body on mobile.
+                -->
+                <th scope="col" class="relative px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <span class="sr-only">View receipt</span>
+                </th>
+              </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+              <tr *ngFor="let order of allOrders">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <time >{{order.date.seconds * 1000 | date:'fullDate'}}</time>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{order.id}}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">RS. {{order.totalPrice}}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium ">
+                  <a (click)="showInvoice(order.id)" class="text-black cursor-pointer bg-primary rounded-full px-3 py-2 font-bold">View receipt</a>
+                </td>
+              </tr>
+
+              <!-- More payments... -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+

@@ -1,0 +1,47 @@
+<div class="p-4 w-120">
+  <!-- Alert -->
+  <reflection-alert class="w-full py-4 mb-2" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="true"
+                    [type]="alert.type" [@shake]="alert.type === 'error'" [dismissible]="true">
+    {{alert.message}}
+  </reflection-alert>
+  <ng-container *ngTemplateOutlet="CodeForm"></ng-container>
+</div>
+
+
+<ng-template #CodeForm>
+  <!--  Add Main Category Form -->
+  <form class="grid grid-cols-12 form" [formGroup]="form">
+    <span class="font-extrabold text-3xl">Update</span>
+    <!--  Sub Category Name  -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Voucher Code</span>
+      <input readonly type="text" class="w-full field" maxlength="20" [formControlName]="'voucherCode'">
+      <span class="hint">Do not exceed 20 characters</span>
+      <!--      <mat-error *ngIf="form.controls['name'].hasError('required')">-->
+      <!--        Category Name is <strong>required</strong>-->
+      <!--      </mat-error>-->
+    </div>
+
+    <div class="col-span-full flex flex-col">
+      <span class="label">Voucher Discount</span>
+      <input type="number" min="1" max="100" class="w-full field" [formControlName]="'discount'">
+      <span class="field-error" *ngIf="discount.hasError('required') && discount.touched">
+        Voucher discount is required
+      </span>
+      <span class="field-error" *ngIf="discount.hasError('min') && discount.touched">
+        Min discount is 1
+      </span>
+      <span class="field-error" *ngIf="discount.hasError('max') && discount.touched">
+        Max discount is 100
+      </span>
+    </div>
+
+    <button (click)="update()" [disabled]="!form.valid || isUpdating" class="col-span-full h-[44px] mt-2 primary-button">
+      <span *ngIf="!isUpdating">Update</span>
+      <div class="flex justify-center items-center" *ngIf="isUpdating">
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'">
+        </mat-progress-spinner>
+      </div>
+    </button>
+  </form>
+</ng-template>

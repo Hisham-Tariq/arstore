@@ -1,0 +1,208 @@
+<div #eligibleToAddToCartModal class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+    <div
+      [ngClass]="{
+      'animate__fadeIn': isShowingNotEligibleModal,
+      'animate__fadeOut': !isShowingNotEligibleModal
+      }"
+      (click)="closeEligibleModal()"
+      class="animate__faster animate__animated fixed inset-0 dark-overlay transition-opacity" aria-hidden="true"></div>
+
+    <!-- This element is to trick the browser into centering the modal contents. -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+    <div
+      [ngClass]="{
+      'animate__zoomIn': isShowingNotEligibleModal,
+      'animate__zoomOut': !isShowingNotEligibleModal
+      }"
+      class="animate__animated animate__faster relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+            <!-- Heroicon name: outline/exclamation -->
+            <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+            <div class="mt-2">
+              <p #eligibleModalMessage class="text-sm text-gray-500">You are not logged in. Login to your account to continue shopping.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button (click)="closeEligibleModal()" type="button"
+                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 !bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="bg-white">
+  <div class="max-w-2xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
+    <div class="lg:grid lg:grid-cols-2 lg:gap-x-8 lg:items-start">
+      <!-- Image gallery -->
+      <div class="flex flex-col">
+        <div class="w-full aspect-w-1 aspect-h-1">
+          <!-- Tab panel, show/hide based on tab state. -->
+          <div id="tabs-1-panel-1" aria-labelledby="tabs-1-tab-1" role="tabpanel" tabindex="0">
+            <div style="all: unset !important;">
+              <div #imgLoading class="absolute inset-0 flex items-center justify-center border border-gray-300 sm:rounded-lg">
+                <div class="h-20 w-20 rounded-full">
+                  <img src="assets/svg/dark-loading-white.svg" class="h-full w-full" alt="">
+                </div>
+              </div>
+            </div>
+            <img (onStateChange)="imageLoadingState($event,productImg, imgLoading)" #productImg src="assets/dark-loading.gif" [lazyLoad]="currentColorImages[selectedImageKey]"
+                 alt="" class="w-full h-full object-center object-scale-down sm:rounded-lg border border-gray-300 invisible">
+          </div>
+          <!-- More images... -->
+        </div>
+
+        <!-- Image selector -->
+        <div class="hidden mt-6 w-full max-w-2xl mx-auto sm:block lg:max-w-none">
+          <div class="grid grid-cols-4 gap-6" aria-orientation="horizontal" role="tablist">
+            <button (click)="changeSelectedImage(key)" *ngFor="let key of imagesKey" id="tabs-1-tab-1"
+                    class="relative h-24 bg-white rounded-md flex items-center justify-center text-sm font-medium uppercase text-gray-900 cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring focus:ring-offset-4 focus:ring-opacity-50"
+                    aria-controls="tabs-1-panel-1" role="tab" type="button">
+              <span class="sr-only"> Angled view </span>
+              <span class="absolute inset-0 rounded-md overflow-hidden">
+                <div #subImageLoading class="absolute inset-0 flex items-center justify-center border border-gray-300 sm:rounded-lg">
+                <div class="h-10 w-10 rounded-full">
+                  <img src="assets/svg/dark-loading-white.svg" class="h-full w-full" alt="">
+                </div>
+              </div>
+                <img
+                  (onStateChange)="imageLoadingState($event,subImage, subImageLoading)" #subImage src="assets/dark-loading.gif" [lazyLoad]="currentColorImages[key]"
+                  alt=""
+                  class="w-full h-full object-center object-scale-down">
+              </span>
+              <!-- Selected: "ring-indigo-500", Not Selected: "ring-transparent" -->
+              <span
+                [ngClass]="{
+                  'ring-primary-500': key === selectedImageKey,
+                  'ring-transparent': key !== selectedImageKey
+                }"
+                class="absolute inset-0 rounded-md ring-2 ring-offset-2 pointer-events-none outline-0 focus:!outline-0" aria-hidden="true"></span>
+            </button>
+            <!-- More images... -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Product info -->
+      <div class="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
+        <h1 class="text-3xl font-extrabold tracking-tight text-gray-900" #productName>Product Name</h1>
+
+        <div class="mt-3">
+          <h2 class="sr-only">Product information</h2>
+          <p class="text-3xl text-gray-900"><span #productPrice>RS. 0</span></p>
+        </div>
+
+        <!-- Reviews -->
+        <div class="mt-3">
+          <h3 class="sr-only">Reviews</h3>
+          <div class="flex items-center">
+            <div class="flex items-center">
+              <bar-rating [readOnly]="true" [rate]="getAverageRating()" [max]="5" class="my-4">
+                <ng-template ratingActive>
+                  <i class="fa-solid fa-star text-primary"></i>
+                </ng-template>
+                <ng-template ratingInactive>
+                  <i class="fa-regular fa-star"></i>
+                </ng-template>
+                <ng-template ratingFraction>
+                  <i class="fa-solid fa-star-half-stroke text-primary"></i>
+                </ng-template>
+              </bar-rating>
+              <span class="text-gray-900">({{product?.ratedBy || 0}})</span>
+            </div>
+            <p class="sr-only">{{getAverageRating()}} out of 5 stars</p>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <h3 class="sr-only">Description</h3>
+
+          <div class="text-base text-gray-700 space-y-6" #productDescription>
+            <p>This is the product description</p>
+          </div>
+        </div>
+
+        <form class="mt-6">
+          <!-- Colors -->
+          <div>
+            <h3 class="text-sm text-gray-600">Color</h3>
+            <fieldset class="mt-2">
+              <legend class="sr-only">Choose a color</legend>
+              <div class="flex items-center space-x-3">
+                <!--
+                  Active and Checked: "ring ring-offset-1"
+                  Not Active and Checked: "ring-2"
+                -->
+
+                <label *ngFor="let color of currentProductColors; let i = index;"
+                       [ngClass]="{'ring ring-offset-1': selectedColor == color, 'ring-1': selectedColor != color}"
+                       class="-m-0.5 relative p-0.5 rounded-full flex items-center justify-center cursor-pointer focus:outline-none ring-gray-700">
+                  <input type="radio" (click)="changeSelectedColor(color)" name="color-choice" value="{{color}}" class="sr-only" attr.aria-labelledby="color-choice-{{i}}-label">
+                  <p id="color-choice-0-label" class="sr-only">{{color}}</p>
+                  <span aria-hidden="true" [ngStyle]="{'background-color': color}" class="h-6 w-6 border border-black border-opacity-10 rounded-full"></span>
+                </label>
+              </div>
+            </fieldset>
+          </div>
+          <div class="w-full mt-10 flex flex-col">
+            <label class="text-sm text-gray-600" for="product-quantity">Quantity</label>
+            <div class="w-full h-10 bg-gray-200 mt-2">
+              <div class="flex flex-row h-10 w-full rounded-lg relative bg-transparent">
+                <button (click)="decrementQuantity()" class="text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-l cursor-pointer outline-none">
+                  <span class="m-auto text-2xl text-black font-bold">−</span>
+                </button>
+                <input min="1" [(ngModel)]="quantity" (ngModelChange)="onQuantityChange()" [ngModelOptions]="{standalone: true}" id="product-quantity" type="number"
+                       class="number-counter outline-none focus:outline-none text-center w-full bg-gray-300 font-semibold text-md hover:text-black focus:text-black  md:text-basecursor-default flex items-center text-gray-700  outline-none"
+                       value="0"/>
+                <button (click)="incrementQuantity()" class="text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-r cursor-pointer">
+                  <span class="m-auto text-2xl text-black font-bold">+</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="w-full mt-4 flex flex-col md:space-y-4">
+            <button
+              [disabled]="isAddingInCart || !productDataFetched"
+              [ngClass]="{
+              '!bg-gray-500': isAddingInCart
+              }"
+              (click)="addProductToCart()" class="max-w-full primary-button sm:w-full mt-4">
+              <span *ngIf="!isAddingInCart">Add to Cart</span>
+              <div class="flex justify-center items-center" *ngIf="isAddingInCart">
+                <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'">
+                </mat-progress-spinner>
+              </div>
+
+            </button>
+            <button (click)="onTryProduct()" class="primary-outlined-button !text-black  w-full mt-4">
+              Try your product
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+
+  </div>
+
+  <app-top-products></app-top-products>
+  <div *ngIf="currentProductId != null">
+    <app-review-section [productId]="currentProductId!"></app-review-section>
+  </div>
+</div>
+
+
+
+

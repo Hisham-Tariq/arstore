@@ -1,0 +1,12 @@
+.invoice-row{
+  @apply px-4
+}
+
+.invoice-header {
+  @apply bg-black h-12 rounded-t-md
+}
+
+.invoice-header-cell{
+  @apply text-primary font-medium font-medium text-md text-right first:text-left
+  flex flex-col justify-center
+}

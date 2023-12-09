@@ -1,0 +1,37 @@
+<div class="p-4 w-120">
+  <!-- Alert -->
+  <reflection-alert class="col-span-full py-4 mb-2" [dismissed]="!showAlert" (dismissedChanged)="onDismissedChanged($event)"
+                    [appearance]="'outline'" [showIcon]="true"
+                    [type]="alert.type" [@shake]="alert.type === 'error'" dismissible>
+    {{alert.message}}
+  </reflection-alert>
+  <span class="font-extrabold text-3xl my-2">Update</span>
+  <ng-container *ngTemplateOutlet="MainCategoryForm"></ng-container>
+</div>
+
+
+
+
+<ng-template #MainCategoryForm>
+  <!--  Add Main Category Form -->
+  <form class="grid grid-cols-12 form" [formGroup]="form">
+    <!--  Main Category Name  -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Main Category Name</span>
+      <input type="text" class="w-full field" maxlength="20" [formControlName]="'name'">
+      <span class="hint">Do not exceed 20 characters</span>
+      <!--      <mat-error *ngIf="form.controls['name'].hasError('required')">-->
+      <!--        Category Name is <strong>required</strong>-->
+      <!--      </mat-error>-->
+    </div>
+
+    <!-- Main Category Description Field -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Main Category Description</span>
+      <textarea maxlength="100" class="field h-30" [formControlName]="'description'"></textarea>
+      <span class="hint">Do not exceed 100 characters</span>
+    </div>
+    <button (click)="update()"  class="col-span-full h-[44px] mt-1 primary-button">Update</button>
+  </form>
+</ng-template>
+

@@ -1,0 +1,24 @@
+  --> for Completed
+  --> for Completed + Tested
+  --> for issue
++  --> for new feature to be added
+
+
+1. Show No Products Found on Products Page                       
+2. Show no items in the cart (Go to Products)                    
+3. Products Update                                               
+4. Product Deletion                                              
+
+
+6. main category and sub category delete method     + complete
+
+8. events on UI  + complete
+10. quantity in the database   and in UI is different         complete   
+
+
+
+
+
+5. loading bar show when products are loading in the page and also for color switching    +
+7. feature product on home page    +
+9. all customer who buy products show on Admin Customer field on dashboard

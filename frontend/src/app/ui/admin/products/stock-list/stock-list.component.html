@@ -1,0 +1,192 @@
+<div (click)="hideDeleteDialog()" *ngIf="itemSelectedForDelete !=null" class="absolute inset-0 dark-overlay z-10 flex justify-center items-center bg-slate-300">
+  <div (click)="$event.stopPropagation()" class="bg-white rounded-lg w-120 h-80 flex flex-col">
+    <div class="flex flex-row justify-center mt-8">
+      <svg class="w-14 fill-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+        <path
+          d="M135.2 17.69C140.6 6.848 151.7 0 163.8 0H284.2C296.3 0 307.4 6.848 312.8 17.69L320 32H416C433.7 32 448 46.33 448 64C448 81.67 433.7 96 416 96H32C14.33 96 0 81.67 0 64C0 46.33 14.33 32 32 32H128L135.2 17.69zM31.1 128H416V448C416 483.3 387.3 512 352 512H95.1C60.65 512 31.1 483.3 31.1 448V128zM111.1 208V432C111.1 440.8 119.2 448 127.1 448C136.8 448 143.1 440.8 143.1 432V208C143.1 199.2 136.8 192 127.1 192C119.2 192 111.1 199.2 111.1 208zM207.1 208V432C207.1 440.8 215.2 448 223.1 448C232.8 448 240 440.8 240 432V208C240 199.2 232.8 192 223.1 192C215.2 192 207.1 199.2 207.1 208zM304 208V432C304 440.8 311.2 448 320 448C328.8 448 336 440.8 336 432V208C336 199.2 328.8 192 320 192C311.2 192 304 199.2 304 208z"/>
+      </svg>
+    </div>
+    <span class="col-span-full text-center text-lg p-6 mt-6"> Are you sure, you want to delete the event? </span>
+    <div class="flex flex-row justify-center">
+      <div class="h-12 justify-center px-8">
+        <button (click)="delete()" class="w-full bg-red-500 hover:bg-red-700 text-black text-center text-lg py-2 px-8 rounded-lg">Delete</button>
+      </div>
+      <div class="h-12 justify-center px-6">
+        <button (click)="hideDeleteDialog()" class="w-full bg-gray-300 hover:bg-gray-500 text-center text-lg py-2 px-8 rounded-lg">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="flex flex-col mx-auto max-w-screen-md">
+  <div class="font-extrabold text-4xl w-full text-left">Stock List</div>
+  <div class="grid grid-cols-12 my-2 gap-x-4 form">
+    <ng-container *ngTemplateOutlet="ManageStockFilterOptions"></ng-container>
+  </div>
+  <ng-container class="col-span-full" *ngTemplateOutlet="ManageStockDataTable"></ng-container>
+</div>
+
+<!--All Sub Category Filter Options-->
+<ng-template #ManageStockFilterOptions>
+  <div class="flex flex-col col-span-3">
+    <span class="label w-full">Products</span>
+    <ng-select [clearable]="false" [multiple]="true" dropdownPosition="auto" name="main_category_selector" (change)="applyFilter()" [(ngModel)]="selectedProducts">
+      <ng-option *ngFor="let item of this.allProducts" [value]="item.id">{{item.name}}</ng-option>
+    </ng-select>
+  </div>
+  <div class="col-span-5 grid grid-cols-12 gap-x-4">
+    <div class="col-span-6 flex flex-col">
+      <ng-container *ngTemplateOutlet="RPriceFilter"></ng-container>
+    </div>
+    <div class="col-span-6 flex flex-col">
+      <ng-container *ngTemplateOutlet="CPriceFilter"></ng-container>
+    </div>
+  </div>
+  <div class="flex flex-col col-span-1 ml-2">
+    <span class="label">InStock</span>
+    <div class="flex w-full h-full">
+
+      <label for="InStockToggle" class="flex items-center cursor-pointer">
+        <!-- toggle -->
+        <div class="relative">
+          <!-- input -->
+          <input (change)="applyFilter()" [(ngModel)]="activeStockFilter" type="checkbox" id="InStockToggle" class="sr-only peer">
+          <!-- line -->
+          <div class="block bg-gray-600 w-14 h-8 rounded-full"></div>
+          <!-- dot -->
+          <div class="peer-checked:bg-primary dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition"></div>
+        </div>
+      </label>
+    </div>
+  </div>
+  <div class="flex flex-col form col-span-3">
+    <span class="label">Search</span>
+    <div class="icon-field">
+      <input [(ngModel)]="searchKey" autocomplete="off" (ngModelChange)="applyFilter()" type="search" class="leading-icon peer">
+      <mat-icon class="leading peer-focus:text-primary" svgIcon="heroicons_outline:search"></mat-icon>
+    </div>
+  </div>
+</ng-template>
+
+<!--Stock Table-->
+<ng-template #ManageStockDataTable>
+  <div class="table-wrapper">
+    <table mat-table class="w-full" matSort aria-label="Elements">
+      <!-- Product Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Product Name</th>
+        <td mat-cell *matCellDef="let row">{{row.productData.name}}</td>
+      </ng-container>
+      <ng-container matColumnDef="color">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Color</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="w-4 h-4 rounded-full border border-black" [ngStyle]="{'background-color': row.color}"></div>
+        </td>
+      </ng-container>
+
+      <!--Consumer Price-->
+      <ng-container matColumnDef="CPrice">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>CPrice</th>
+        <td mat-cell *matCellDef="let row">{{row.consumerPrice}}</td>
+      </ng-container>
+      <!--   Retail Price   -->
+      <ng-container matColumnDef="RPrice">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>RPrice</th>
+        <td mat-cell *matCellDef="let row">{{row.retailerPrice}}</td>
+      </ng-container>
+      <!--  Current Stock Quantity   -->
+      <ng-container matColumnDef="Quantity">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Quantity</th>
+        <td mat-cell *matCellDef="let row">{{row.totalQuantity}}</td>
+      </ng-container>
+      <!--   Last Stock Change Date   -->
+      <ng-container matColumnDef="Date">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+        <td mat-cell *matCellDef="let row">{{row.date}}</td>
+      </ng-container>
+      <!--   Actions Column for update and delete and history   -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let row">
+          <mat-icon (click)="showStockHistory(row)" class="material-icons update-color cursor-pointer" svgIcon="heroicons_outline:book-open"></mat-icon>
+          <!--          <mat-icon (click)="openUpdateModal(row)" class="material-icons update-color cursor-pointer" svgIcon="heroicons_outline:pencil"></mat-icon>-->
+          <!--          <mat-icon (click)="openConfirmDeleteDialog(row)" class="ml-4 material-icons delete-color cursor-pointer" svgIcon="heroicons_outline:trash"></mat-icon>-->
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+  <mat-paginator #paginator
+                 [length]="data?.data?.length"
+                 [pageIndex]="0"
+                 [pageSize]="10"
+                 [pageSizeOptions]="[5, 10, 20]"
+                 aria-label="Select page">
+  </mat-paginator>
+</ng-template>
+
+
+<ng-template #CPriceFilter>
+    <span class="label w-full">CPrice</span>
+    <reflection-menu id="cprice" class="w-full">
+      <div reflectionMenuButton class="cursor-pointer hover:bg-gray-100 flex items-center justify-center relative min-h-[44px] w-full bg-white border-gray-300 border-2 rounded-md">
+        <span class="w-full text-center text-gray-600 font-semibold">{{minCPriceFilter}} - {{maxCPriceFilter}}</span>
+        <mat-icon class="w-4 h-4 absolute right-0 mr-3" svgIcon="heroicons_solid:chevron-down"></mat-icon>
+      </div>
+      <div reflectionMenuItems class="border rounded-b-sm w-full flex flex-col">
+        <div class="w-full">
+          <div class="icon-field">
+            <input type="number" value="0" min="0" max="{{maxCPriceFilter}}" (ngModelChange)="applyFilter()" (keyup)="applyFilter()" [(ngModel)]="minCPriceFilter"
+                   class="border-0 leading-icon peer text-center">
+            <span class="leading text-gray-600 font-bold">Min</span>
+          </div>
+        </div>
+        <div class="my-1 border-b border-gray-100"></div>
+        <div class="w-full">
+          <div class="icon-field">
+            <input type="number" value="0" min="{{minCPriceFilter}}" (ngModelChange)="applyFilter()" (keyup)="applyFilter()" [(ngModel)]="maxCPriceFilter"
+                   class="border-0 leading-icon peer text-center">
+            <span class="leading text-gray-600 font-bold">Max</span>
+          </div>
+        </div>
+        <div class="w-full my-2 px-2">
+          <button (click)="minCPriceFilter =0; maxCPriceFilter = 999999; applyFilter()" class="primary-button w-full">Reset</button>
+        </div>
+      </div>
+    </reflection-menu>
+<!--  Retail Price Filter -->
+
+</ng-template>
+
+
+<ng-template #RPriceFilter>
+    <span class="label w-full">RPrice</span>
+    <reflection-menu class="w-full">
+      <div reflectionMenuButton class="cursor-pointer hover:bg-gray-100 flex items-center justify-center relative min-h-[44px] w-full bg-white border-gray-300 border-2 rounded-md">
+        <span class="w-full text-center text-gray-600 font-semibold">{{minRPriceFilter}} - {{maxRPriceFilter}}</span>
+        <mat-icon class="w-4 h-4 absolute right-0 mr-3" svgIcon="heroicons_solid:chevron-down"></mat-icon>
+      </div>
+      <div reflectionMenuItems class="border rounded-b-sm w-full flex flex-col">
+        <div class="w-full">
+          <div class="icon-field">
+            <input type="number" value="0" min="0" max="{{maxRPriceFilter}}" (ngModelChange)="applyFilter()" (keyup)="applyFilter()" [(ngModel)]="minRPriceFilter"
+                   class="border-0 leading-icon peer text-center">
+            <span class="leading text-gray-600 font-bold">Min</span>
+          </div>
+        </div>
+        <div class="my-1 border-b border-gray-100"></div>
+        <div class="w-full">
+          <div class="icon-field">
+            <input type="number" value="0" min="{{minRPriceFilter}}" (ngModelChange)="applyFilter()" (keyup)="applyFilter()" [(ngModel)]="maxRPriceFilter"
+                   class="border-0 leading-icon peer text-center">
+            <span class="leading text-gray-600 font-bold">Max</span>
+          </div>
+        </div>
+        <div class="w-full my-2 px-2">
+          <button (click)="minRPriceFilter =0; maxRPriceFilter = 999999; applyFilter()" class="primary-button w-full">Reset</button>
+        </div>
+      </div>
+    </reflection-menu>
+</ng-template>

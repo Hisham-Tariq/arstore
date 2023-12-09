@@ -1,0 +1,74 @@
+<div class="w-full px-12 grid grid-cols-12">
+  <div class="flex flex-row w-full justify-start font-extrabold text-5xl py-4">
+    <span>Customers</span>
+  </div>
+  <ng-container *ngTemplateOutlet="CustomersFilterOption"></ng-container>
+  <!--Table-->
+  <div class="col-span-full">
+    <ng-container *ngTemplateOutlet="CustomersTable"></ng-container>
+  </div>
+</div>
+
+<ng-template #CustomersFilterOption>
+  <div class="grid grid-cols-12 col-span-full form gap-x-2 mb-2">
+
+    <div class="col-span-3 flex flex-col">
+
+    </div>
+    <div class="col-span-3 form flex flex-col">
+
+    </div>
+    <div class="col-span-3 form flex flex-col">
+
+    </div>
+
+    <!-- Search Box -->
+    <div class="col-span-3 flex flex-col">
+      <span class="label">Search</span>
+      <div class="icon-field">
+        <input [(ngModel)]="searchKey" autocomplete="off" (keyup)="applyFilter()" type="search" class="leading-icon peer">
+        <mat-icon class="leading peer-focus:text-primary" svgIcon="heroicons_outline:search"></mat-icon>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+
+<ng-template #CustomersTable>
+  <div class="table-wrapper">
+    <table mat-table class="w-full" matSort aria-label="Elements">
+      <!-- Id Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+        <td mat-cell *matCellDef="let row">
+          {{row.name}}
+        </td>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+        <td mat-cell *matCellDef="let row">{{row.email}}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="phone">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Phone</th>
+        <td mat-cell *matCellDef="let row">{{row.phone}}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="total_orders">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Orders</th>
+        <td mat-cell *matCellDef="let row">{{row.totalOrders}}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <!--  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>-->
+
+  <mat-paginator #paginator [length]="data?.data.length" [pageIndex]="0" [pageSize]="10"
+                 [pageSizeOptions]="[5, 10, 20]" aria-label="Select page">
+  </mat-paginator>
+</ng-template>

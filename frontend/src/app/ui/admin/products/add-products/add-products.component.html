@@ -1,0 +1,230 @@
+<div class="flex flex-col w-full gap-x-2 p-4 h-full overflow-y-hidden">
+  <!-- START: Product Upload Dialog  -->
+  <div *ngIf="isAddingProduct" class="absolute dark-overlay inset-0 z-10 flex justify-center items-center animate__fast"
+       [class.animate__fadeIn]="isAddingProduct">
+    <div class="bg-white rounded h-120 w-160 grid grid-cols-12 gap-x-4 animate__animated animate__fast"
+         [class.animate__bounceInUp]="isAddingProduct"
+         [class.animate__bounceOutDown]="!isAddingProduct">
+      <div class="h-12 col-span-full"></div>
+      <div class="col-span-full flex justify-center items-center">
+        <img class="h-16 w-16 animate-spin" src="assets/svg/spinner.svg" alt="">
+      </div>
+      <div class="col-span-full flex justify-center items-center">
+        <span class="font-semibold text-lg mt-4">Please wait we are adding your product</span>
+      </div>
+      <perfect-scrollbar class="col-span-full px-8 " style="max-height: 100%;">
+        <div class="h-8"></div>
+        <ng-container *ngTemplateOutlet="ProductUploadDialogUI"></ng-container>
+        <div class="h-8"></div>
+      </perfect-scrollbar>
+    </div>
+  </div>
+  <!-- END: Product Upload Dialog  -->
+
+
+  <!-- Title Section -->
+  <div class="font-extrabold text-4xl w-full text-left"> Add Products</div>
+  <div class="divider-spacer m-0 my-3"></div>
+  <div class="transparent-spacer"></div>
+  <!-- Alert -->
+  <reflection-alert class="w-full"
+                    [dismissed]="!showAlert" (dismissedChanged)="onDismissedChanged($event)"
+                    [appearance]="'outline'" [showIcon]="true"
+                    [type]="alert.type" [@shake]="alert.type === 'error'" dismissible>
+    {{alert.message}}
+  </reflection-alert>
+  <form action="" class="form w-full h-full flex flex-col">
+    <div class="h-full flex flex-row justify-between">
+      <!-- Left Side: Fields Area START -->
+      <div class="w-5/12">
+        <ng-container [ngTemplateOutlet]="ProductDetail"></ng-container>
+      </div>
+      <!-- Left Side: Fields Area END -->
+
+      <!-- Right Side: Images Area Start -->
+      <div class="w-6/12 justify-start flex flex-col pb-4">
+        <ng-container *ngTemplateOutlet="ProductImages"></ng-container>
+      </div>
+    </div>
+    <!-- Right Side: Images Area END -->
+    <div class="col-span-full flex flex-row justify-center">
+      <button (click)="addProduct()" class="primary-button mt-2 w-120">Add Product</button>
+    </div>
+  </form>
+
+</div>
+
+<!-- Product Detail Fields Template START -->
+<ng-template #ProductDetail>
+  <form [formGroup]="form" class="col-span-full grid grid-cols-12">
+    <!--  Product Name Field  -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Product Name</span>
+      <input type="text" class="w-full field" maxlength="20" [formControlName]="'name'">
+      <span class="hint">Do not exceed 20 characters</span>
+      <span class="field-error" *ngIf="name.hasError('required') && name.touched">
+        Product Name is required
+      </span>
+    </div>
+
+
+    <!--  Product Price Field  -->
+    <!-- Tag Selection Field -->
+<!--    <div class="col-span-5 flex flex-col">-->
+<!--      <span class="label">Tags</span>-->
+<!--      <ng-select [searchable]="true" [multiple]="true"-->
+<!--                 dropdownPosition="bottom"-->
+<!--                 [virtualScroll]="true" appendTo="body"-->
+<!--                 [formControlName]="'tags'"-->
+<!--                 class="col-span-full">-->
+<!--        <ng-option *ngFor="let tag of this.tagList" [value]="tag">{{tag}}</ng-option>-->
+<!--      </ng-select>-->
+<!--      <span class="field-error" *ngIf="tags.hasError('required') && tags.touched">-->
+<!--        Tag is required-->
+<!--      </span>-->
+<!--    </div>-->
+
+    <!--Select Gender Field-->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Gender</span>
+      <ng-select dropdownPosition="auto" [formControlName]="'gender'">
+        <ng-option *ngFor="let gender of genders" [value]="gender">{{gender}}</ng-option>
+      </ng-select>
+      <span class="field-error" *ngIf="gender.hasError('required') && gender.touched">
+        Gender is required
+      </span>
+    </div>
+
+    <!--   Main Category   -->
+    <div class="col-span-5 flex flex-col">
+      <span class="label">Main Category</span>
+      <ng-select dropdownPosition="auto" (change)="onMainCategoryChange()" [formControlName]="'mainCategory'">
+        <ng-option *ngFor="let category of this.mainCategories" [value]="category.id">{{category.name}}</ng-option>
+      </ng-select>
+      <span class="field-error" *ngIf="mainCategory.hasError('required') && mainCategory.touched">
+        Main Category is required
+      </span>
+    </div>
+
+    <!--   Sub Category Field  -->
+    <div class="col-span-6 col-end-13 flex flex-col">
+      <span class="label">Sub Category</span>
+      <ng-select dropdownPosition="auto" [formControlName]="'subCategory'">
+        <ng-option *ngFor="let category of this.subCategories" [value]="category.id">{{category.name}}</ng-option>
+      </ng-select>
+      <span class="field-error" *ngIf="subCategory.hasError('required') && subCategory.touched">
+        SubCategory is required
+      </span>
+    </div>
+
+
+
+    <!-- Product Description Field -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Product Description</span>
+      <textarea style="height: 18rem" maxlength="300" class="field resize-none" [formControlName]="'description'"></textarea>
+      <span class="hint">Do not exceed 300 characters</span>
+    </div>
+  </form>
+</ng-template>
+<!-- Product Detail Fields Template END-->
+
+<!-- Product Image Template START-->
+<ng-template #ProductImages>
+  <!--  Color Variant Selector    -->
+  <div class="col-span-full flex flex-col">
+    <span class="label">Colors</span>
+    <input class="field"
+      [(colorPicker)]="color"
+           [cpAlphaChannel]="'disabled'"
+           [cpPresetColors]="hexColors"
+           [cpExtraTemplate]="customTemplate"
+           [style.background-color]="color"
+    />
+  </div>
+
+  <virtual-scroller class="h-full mt-4" #scroll [items]="selectedColors">
+    <div *ngFor="let item of scroll.viewPortItems" class="col-span-full mt-4">
+      <div class="flex flex-row justify-between">
+        <span class="font-bold text-lg w-40 inline-block h-12 rounded-lg border" [ngStyle]="{'background-color': item}"></span>
+<!--        delete button-->
+        <button mat-icon-button class="ml-4" (click)="selectedColors.splice(selectedColors.indexOf(item), 1);">
+          <mat-icon color="warn">delete</mat-icon>
+        </button>
+      </div>
+      <div class="col-span-full grid grid-cols-12 gap-x-2 h-56">
+        <app-image-upload (onImageChange)="onImageChange($event, item,'model')" class="col-span-4 h-56"></app-image-upload>
+        <app-image-upload (onImageChange)="onImageChange($event, item,'thumbnail')" class="col-span-4 h-56"></app-image-upload>
+        <div class="col-span-4 space-y-2 grid grid-rows-2 h-56">
+          <app-image-upload class="row-span-1" (onImageChange)="onImageChange($event, item,'left')"></app-image-upload>
+          <app-image-upload class="row-span-1 text-sm" (onImageChange)="onImageChange($event, item,'right')"></app-image-upload>
+        </div>
+      </div>
+      <div class="h-4"></div>
+    </div>
+  </virtual-scroller>
+</ng-template>
+<!-- Product Image Template END-->
+
+<ng-template #ProductUploadDialogUI>
+  <ul class="space-y-4">
+    <!-- START: Product Document Data Upload Info  -->
+    <li class="flex items-center justify-between">
+      <div class="flex items-center">
+        <svg *ngIf="isProductDataUploaded" class="w-6 h-6 flex-none complete-icon stroke-2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="11"/>
+          <path d="m8 13 2.165 2.165a1 1 0 0 0 1.521-.126L16 9" fill="none"/>
+        </svg>
+        <svg *ngIf="!isProductDataUploaded" class="w-6 h-6 flex-none fill-zinc-600 animate-bounce" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <!--! Font Awesome Pro 6.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+          <path
+            d="M105.4 182.6c12.5 12.49 32.76 12.5 45.25 .001L224 109.3V352c0 17.67 14.33 32 32 32c17.67 0 32-14.33 32-32V109.3l73.38 73.38c12.49 12.49 32.75 12.49 45.25-.001c12.49-12.49 12.49-32.75 0-45.25l-128-128C272.4 3.125 264.2 0 256 0S239.6 3.125 233.4 9.375L105.4 137.4C92.88 149.9 92.88 170.1 105.4 182.6zM480 352h-160c0 35.35-28.65 64-64 64s-64-28.65-64-64H32c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h448c17.67 0 32-14.33 32-32v-96C512 366.3 497.7 352 480 352zM432 456c-13.2 0-24-10.8-24-24c0-13.2 10.8-24 24-24s24 10.8 24 24C456 445.2 445.2 456 432 456z"/>
+        </svg>
+        <p *ngIf="isProductDataUploaded" class="ml-4">Product Data is added</p>
+        <p *ngIf="!isProductDataUploaded" class="ml-4">Adding Product Data</p>
+      </div>
+    </li>
+    <!-- END: Product Document Data Upload Info  -->
+
+    <li *ngFor="let color of this.selectedColors" class="flex items-center justify-between">
+      <div class="flex items-center">
+        <svg *ngIf="imagesUploadCount[color] == 4" class="w-6 h-6 flex-none complete-icon stroke-2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="11"/>
+          <path d="m8 13 2.165 2.165a1 1 0 0 0 1.521-.126L16 9" fill="none"/>
+        </svg>
+        <svg *ngIf="imagesUploadCount[color] != 4" class="w-6 h-6 flex-none fill-zinc-600 animate-bounce" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <path
+            d="M105.4 182.6c12.5 12.49 32.76 12.5 45.25 .001L224 109.3V352c0 17.67 14.33 32 32 32c17.67 0 32-14.33 32-32V109.3l73.38 73.38c12.49 12.49 32.75 12.49 45.25-.001c12.49-12.49 12.49-32.75 0-45.25l-128-128C272.4 3.125 264.2 0 256 0S239.6 3.125 233.4 9.375L105.4 137.4C92.88 149.9 92.88 170.1 105.4 182.6zM480 352h-160c0 35.35-28.65 64-64 64s-64-28.65-64-64H32c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h448c17.67 0 32-14.33 32-32v-96C512 366.3 497.7 352 480 352zM432 456c-13.2 0-24-10.8-24-24c0-13.2 10.8-24 24-24s24 10.8 24 24C456 445.2 445.2 456 432 456z"/>
+        </svg>
+        <p *ngIf="imagesUploadCount[color] == 4" class="ml-4 flex flex-row items-center">Successfully Uploaded images for <span class="inline-block h-4 w-4 mx-2 rounded-full" [ngStyle]="{'background-color': color}"></span> color</p>
+        <p *ngIf="imagesUploadCount[color] != 4" class="ml-4 flex flex-row items-center">Uploading images for <span class="inline-block h-4 w-4 mx-2 rounded-full" [ngStyle]="{'background-color': color}"></span> color</p>
+      </div>
+      <div [ngStyle]="{ 'background-color' : color}" class="w-8 h-8 border-black border rounded-full text-sm flex justify-center items-center">
+        <div class="w-6 h-6 bg-white border-black border rounded-full text-xs flex justify-center items-center">
+          {{imagesUploadCount[color]}}/4
+        </div>
+      </div>
+    </li>
+    <li *ngIf="isAllImagesAreUploaded" class="flex items-center justify-center">
+      <div class="cursor-pointer relative inline-block text-lg group" (click)="resetUI()">
+    <span
+      class="relative z-10 block px-5 py-3 overflow-hidden font-medium leading-tight text-gray-800 transition-colors duration-300 ease-out border-2 border-amber-400 rounded-lg group-hover:text-white">
+        <span class="absolute inset-0 w-full h-full px-5 py-3 rounded-lg bg-gray-50"></span>
+        <span
+          class="absolute left-0 w-48 h-48 -ml-2 transition-all duration-300 origin-top-right -rotate-90 -translate-x-full translate-y-12 bg-amber-500 group-hover:-rotate-180 ease"></span>
+        <span class="relative">Close</span>
+    </span>
+        <span class="absolute bottom-0 right-0 w-full h-12 -mb-1 -mr-1 transition-all duration-200 ease-linear bg-amber-500 rounded-lg group-hover:mb-0 group-hover:mr-0"
+              data-rounded="rounded-lg"></span>
+      </div>
+    </li>
+
+  </ul>
+</ng-template>
+
+
+<ng-template #customTemplate>
+  <div class="flex flex-row justify-center py-4">
+    <button (click)="addColor()" class="primary-outlined-button  !text-black w-4/5">Add</button>
+  </div>
+</ng-template>

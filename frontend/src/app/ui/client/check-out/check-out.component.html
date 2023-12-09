@@ -1,0 +1,333 @@
+<div #checkoutModal class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+    <div
+      [ngClass]="{
+      'animate__fadeIn': isPlacingOrder || havePlacedOrder,
+      'animate__fadeOut': !isPlacingOrder && !havePlacedOrder
+      }"
+      (click)="closeCheckOutModal()"
+      class="animate__faster animate__animated fixed inset-0 dark-overlay transition-opacity" aria-hidden="true"></div>
+
+    <!-- This element is to trick the browser into centering the modal contents. -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <!--
+      Modal panel, show/hide based on modal state.
+
+      Entering: "ease-out duration-300"
+        From: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+        To: "opacity-100 translate-y-0 sm:scale-100"
+      Leaving: "ease-in duration-200"
+        From: "opacity-100 translate-y-0 sm:scale-100"
+        To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+    -->
+    <div
+      [ngClass]="{
+      'animate__zoomIn': isPlacingOrder || havePlacedOrder,
+      'animate__zoomOut': !isPlacingOrder && !havePlacedOrder
+      }"
+      class="animate__animated animate__faster relative inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-green-100 sm:mx-0 sm:h-10 sm:w-10">
+            <!-- Heroicon name: outline/exclamation -->
+            <svg class="h-6 w-6 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+            <h3 *ngIf="isPlacingOrder" class="text-lg leading-6 font-medium text-gray-900">Please wait we are placing your order.</h3>
+            <h3 *ngIf="havePlacedOrder" class="text-lg leading-6 font-medium text-gray-900">Successfully placed the order.</h3>
+            <div class="mt-2" *ngIf="!isPlacingOrder">
+              <p class="text-sm text-gray-500">Your order has been booked. Do you want to continue shopping or go to Orders</p>
+            </div>
+            <div class="mt-2 w-full flex flex-row justify-center" *ngIf="isPlacingOrder">
+              <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'">
+              </mat-progress-spinner>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div *ngIf="havePlacedOrder" class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button (click)="goToOrders()" type="button"
+                class="primary-button w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+          Go to Orders
+        </button>
+        <button (click)="goToProducts()" type="button"
+                class="mt-3 items-center w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+          Continue Shopping
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bg-gray-50">
+  <div class="max-w-2xl mx-auto pt-16 pb-24 px-4 sm:px-6 lg:max-w-7xl lg:px-8">
+    <h2 class="sr-only">Checkout</h2>
+    <form class="form lg:grid md:grid-cols-2 md:gap-x-12 xl:gap-x-16" [formGroup]="form">
+      <div>
+        <div>
+          <h2 class="text-lg font-medium text-gray-900">Contact information</h2>
+          <div class="mt-4">
+            <label for="email-address" class="block text-sm font-medium text-gray-700">Email address</label>
+            <div class="mt-1">
+              <input [formControlName]="'email'" type="email" id="email-address" name="email-address" autocomplete="email"
+                     class="field block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
+              <span class="field-error" *ngIf="email.hasError('required') && email.touched">
+                  Email is required
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-10 border-t border-gray-200 pt-10">
+          <h2 class="text-lg font-medium text-gray-900">Shipping information</h2>
+
+          <div class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 gap-x-4">
+            <div>
+              <label for="first-name" class="block text-sm font-medium text-gray-700">First name</label>
+              <div class="mt-1">
+                <input [formControlName]="'firstName'" readonly type="text" id="first-name" name="first-name" autocomplete="given-name"
+                       class="field block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
+                <span class="field-error" *ngIf="firstName.hasError('required') && firstName.touched">
+                  First Name is required
+              </span>
+              </div>
+            </div>
+
+            <div>
+              <label for="last-name" class="block text-sm font-medium text-gray-700">Last name</label>
+              <div class="mt-1">
+                <input [formControlName]="'lastName'" readonly type="text" id="last-name" name="last-name" autocomplete="family-name"
+                       class="field block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
+                <span class="field-error" *ngIf="lastName.hasError('required') && lastName.touched">
+                  Last Name is required
+              </span>
+              </div>
+            </div>
+
+            <!--            <div class="sm:col-span-2">-->
+            <!--              <label for="company" class="block text-sm font-medium text-gray-700">Company</label>-->
+            <!--              <div class="mt-1">-->
+            <!--                <input type="text" name="company" id="company" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">-->
+            <!--              </div>-->
+            <!--            </div>-->
+
+            <div class="sm:col-span-2">
+              <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+              <div class="mt-1">
+                <input [formControlName]="'address'" type="text" name="address" id="address" autocomplete="street-address"
+                       class="field block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
+                <span class="field-error" *ngIf="address.hasError('required') && address.touched">
+                  Address is required
+              </span>
+              </div>
+            </div>
+
+            <!--            <div class="sm:col-span-2">-->
+            <!--              <label for="apartment" class="block text-sm font-medium text-gray-700">Apartment, suite, etc.</label>-->
+            <!--              <div class="mt-1">-->
+            <!--                <input type="text" name="apartment" id="apartment" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">-->
+            <!--              </div>-->
+            <!--            </div>-->
+
+            <div>
+              <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+              <div class="mt-1">
+                <input [formControlName]="'city'" type="text" name="city" id="city" autocomplete="address-level2"
+                       class="field block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
+                <span class="field-error" *ngIf="city.hasError('required') && city.touched">
+                  City is required
+              </span>
+              </div>
+            </div>
+
+            <!--            <div>-->
+            <!--              <label for="country" class="block text-sm font-medium text-gray-700">Country</label>-->
+            <!--              <div class="mt-1">-->
+            <!--                <select id="country" name="country" autocomplete="country-name" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">-->
+            <!--                  <option>United States</option>-->
+            <!--                  <option>Canada</option>-->
+            <!--                  <option>Mexico</option>-->
+            <!--                </select>-->
+            <!--              </div>-->
+            <!--            </div>-->
+
+            <div>
+              <label for="region" class="block text-sm font-medium text-gray-700">State / Province</label>
+              <div class="mt-1">
+                <input [formControlName]="'state'" type="text" name="region" id="region" autocomplete="address-level1"
+                       class="field block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
+                <span class="field-error" *ngIf="state.hasError('required') && state.touched">
+                  State is required
+              </span>
+              </div>
+            </div>
+
+            <div>
+              <label for="postal-code" class="block text-sm font-medium text-gray-700">Postal code</label>
+              <div class="mt-1">
+                <input [formControlName]="'zip'" type="text" name="postal-code" id="postal-code" autocomplete="postal-code"
+                       class="field block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
+                <span class="field-error" *ngIf="zip.hasError('required') && zip.touched">
+                  Postal Code is required. if you dont know, write 0000
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+              <div class="mt-1">
+                <input [formControlName]="'phone'" type="tel" maxlength="11" name="phone" id="phone" autocomplete="tel"
+                       class="field block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">
+                <span class="field-error" *ngIf="phone.hasError('required') && phone.touched">
+                  Phone is required
+                </span>
+                <span class="field-error" *ngIf="phone.hasError('pattern') && phone.touched">
+                  Phone No. must be in the format: 03XX-XXXXXXX
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment -->
+<!--        <div class="mt-10 border-t border-gray-200 pt-10">-->
+<!--          <h2 class="text-lg font-medium text-gray-900">Payment</h2>-->
+
+<!--          <fieldset class="mt-4">-->
+<!--            <legend class="sr-only">Payment type</legend>-->
+<!--            <div class="space-y-4 sm:flex sm:items-center sm:space-y-0 sm:space-x-10">-->
+<!--              <div class="flex items-center">-->
+<!--                <input id="credit-card" name="payment-type" type="radio" checked class="focus:ring-amber-500 h-4 w-4 text-amber-600 border-gray-300">-->
+<!--                <label for="credit-card" class="ml-3 block text-sm font-medium text-gray-700"> Credit card </label>-->
+<!--              </div>-->
+
+<!--              <div class="flex items-center">-->
+<!--                <input id="paypal" name="payment-type" type="radio" class="focus:ring-amber-500 h-4 w-4 text-amber-600 border-gray-300">-->
+<!--                <label for="paypal" class="ml-3 block text-sm font-medium text-gray-700"> PayPal </label>-->
+<!--              </div>-->
+
+<!--              <div class="flex items-center">-->
+<!--                <input id="etransfer" name="payment-type" type="radio" class="focus:ring-amber-500 h-4 w-4 text-amber-600 border-gray-300">-->
+<!--                <label for="etransfer" class="ml-3 block text-sm font-medium text-gray-700"> eTransfer </label>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </fieldset>-->
+
+<!--          <form novalidate (ngSubmit)="createToken()" [formGroup]="stripeTest">-->
+<!--            <input type="text" formControlName="name" placeholder="Jane Doe">-->
+<!--            <ngx-stripe-card-->
+<!--              [options]="cardOptions"-->
+<!--              [elementsOptions]="elementsOptions"-->
+<!--            ></ngx-stripe-card>-->
+<!--            <button type="submit">-->
+<!--              CREATE TOKEN-->
+<!--            </button>-->
+<!--          </form>-->
+
+<!--          <div class="mt-6 grid grid-cols-4 gap-y-6 gap-x-4">-->
+<!--            <div class="col-span-4">-->
+<!--              <label for="card-number" class="block text-sm font-medium text-gray-700">Card number</label>-->
+<!--              <div class="mt-1">-->
+<!--                <input type="text" id="card-number" name="card-number" autocomplete="cc-number"-->
+<!--                       class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">-->
+<!--              </div>-->
+<!--            </div>-->
+
+<!--            <div class="col-span-4">-->
+<!--              <label for="name-on-card" class="block text-sm font-medium text-gray-700">Name on card</label>-->
+<!--              <div class="mt-1">-->
+<!--                <input type="text" id="name-on-card" name="name-on-card" autocomplete="cc-name"-->
+<!--                       class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">-->
+<!--              </div>-->
+<!--            </div>-->
+
+<!--            <div class="col-span-3">-->
+<!--              <label for="expiration-date" class="block text-sm font-medium text-gray-700">Expiration date (MM/YY)</label>-->
+<!--              <div class="mt-1">-->
+<!--                <input type="text" name="expiration-date" id="expiration-date" autocomplete="cc-exp"-->
+<!--                       class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">-->
+<!--              </div>-->
+<!--            </div>-->
+
+<!--            <div>-->
+<!--              <label for="cvc" class="block text-sm font-medium text-gray-700">CVC</label>-->
+<!--              <div class="mt-1">-->
+<!--                <input type="text" name="cvc" id="cvc" autocomplete="csc"-->
+<!--                       class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm">-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+      </div>
+      <!-- Order summary -->
+      <div class="mt-10 p-8 lg:mt-0">
+        <h2 class="text-lg font-medium text-gray-900">Order summary</h2>
+
+        <div class="mt-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <h3 class="sr-only">Items in your cart</h3>
+          <ul role="list" class="divide-y divide-gray-200">
+            <li *ngFor="let item of this.cartProducts">
+              <app-item-card [product]="item"></app-item-card>
+            </li>
+
+            <!-- More products... -->
+          </ul>
+          <div class="px-6 mb-4" *ngIf="cartProducts.length != 0">
+            <div
+              class="border-2 border-gray-200 rounded-md overflow-hidden flex-col sm:flex-row flex items-center w-full mt-4 space-y-4 sm:space-y-0">
+              <input
+                #voucherCode
+                class="border border-white sm:border-transparent text-base w-full font-medium leading-none text-black p-4 focus:outline-none bg-white placeholder-black"
+                placeholder="Enter your voucher code"/>
+              <button
+                [disabled]="isCheckingVoucherCode"
+                (click)="checkVoucherCode(voucherCode.value)"
+                class="!rounded-none primary-button w-full sm:w-auto py-4 px-6 hover:bg-opacity-75">
+                <span *ngIf="!isCheckingVoucherCode">Apply</span>
+                <div *ngIf="isCheckingVoucherCode" class="w-full flex flex-row justify-center">
+                  <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'">
+                  </mat-progress-spinner>
+                </div>
+              </button>
+            </div>
+          </div>
+          <dl class="border-t border-gray-200 py-6 px-4 space-y-6 sm:px-6">
+            <div class="flex items-center justify-between">
+              <dt class="text-sm">Subtotal</dt>
+              <dd class="text-sm font-medium text-gray-900">RS. {{this.subTotalPrice}}.00
+              </dd>
+            </div>
+            <div *ngIf="isVoucherCodeApplied" class="flex items-center justify-between">
+              <dt class="text-sm flex">
+                Voucher-{{this.voucherCode.voucherCode}}({{this.voucherCode.discount}}%)
+                <svg (click)="removeCode()" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red" viewBox="0 0 20 20" fill="red">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </dt>
+              <dd class="text-sm font-medium text-gray-900">-RS. {{voucherPrice}}.00</dd>
+            </div>
+            <!--            <div class="flex items-center justify-between">-->
+            <!--              <dt class="text-sm">Taxes</dt>-->
+            <!--              <dd class="text-sm font-medium text-gray-900">$5.52</dd>-->
+            <!--            </div>-->
+            <div class="flex items-center justify-between border-t border-gray-200 pt-6">
+              <dt class="text-base font-medium">Total</dt>
+              <dd class="text-base font-medium text-gray-900">RS. {{this.totalPrice}}.00</dd>
+            </div>
+          </dl>
+
+          <div class="border-t border-gray-200 py-6 px-4 sm:px-6">
+            <button [disabled]="cartProducts.length == 0" (click)="onConfirmOrder()" class="w-full primary-button py-3 px-4 text-base font-medium ">
+              Confirm order
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

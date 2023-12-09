@@ -1,0 +1,61 @@
+<div class="p-4 w-120">
+  <!-- Alert -->
+  <reflection-alert class="w-full py-4 mb-2" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="true"
+                    [type]="alert.type" [@shake]="alert.type === 'error'" [dismissible]="true">
+    {{alert.message}}
+  </reflection-alert>
+  <ng-container *ngTemplateOutlet="EventsForm"></ng-container>
+</div>
+
+
+<ng-template #EventsForm>
+  <!--  Add Main Category Form -->
+  <form class="grid grid-cols-12 form" [formGroup]="form">
+    <span class="font-extrabold text-3xl">Update</span>
+    <!--  Sub Category Name  -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Event Name</span>
+      <input type="text" class="w-full field" maxlength="20" [formControlName]="'name'">
+      <span class="hint">Do not exceed 20 characters</span>
+      <!--      <mat-error *ngIf="form.controls['name'].hasError('required')">-->
+      <!--        Category Name is <strong>required</strong>-->
+      <!--      </mat-error>-->
+    </div>
+
+    <!--   Main Category   -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Products</span>
+      <ng-select [searchable]="true" [multiple]="true"
+                 dropdownPosition="bottom"
+                 [virtualScroll]="true" appendTo="body"
+                 [formControlName]="'products'"
+
+                 class="col-span-full">
+        <ng-option *ngFor="let product of this.products" [value]="product.id">{{product.name}}</ng-option>
+      </ng-select>
+      <span class="field-error" *ngIf="product.hasError('required') && product.touched">
+            At least one product is required
+          </span>
+    </div>
+
+    <div class="col-span-full flex flex-col">
+      <span class="label">Event Discount</span>
+      <input type="number" min="1" max="100" class="w-full field"  [formControlName]="'discount'">
+    </div>
+    <!-- Sub Category Description Field -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Valid Up To</span>
+      <div class="icon-field">
+        <input type="date" class="leading-icon peer" [formControlName]="'validUpTo'">
+        <mat-icon class="leading peer-focus:text-primary" svgIcon="heroicons_solid:calendar"></mat-icon>
+      </div>
+    </div>
+    <button (click)="update()" [disabled]="!form.valid || isUpdating" class="col-span-full h-[44px] mt-2 primary-button">
+      <span *ngIf="!isUpdating">Update</span>
+      <div class="flex justify-center items-center" *ngIf="isUpdating">
+        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'">
+        </mat-progress-spinner>
+      </div>
+    </button>
+  </form>
+</ng-template>

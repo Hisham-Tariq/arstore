@@ -1,0 +1,37 @@
+<!-- Parent -->
+<div (click)="this.isCollapsed = !this.isCollapsed" class="collapsable-vertical-nav-item flex flex-row items-center justify-between">
+  <div class="flex flex-row items-center">
+    <mat-icon class="mr-2 h-5 w-5" svgIcon="{{this.item.icon}}"></mat-icon>
+    <span>{{item.title}}</span>
+  </div>
+  <mat-icon svgIcon="heroicons_outline:chevron-down" [@rotate180]="!isCollapsed"></mat-icon>
+<!--  <mat-icon *ngIf="!isCollapsed" svgIcon="heroicons_outline:chevron-up"></mat-icon>-->
+</div>
+<!-- Child -->
+<div id="dropdown-item"  class="flex flex-col overflow-hidden collapsable-children" [@expandCollapse]="isCollapsed ? 'collapsed' : 'expanded'">
+
+  <basic-vertical-nav-item *ngFor="let subItem of this.item.children" (onItemClicked)="onSubItemsClicked()" [item]="subItem" class="text-md vertical-nav-item"></basic-vertical-nav-item>
+
+<!--  <div  *ngFor="let subItem of this.item.children" (click)="onSubItemsClicked(subItem.link)" class="vertical-nav-item">-->
+<!--      <mat-icon *ngIf="subItem.icon" class="mr-2 w-5 h-5" svgIcon="{{this.subItem.icon}}"></mat-icon>-->
+<!--      <span>{{subItem.title}}</span>-->
+<!--    </div>-->
+</div>
+
+
+<!--<div class="collapsable-vertical-nav-item">-->
+<!--  <input type="checkbox" class="absolute inset-0 h-full w-full opacity-0 cursor-pointer peer">-->
+<!--  <div class="icon transition-transform rotate-0 peer-checked:rotate-180 h-12">-->
+<!--    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">-->
+<!--      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>-->
+<!--    </svg>-->
+<!--  </div>-->
+<!--  <div class="title">-->
+<!--    <span class="w-full">{{this.item.title}}</span>-->
+<!--  </div>-->
+<!--  <div id="dropdown-item" class="max-h-0 peer-checked:max-h-60">-->
+<!--    <div *ngFor="let subItem of this.item.children" routerLink="{{this.subItem.link}}" routerLinkActive="v-item-active">-->
+<!--      <span>{{subItem.title}}</span>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->

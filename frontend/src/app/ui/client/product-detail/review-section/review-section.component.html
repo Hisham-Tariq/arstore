@@ -1,0 +1,152 @@
+<div class="bg-white py-6 sm:py-8 lg:py-12 px-12 py-10 ">
+  <div class="row font-extrabold text-5xl tracking-wide items-center justify-center">
+    <span>Customer Review's</span>
+  </div>
+  <div *ngIf="reviews.length == 0" class="max-w-screen-xl mt-10">
+    <h1 class="text-center font-medium text-lg">There are no reviews for this item yet</h1>
+  </div>
+  <div *ngIf="reviews.length != 0" class="max-w-screen-xl mt-10">
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+      <!-- overview - start -->
+      <div>
+        <div class="border border-black rounded-lg p-4">
+          <h2 class="text-gray-800 text-lg lg:text-xl font-bold mb-3">Customer Reviews</h2>
+
+          <div class="flex items-center gap-2 mb-0.5">
+            <!-- stars - start -->
+            <div class="flex gap-0.5 -ml-1">
+              <bar-rating [readOnly]="true" [rate]="overAllRating" [max]="5" class="my-4">
+                <ng-template ratingActive>
+                  <i class="fa-solid fa-star text-primary"></i>
+                </ng-template>
+                <ng-template ratingInactive>
+                  <i class="fa-regular fa-star"></i>
+                </ng-template>
+                <ng-template ratingFraction>
+                  <i class="fa-solid fa-star-half-stroke text-primary"></i>
+                </ng-template>
+              </bar-rating>
+            </div>
+            <!-- stars - end -->
+
+<!--            <span class="text-sm font-semibold"></span>-->
+          </div>
+
+          <span class="block text-gray-500 text-sm">Bases on {{productReviews.length}} reviews</span>
+
+          <div class="flex flex-col border-t border-black  gap-2 py-5 my-5">
+            <!-- 5 star -->
+            <div class="flex items-center gap-3 w-full my-1">
+              <span class="w-15 text-gray-600 text-sm text-left">5 Star</span>
+              <div class="w-full bg-gray-200 h-5 ml-6 rounded-full overflow-hidden">
+                <div class="bg-amber-400 h-5 " [ngStyle]="{
+                'width':  total5StarsPercentage + '%'
+                }"></div>
+              </div>
+              <span class="w-10 text-gray-600 text-sm text-right ">{{total5StarsPercentage}}%</span>
+            </div>
+
+            <!-- 4 star -->
+            <div class="flex items-center gap-3 w-full my-1">
+              <span class="w-15 text-gray-600 text-sm text-left">4 Star</span>
+              <div class="w-full bg-gray-200 h-5 ml-6 rounded-full overflow-hidden">
+                <div class="bg-amber-400 h-5 " [ngStyle]="{
+                'width':  total4StarsPercentage + '%'
+                }"></div>
+              </div>
+              <span class="w-10 text-gray-600 text-sm text-right ">{{total4StarsPercentage}}%</span>
+            </div>
+
+            <!-- 3 star -->
+            <div class="flex items-center gap-3 w-full my-1">
+              <span class="w-15 text-gray-600 text-sm text-left">3 Star</span>
+              <div class="w-full bg-gray-200 h-5 ml-6 rounded-full overflow-hidden">
+                <div class="bg-amber-400 h-5 " [ngStyle]="{
+                'width':  total3StarsPercentage + '%'
+                }"></div>
+              </div>
+              <span class="w-10 text-gray-600 text-sm text-right ">{{total3StarsPercentage}}%</span>
+            </div>
+
+            <!-- 2 star -->
+            <div class="flex items-center gap-3 w-full my-1">
+              <span class="w-15 text-gray-600 text-sm text-left">2 Star</span>
+              <div class="w-full bg-gray-200 h-5 ml-6 rounded-full overflow-hidden">
+                <div class="bg-amber-400 h-5 " [ngStyle]="{
+                'width':  total2StarsPercentage + '%'
+                }"></div>
+              </div>
+              <span class="w-10 text-gray-600 text-sm text-right ">{{total2StarsPercentage}}%</span>
+            </div>
+
+            <!-- 1 star -->
+            <div class="flex items-center gap-3 w-full my-1">
+              <span class="w-15 text-gray-600 text-sm text-left">1 Star</span>
+              <div class="w-full bg-gray-200 h-5 ml-6 rounded-full overflow-hidden">
+                <div class="bg-amber-400 h-5 " [ngStyle]="{
+                'width':  total1StarsPercentage + '%'
+                }"></div>
+              </div>
+              <span class="w-10 text-gray-600 text-sm text-right ">{{total1StarsPercentage}}%</span>
+            </div>
+          </div>
+
+<!--          <h2 class="text-center text-black font-bold text-2xl">Write a review</h2>-->
+<!--          &lt;!&ndash; comment form &ndash;&gt;-->
+<!--          <div class="flex mx-auto items-center justify-center">-->
+<!--            <form class="w-full bg-white rounded-lg px-4 mt-4">-->
+<!--                <div class="w-full md:w-full mb-2 mt-2">-->
+<!--                  <textarea class="bg-gray-100 rounded border border-gray-400 leading-normal resize-none w-full h-20 py-2 font-medium placeholder-gray-700 focus:outline-none focus:bg-white" name="body" placeholder='Type Your Comment' required></textarea>-->
+<!--                </div>-->
+<!--              <button class="primary-button flex justify-center text-align-center w-full">Post Your Comment</button>-->
+<!--            </form>-->
+<!--          </div>-->
+
+
+
+        </div>
+      </div>
+      <!-- overview - end -->
+
+      <!-- reviews - start -->
+      <div class="lg:col-span-2">
+        <div class="border-b  border-black pb-4 md:pb-6">
+          <h2 class="text-gray-800 text-lg lg:text-xl font-bold">Top Reviews</h2>
+        </div>
+
+        <div class="divide-y">
+          <!-- review - start -->
+          <div *ngFor="let review of reviews" class="flex flex-col gap-3 py-4 md:py-8">
+            <div>
+              <span class="block text-sm font-bold">{{review.userName}}</span>
+              <span class="block text-gray-500 text-sm">{{review.createdAt.seconds * 1000 | date:'fullDate'}}</span>
+            </div>
+
+            <!-- stars - start -->
+            <div class="flex gap-0.5 -ml-1">
+              <i class="fa-solid fa-star text-primary" *ngFor="let i of range(0, review.rating)"></i>
+              <i class="fa-regular fa-star" *ngFor="let i of range(review.rating, 5)"></i>
+            </div>
+            <!-- stars - end -->
+            <p class="text-gray-600">{{review.comment}}</p>
+          </div>
+          <!-- review - end -->
+
+          <!-- review - start -->
+
+          <!-- review - end -->
+
+          <!-- review - start -->
+
+          <!-- review - end -->
+        </div>
+
+        <div class="border-t border-black pt-6">
+          <a *ngIf="isShowingLess" (click)="showAll()" class="cursor-pointer flex items-center text-amber-400 hover:text-amber-500 active:text-indigo-600 font-semibold transition duration-100 gap-0.5">Show All</a>
+          <a *ngIf="!isShowingLess" (click)="showLess()" class="cursor-pointer flex items-center text-amber-400 hover:text-amber-500 active:text-indigo-600 font-semibold transition duration-100 gap-0.5">Show Less</a>
+        </div>
+      </div>
+      <!-- reviews - end -->
+    </div>
+  </div>
+</div>

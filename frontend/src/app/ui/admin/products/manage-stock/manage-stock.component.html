@@ -1,0 +1,126 @@
+<div class="flex flex-col max-w-screen-md mx-auto gap-x-2 p-4 h-full overflow-y-hidden">
+  <!-- Alert -->
+  <reflection-alert class="py-4 mb-2" *ngIf="showAlert" [appearance]="'outline'" [showIcon]="true"
+                    [type]="alert.type" [@shake]="alert.type === 'error'" [dismissible]="true">
+    {{alert.message}}
+  </reflection-alert>
+  <!--  Page Title -->
+  <div class="col-span-full text-5xl font-extrabold py-4">
+    <span>Manage Stock</span>
+  </div>
+  <div class="col-span-5 mt-8">
+    <ng-container *ngTemplateOutlet="ManageStockForm"></ng-container>
+  </div>
+  <!--  <div class="col-span-1"></div>-->
+<!--  <div class="col-span-7 flex flex-col">-->
+<!--    <div class="w-full flex flex-row justify-end">-->
+<!--      <div class="w-5/12">-->
+<!--        <ng-container *ngTemplateOutlet="ManageStockFilterOptions"></ng-container>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--    &lt;!&ndash;    <div class="col-span-full my-2">&ndash;&gt;-->
+<!--    <div class="w-full mt-4">-->
+<!--      <ng-container *ngTemplateOutlet="ManageStockDataTable"></ng-container>-->
+<!--    </div>-->
+<!--  </div>-->
+</div>
+
+<ng-template #ManageStockForm>
+  <!--  Add Main Category Form -->
+  <form class="grid grid-cols-12 form" [formGroup]="form">
+    <!--   Main Category   -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Select Product</span>
+      <ng-select (change)="onProductSelect()" [formControlName]="'product'" dropdownPosition="auto">
+        <ng-option *ngFor="let product of this.allProducts" [value]="product.id">{{product.name}}</ng-option>
+      </ng-select>
+      <!--      <mat-error *ngIf="form.controls['mainCategory'].hasError('required')">-->
+      <!--        MainCategory is <strong>required</strong>-->
+      <!--      </mat-error>-->
+    </div>
+
+
+    <div class="col-span-full flex flex-col">
+      <span class="label">Select Color</span>
+      <ng-select (change)="onColorSelect()" class="remove-padding"  [formControlName]="'color'" dropdownPosition="auto">
+          <ng-option *ngFor="let color of this.currentProductColors" [value]="color">
+            <div class="h-12 item" [ngStyle]="{'background-color': color}"></div>
+          </ng-option>
+      </ng-select>
+      <!--      <mat-error *ngIf="form.controls['mainCategory'].hasError('required')">-->
+      <!--        MainCategory is <strong>required</strong>-->
+      <!--      </mat-error>-->
+    </div>
+
+    <!--  Stock Consumer price  -->
+    <div class="col-span-5 flex flex-col">
+      <span class="label">Consumer Price</span>
+      <div class="icon-field">
+        <input type="number" class="leading-icon peer" [formControlName]="'consumerPrice'" min="1">
+        <mat-icon class="leading peer-focus:text-primary" svgIcon="heroicons_solid:currency-dollar"></mat-icon>
+      </div>
+      <span class="field-error" *ngIf="consumerPrice.hasError('required') && consumerPrice.touched">
+        Consumer Price is required
+      </span>
+      <span class="field-error" *ngIf="consumerPrice.hasError('min') && consumerPrice.touched">
+        Minimum price is 1
+      </span>
+    </div>
+
+    <div class="col-start-7 col-end-13 flex flex-col">
+      <span class="label">Retailer Price</span>
+      <div class="icon-field">
+        <input type="number" class="leading-icon peer" [formControlName]="'retailerPrice'" min="1">
+        <mat-icon class="leading peer-focus:text-primary" svgIcon="heroicons_solid:currency-dollar"></mat-icon>
+      </div>
+      <span class="field-error" *ngIf="retailerPrice.hasError('required') && retailerPrice.touched">
+        Retailer Price is required
+      </span>
+      <span class="field-error" *ngIf="retailerPrice.hasError('min') && retailerPrice.touched">
+        Minimum price is 1
+      </span>
+    </div>
+    <!--  Stock quantity  -->
+    <div class="col-span-5 flex flex-col">
+      <span class="label">Previous Quantity</span>
+      <input readonly type="number" class="w-full field" [formControlName]="'remainingQuantity'"
+             (change)="onQuantityChange()" min="0">
+      <span class="field-error" *ngIf="remainingQuantity.hasError('required') && remainingQuantity.touched">
+        previous quantity is required
+      </span>
+      <span class="field-error" *ngIf="remainingQuantity.hasError('min') && remainingQuantity.touched">
+        Minimum stock is 0
+      </span>
+    </div>
+    <div class="col-start-7 col-end-13 flex flex-col">
+      <span class="label">New Quantity</span>
+      <input type="number" class="w-full field" [formControlName]="'newQuantity'"
+             (keyup)="onQuantityChange()" (change)="onQuantityChange()">
+      <span class="field-error" *ngIf="newQuantity.hasError('required') && newQuantity.touched">
+        new quantity is required
+      </span>
+      <span class="field-error" *ngIf="newQuantity.hasError('min') && newQuantity.touched">
+        Minimum stock is 0
+      </span>
+    </div>
+    <div class="col-span-full flex flex-col">
+      <span class="label">Total Quantity</span>
+      <input readonly type="text" class="w-full field" [formControlName]="'totalQuantity'">
+      <span class="field-error" *ngIf="totalQuantity.hasError('required') && totalQuantity.touched">
+        Total quantity is required
+      </span>
+      <span class="field-error" *ngIf="totalQuantity.hasError('min') && totalQuantity.touched">
+        Minimum stock is 0
+      </span>
+    </div>
+    <!--  Stock quantity  -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Date</span>
+      <div class="icon-field">
+        <input type="date" class="leading-icon peer" [formControlName]="'date'">
+        <mat-icon class="leading peer-focus:text-primary" svgIcon="heroicons_solid:calendar"></mat-icon>
+      </div>
+    </div>
+    <button (click)="save()" class="col-span-full h-[44px] mt-4 primary-button">Save</button>
+  </form>
+</ng-template>

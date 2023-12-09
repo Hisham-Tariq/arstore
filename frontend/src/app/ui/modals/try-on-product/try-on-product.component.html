@@ -1,0 +1,61 @@
+<div style="width: 640px;" class="relative overflow-x-hidden h-160 bg-white flex flex-auto items-center justify-center lg:items-start lg:justify-start overflow-hidden">
+
+  <div class="flex flex-col w-full">
+   <div class="w-full h-100 overflow-hidden flex overflow-hidden relative">
+
+     <video crossorigin="anonymous" autoplay playsinline muted id="tryon-webcam" #video></video>
+     <canvas id="tryon-canvas" #canvas></canvas>
+      <!--  A Camera Button to save the current image on canvas -->
+     <button class="absolute bottom-0 right-0 m-4 h-12 w-12 bg-primary text-white rounded-full hover:bg-primary-500 transition-all" (click)="saveImage()">
+       <i class="fas fa-camera text-black"></i>
+     </button>
+
+<!--     <div (click)="closeDialog()"  class="absolute w-10 h-10 hover:bg-gray-100 rounded-sm flex items-center justify-center cursor-pointer transition-all duration-200" style="top: 12px; right: 12px">-->
+<!--       <mat-icon svgIcon="heroicons_outline:x" class="h-8 w-8"></mat-icon>-->
+<!--     </div>-->
+
+
+    <!--  A Loading Overlay until modle is loaded   -->
+    <div #modelLoader class="absolute inset-0 flex items-center justify-center">
+      <div class="bg-gray-800 w-full h-full flex flex-col items-center justify-center">
+        <span class="text-white font-bold text-xl">Please wait we are loading the model</span>
+        <img src="assets/svg/white-loading-dark.svg" class="h-20 w-20 mt-8" alt="">
+      </div>
+    </div>
+<!--     <webcam *ngIf="!isMobile" (initError)="handleInitError($event)" class="flex-1"></webcam>-->
+<!--     <webcam *ngIf="isMobile"  [videoOptions]="videoOptions" (initError)="handleInitError($event)" class="flex-1"></webcam>-->
+   </div>
+   <div class="w-full h-28 flex flex-row px-8 overflow-auto my-4">
+     <div *ngFor="let color of this.product.colors" class="w-30 h-full relative mx-2">
+       <img  class="w-30 h-full border border-gray-400 rounded absolute inset-0" src="{{this.product.images[color]['thumbnail']}}">
+       <div class="inset-x-0 bottom-0 absolute">
+         <div class="h-4" [ngStyle]="{
+         'background-color': color,
+           'width': '100%'
+         }"></div>
+       </div>
+       <div (click)="selectedColor = color" [ngClass]="{
+       'border-2': color == selectedColor
+       }" class="cursor-pointer inset-0 hover:border-2 border-primary transition-all absolute">
+
+       </div>
+     </div>
+   </div>
+   <div class="w-full h-24 flex border-t border-gray-400">
+     <div class="w-full flex flex-row justify-between">
+       <div class="w-1/2 flex flex-row">
+         <div class="overflow-hidden w-14 h-14 rounded-full border border-black ml-4 mt-6">
+           <img class="w-full h-full" src="{{thumbnailUrl(this.selectedColor)}}" alt="">
+         </div>
+         <div class="w-36 h-24 flex flex-col justify-center ml-6">
+           <p class="font-bold">{{product.name}}</p>
+           <p class="font-light font-medium" #productPrice></p>
+         </div>
+       </div>
+       <div class="w-1/2 h-24 mr-4">
+         <button (click)="data.addToCart(this.selectedColor)" class="primary-button w-4/5 ml-12 mt-6">Add To Cart</button>
+       </div>
+     </div>
+   </div>
+ </div>
+</div>

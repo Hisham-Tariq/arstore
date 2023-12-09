@@ -1,0 +1,10 @@
+.horizontal-nav-item{
+  @apply border-b-2 border-transparent hover:border-primary-300 mx-2
+  cursor-pointer text-center text-white hover:text-primary-300
+  flex flex-row items-center font-semibold tracking-wider px-2 h-12;
+
+  &.item-active{
+    @apply border-primary-300 text-primary-300;
+  }
+
+}

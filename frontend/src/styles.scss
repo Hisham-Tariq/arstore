@@ -1,0 +1,287 @@
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use '@angular/material' as mat;
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$reflection_store-primary: mat.define-palette(mat.$amber-palette);
+$reflection_store-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+$reflection_store-warn: mat.define-palette(mat.$red-palette);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$reflection_store-theme: mat.define-light-theme((
+  color: (
+    primary: $reflection_store-primary,
+    accent: $reflection_store-accent,
+    warn: $reflection_store-warn,
+  ),
+));
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($reflection_store-theme);
+
+
+/* ----------------------------------------------------------------------------------------------------- */
+/*  @ Main Tailwind file for injecting utilities.
+/* ----------------------------------------------------------------------------------------------------- */
+@tailwind utilities;
+@tailwind base;
+@tailwind components;
+
+@layer components {
+  .content-section {
+    @apply md:px-8
+  }
+
+  .primary-button {
+    @apply bg-primary text-black font-bold text-lg px-5 py-3
+    rounded-md hover:bg-primary-400 transition-all duration-200;
+
+    &:disabled {
+      @apply bg-gray-400 text-white;
+    }
+  }
+
+  .primary-outlined-text {
+    -webkit-text-stroke: 1px #FCD34D;
+    -webkit-text-fill-color: white;
+  }
+
+  .primary-outlined-button {
+    @apply bg-transparent text-white border-2 border-primary font-bold
+    text-lg px-5 py-3 rounded-md hover:bg-primary-200 hover:bg-opacity-10
+    transition-all duration-200
+  }
+
+  .secondary-outline {
+    @apply bg-transparent  border-2  font-bold
+    text-lg px-5 py-3 rounded-md hover:bg-primary
+    transition-all duration-200 hover:text-black
+  }
+
+  .secondary-outlined-button-white {
+    @apply secondary-outline text-white border-white
+  }
+
+  .secondary-outlined-button-black {
+    @apply secondary-outline text-black border-black
+  }
+
+
+  .nav-side-actions {
+    @apply flex text-white items-center justify-center
+    hover:bg-primary rounded-full hover:text-black
+    duration-300 transition-all h-8 w-8 p-1
+  }
+
+  a {
+
+    @apply text-primary hover:underline
+  }
+
+}
+
+html, body {
+  height: 100%;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.col {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.col:last-child {
+  margin-right: 0;
+}
+
+.material-icons.update-color {
+  @apply text-green-700
+}
+
+.material-icons.delete-color {
+  @apply text-red-700
+}
+
+.material-icons.clear-color {
+  @apply text-gray-400
+}
+
+.mat-dialog-container {
+  padding: 0 !important;
+
+  & {
+    @apply rounded-md;
+  }
+}
+
+
+.table-wrapper {
+  border-radius: 2px;
+  @apply w-full overflow-hidden;
+}
+
+[mat-header-row] {
+  @apply bg-black border-x border-black;
+}
+
+[mat-row] {
+  @apply bg-gray-100 border-x-2 border-black;
+  &:last-child {
+    border-bottom: 1.5px solid black !important;
+  }
+}
+
+.mat-cell {
+  @apply border-none py-3;
+}
+
+.mat-sort-header-stem, .mat-sort-header-pointer-left, .mat-sort-header-pointer-right, .mat-sort-header-pointer-middle {
+  background-color: rgba(252, 211, 77, 1) !important;
+}
+
+.mat-header-cell {
+  @apply font-semibold text-primary text-md border-none ;
+}
+
+
+.form {
+  & .label {
+    @apply font-bold text-lg my-1;
+  }
+
+  & .field, & .icon-field > input, .ng-select .ng-select-container {
+    @apply rounded-md focus:ring-0 border-gray-300
+    border-2 focus:border-primary transition-all
+    duration-200 py-2 text-gray-600 font-medium
+    text-lg
+  }
+
+  & .icon-field {
+
+    & {
+      @apply relative;
+    }
+
+    & > input {
+      @apply w-full;
+
+      &.leading-icon {
+        @apply pl-9;
+      }
+
+      &.ending-icon {
+        @apply pr-9
+      }
+    }
+
+
+    & .leading {
+      @apply h-5 w-5 -mt-2.5 text-gray-600 absolute left-0 top-1/2 ml-3
+    }
+
+    & .ending {
+      @apply h-5 w-5 -mt-2.5 text-gray-600 absolute right-0 top-1/2 mr-3
+    }
+
+  }
+
+  & .hint {
+    @apply text-md font-semibold text-gray-500 my-1
+  }
+
+  & .field-error {
+    @apply text-md font-semibold text-red-500 my-1
+  }
+}
+
+
+.dark-overlay {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.cart-dropdown {
+  @apply hidden;
+}
+
+.cart-icon:hover .cart-dropdown {
+  @apply block;
+}
+
+
+.number-counter{
+  -moz-appearance: textfield !important;
+  margin: 0 !important;
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
+
+.number-counter::-webkit-inner-spin-button,
+.number-counter::-webkit-outer-spin-button {
+  margin: 0 !important;
+  -webkit-appearance: none !important;
+}
+
+.number-counter:focus {
+  outline: none !important;
+}
+
+.number-counter button:focus {
+  outline: none !important;
+}
+
+
+//.webcam-wrapper{
+//  width: 100%;
+//}
+//
+//.webcam-wrapper video{
+//  height: 400px;
+//  width: 100%;
+//}
+
+/* Toggle A */
+input:checked ~ .dot {
+  transform: translateX(100%);
+  @apply bg-primary
+}
+
+/* Toggle B */
+input:checked ~ .dot {
+  transform: translateX(100%);
+  @apply bg-primary
+}
+
+#tryon-webcam {
+  //visibility: hidden;
+  opacity: 0;
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+  position: absolute;
+}
+#tryon-canvas {
+  transform: scaleX(-1);
+  position: absolute;
+}
+
+.fotter-links a{
+  @apply text-gray-400 hover:text-primary
+}

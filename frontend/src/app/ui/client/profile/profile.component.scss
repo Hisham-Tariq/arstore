@@ -1,0 +1,6 @@
+.active-profile-link{
+  @apply bg-primary text-black hover:bg-primary-400 transition-all;
+  mat-icon{
+    @apply text-black
+  }
+}

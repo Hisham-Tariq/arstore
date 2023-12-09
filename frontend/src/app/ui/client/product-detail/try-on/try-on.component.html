@@ -1,0 +1,2 @@
+<webcam *ngIf="!isMobile" [height]="height" [width]="width" (initError)="handleInitError($event)"></webcam>
+<webcam *ngIf="isMobile" [height]="width" [width]="height" [videoOptions]="videoOptions" (initError)="handleInitError($event)"></webcam>

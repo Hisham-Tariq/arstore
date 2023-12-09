@@ -1,0 +1,160 @@
+<div class="flex flex-col w-full gap-x-2 p-4 h-full overflow-y-hidden">
+
+  <!-- Title Section -->
+  <div class="font-extrabold text-4xl w-full text-left"> View Product</div>
+  <div class="divider-spacer m-0 my-3"></div>
+  <div class="transparent-spacer"></div>
+  <!-- Alert -->
+  <reflection-alert class="w-full"
+                    [dismissed]="!showAlert" (dismissedChanged)="onDismissedChanged($event)"
+                    [appearance]="'outline'" [showIcon]="true"
+                    [type]="alert.type" [@shake]="alert.type === 'error'" dismissible>
+    {{alert.message}}
+  </reflection-alert>
+  <form action="" class="form w-full h-full flex flex-col">
+    <div class="h-full flex flex-row justify-between">
+      <!-- Left Side: Fields Area START -->
+      <div class="w-5/12">
+        <ng-container [ngTemplateOutlet]="ProductDetail"></ng-container>
+      </div>
+      <!-- Left Side: Fields Area END -->
+
+      <!-- Right Side: Images Area Start -->
+      <div class="w-6/12 justify-start flex flex-col pb-4">
+        <ng-container *ngTemplateOutlet="ProductImages"></ng-container>
+      </div>
+    </div>
+    <!-- Right Side: Images Area END -->
+    <div class="col-span-full flex flex-row justify-center">
+      <button
+        [disabled]="isUpdatingProduct"
+        (click)="updateProduct()" class="primary-button mt-2 w-120">
+        <span *ngIf="!isUpdatingProduct">Save Product</span>
+        <div class="flex justify-center items-center" *ngIf="isUpdatingProduct">
+          <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'">
+          </mat-progress-spinner>
+        </div>
+      </button>
+    </div>
+  </form>
+
+</div>
+
+<!-- Product Detail Fields Template START -->
+<ng-template #ProductDetail>
+  <form [formGroup]="form" class="col-span-full grid grid-cols-12">
+    <!--  Product Name Field  -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Product Name</span>
+      <input type="text" class="w-full field" maxlength="20" [formControlName]="'name'">
+      <span class="hint">Do not exceed 20 characters</span>
+      <span class="field-error" *ngIf="name.hasError('required') && name.touched">
+        Product Name is required
+      </span>
+    </div>
+
+
+    <!--  Product Price Field  -->
+    <!-- Tag Selection Field -->
+<!--    <div class="col-span-5 flex flex-col">-->
+<!--      <span class="label">Tags</span>-->
+<!--      <ng-select [searchable]="true" [multiple]="true"-->
+<!--                 dropdownPosition="bottom"-->
+<!--                 [virtualScroll]="true" appendTo="body"-->
+<!--                 [formControlName]="'tags'"-->
+<!--                 class="col-span-full">-->
+<!--        <ng-option *ngFor="let tag of this.tagList" [value]="tag">{{tag}}</ng-option>-->
+<!--      </ng-select>-->
+<!--      <span class="field-error" *ngIf="tags.hasError('required') && tags.touched">-->
+<!--        Tag is required-->
+<!--      </span>-->
+<!--    </div>-->
+
+    <!--Select Gender Field-->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Gender</span>
+      <ng-select dropdownPosition="auto" [formControlName]="'gender'">
+        <ng-option *ngFor="let gender of genders" [value]="gender">{{gender}}</ng-option>
+      </ng-select>
+      <span class="field-error" *ngIf="gender.hasError('required') && gender.touched">
+        Gender is required
+      </span>
+    </div>
+
+    <!--   Main Category   -->
+    <div class="col-span-5 flex flex-col">
+      <span class="label">Main Category</span>
+      <ng-select dropdownPosition="auto" (change)="onMainCategoryChange()" [formControlName]="'mainCategory'">
+        <ng-option *ngFor="let category of this.mainCategories" [value]="category.id">{{category.name}}</ng-option>
+      </ng-select>
+      <span class="field-error" *ngIf="mainCategory.hasError('required') && mainCategory.touched">
+        Main Category is required
+      </span>
+    </div>
+
+    <!--   Sub Category Field  -->
+    <div class="col-span-6 col-end-13 flex flex-col">
+      <span class="label">Sub Category</span>
+      <ng-select dropdownPosition="auto" [formControlName]="'subCategory'">
+        <ng-option *ngFor="let category of this.subCategories" [value]="category.id">{{category.name}}</ng-option>
+      </ng-select>
+      <span class="field-error" *ngIf="subCategory.hasError('required') && subCategory.touched">
+        SubCategory is required
+      </span>
+    </div>
+
+
+
+    <!-- Product Description Field -->
+    <div class="col-span-full flex flex-col">
+      <span class="label">Product Description</span>
+      <textarea style="height: 15rem" maxlength="300" class="field resize-none" [formControlName]="'description'"></textarea>
+      <span class="hint">Do not exceed 300 characters</span>
+    </div>
+  </form>
+</ng-template>
+<!-- Product Detail Fields Template END-->
+
+<!-- Product Image Template START-->
+<ng-template #ProductImages>
+  <!--  Color Variant Selector    -->
+  <div class="col-span-full flex flex-col">
+    <span class="label">Colors</span>
+    <input class="field"
+           [(colorPicker)]="color"
+           [cpAlphaChannel]="'disabled'"
+           [cpPresetColors]="hexColors"
+           [cpExtraTemplate]="customTemplate"
+           [style.background-color]="color"
+    />
+  </div>
+
+  <virtual-scroller class="h-full mt-4" #scroll [items]="selectedColors">
+    <div *ngFor="let item of selectedColors" class="col-span-full mt-4">
+      <div class="flex flex-row justify-between">
+        <span class="font-bold text-lg w-40 inline-block h-12 rounded-lg border" [ngStyle]="{'background-color': item}"></span>
+        <!--        delete button-->
+        <button mat-icon-button class="ml-4" (click)="deleteColor(item)">
+          <mat-icon color="warn">delete</mat-icon>
+        </button>
+      </div>
+      <div class="col-span-full grid grid-cols-12 gap-x-2 h-56">
+        <app-image-upload initialImage="{{getInitialImage(item, 'model')}}" (onImageChange)="onImageChange($event, item,'model')" class="col-span-4 h-56"></app-image-upload>
+        <app-image-upload initialImage="{{getInitialImage(item, 'thumbnail')}}" (onImageChange)="onImageChange($event, item,'thumbnail')" class="col-span-4 h-56"></app-image-upload>
+        <div class="col-span-4 space-y-2 grid grid-rows-2 h-56">
+          <app-image-upload initialImage="{{getInitialImage(item, 'left')}}" class="row-span-1" (onImageChange)="onImageChange($event, item,'left')"></app-image-upload>
+          <app-image-upload initialImage="{{getInitialImage(item, 'right')}}" class="row-span-1 text-sm" (onImageChange)="onImageChange($event, item,'right')"></app-image-upload>
+        </div>
+      </div>
+      <div class="h-4"></div>
+    </div>
+  </virtual-scroller>
+</ng-template>
+<!-- Product Image Template END-->
+
+
+<ng-template #customTemplate>
+  <div class="flex flex-row justify-center py-4">
+    <button (click)="addColor()" class="primary-outlined-button !text-black w-4/5">Add</button>
+  </div>
+</ng-template>

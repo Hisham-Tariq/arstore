@@ -1,0 +1,95 @@
+<div #verificationEmailSendModal class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
+
+    <div
+      [ngClass]="{
+      'animate__fadeIn': showEmailHasBeenSent,
+      'animate__fadeOut': !showEmailHasBeenSent
+      }"
+      (click)="closeModal()"
+      class="animate__faster animate__animated fixed inset-0 dark-overlay transition-opacity"
+      style="background: black !important;opacity: 0.5 !important;" aria-hidden="true"></div>
+
+    <!-- This element is to trick the browser into centering the modal contents. -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <div
+      [ngClass]="{
+      'animate__zoomIn': verificationEmailSendModal,
+      'animate__zoomOut': !verificationEmailSendModal
+      }"
+      class="animate__animated animate__faster inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 transform transition-all sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+      <div>
+        <div class="mx-auto flex items-center justify-center h-8 w-8 rounded-full bg-gray-100">
+          <mat-icon [svgIcon]="'heroicons_outline:mail'"></mat-icon>
+        </div>
+        <div class="mt-3 text-center sm:mt-5">
+          <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Email Verification</h3>
+          <p>A Verification mail has been sent on {{this.authService.user.email}}. Verify your email to continue shopping.</p>
+        </div>
+      </div>
+      <div class="mt-5 sm:mt-6">
+        <button (click)="closeModal()" type="button" class="primary-button w-full">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="h-full flex">
+  <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
+
+  <div class="flex-1 flex xl:overflow-hidden">
+    <!-- Main content -->
+    <div class="flex-1 xl:overflow-y-auto">
+      <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:py-12 lg:px-8">
+        <h1 class="text-3xl font-extrabold text-blue-gray-900">Account</h1>
+
+        <form class="mt-6 space-y-8 divide-y divide-y-blue-gray-200 form" [formGroup]="form">
+          <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-6 sm:gap-x-6">
+            <div class="sm:col-span-6">
+              <h2 class="text-xl font-medium text-blue-gray-900">Profile</h2>
+            </div>
+
+            <div class="sm:col-span-3">
+              <label for="first-name" class="block text-sm font-medium text-blue-gray-900"> First name </label>
+              <input type="text" value="{{authService.user.firstName}}" name="first-name" id="first-name" autocomplete="given-name" class="field mt-1 block w-full ">
+            </div>
+
+            <div class="sm:col-span-3">
+              <label for="last-name" class="block text-sm font-medium text-blue-gray-900"> Last name </label>
+              <input type="text" value="{{authService.user.lastName}}" name="last-name" id="last-name" autocomplete="family-name" class="field mt-1 block w-full">
+            </div>
+
+            <div class="sm:col-span-6">
+              <label for="last-name" class="block text-sm font-medium text-blue-gray-900"> User name </label>
+              <input type="text" value="{{authService.user.firstName}} {{authService.user.lastName}}" name="last-name" id="user-name" autocomplete="family-name"
+                     class="field mt-1 block w-full">
+            </div>
+
+            <div class="sm:col-span-6">
+              <label for="email" class="block text-sm font-medium text-blue-gray-900"> User Email </label>
+              <input type="text" value="{{authService.user.email}} " name="email" id="email" autocomplete="email" class="field mt-1 block w-full">
+            </div>
+
+          </div>
+        </form>
+
+        <div class="pt-8 flex flex-row">
+          <button (click)="authService.logout()"
+                  [ngClass]="{
+                  'w-1/2':!isUserVerified,
+                  'w-full': isUserVerified
+                  }"
+                  type="button" class="secondary-outlined-button-black">Logout</button>
+          <button (click)="verifyUser()" *ngIf="!isUserVerified" type="button" class="secondary-outlined-button-black ml-8 w-1/2">Verify Email</button>
+        </div>
+<!--        <div class="pt-4">-->
+<!--          <button (click)="goToOrders()" type="button" class="primary-button w-full ">View Your Orders</button>-->
+<!--        </div>-->
+
+      </div>
+    </div>
+  </div>
+</div>

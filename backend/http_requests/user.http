@@ -1,0 +1,30 @@
+# Create a User
+POST http://localhost:3000/api/v1/users/register
+Content-Type: application/json
+
+{
+    "name": "Admin",
+    "email": "admin@admin.com",
+    "password": "password",
+    "phone": "+947187520",
+    "isAdmin": true,
+    "street": "Main Street",
+    "apartment": "Block C",
+    "zip": 10870,
+    "city": "Colombo",
+    "country": "SriLanka"
+}
+###
+# Login
+POST http://localhost:3000/api/v1/users/login
+Content-Type: application/json
+
+{
+    "email": "admin@admin.com",
+    "password": "password"
+}
+
+###
+
+# Get all users
+GET http://localhost:3000/api/v1/users

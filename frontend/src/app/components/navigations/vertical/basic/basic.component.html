@@ -1,0 +1,7 @@
+<div #navigationItem (click)="itemClicked()" class="vertical-nav-item"
+  routerLink="{{this.item.link}}" >
+<!--  <img id="{{this.id}}" class="svg w-6" src="{{item.svgIcon}}">-->
+  <mat-icon *ngIf="item.icon" class="mr-2 w-5 h-5" svgIcon="{{this.item.icon}}"></mat-icon>
+<!--  <mat-icon class="mr-2" svgIcon="reflection:circle"></mat-icon>-->
+  <span>{{item.title}}</span>
+</div>

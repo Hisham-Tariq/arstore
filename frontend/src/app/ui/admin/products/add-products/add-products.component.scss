@@ -1,0 +1,40 @@
+
+.mat-radio-button {
+  display: block;
+  margin: 5px 0;
+}
+
+.tab-bar {
+  @apply space-x-2
+}
+
+.tab-item {
+  @apply text-gray-600 font-bold text-md px-4 py-3
+  transition-all duration-200 rounded-sm
+  border-b-2 border-transparent cursor-pointer;
+  & mat-icon {
+    @apply w-5 h-5;
+  }
+
+  &.active, &:hover {
+    @apply border-b-primary text-primary
+  }
+
+  &.active mat-icon {
+    @apply text-primary;
+  }
+}
+
+.transparent-spacer {
+  @apply col-span-full my-3
+}
+
+.divider-spacer {
+  @apply col-span-full my-2 border-b-2
+  border-b-gray-200 border-dashed
+}
+
+.complete-icon{
+  stroke: #22c55e;
+  fill: #dcfce7;
+}

@@ -1,0 +1,10 @@
+<div [matMenuTriggerFor]="subNavItemsMenu" id="dropdownButton" data-dropdown-toggle="dropdown" class="horizontal-nav-item">
+  <mat-icon class="mr-2" svgIcon="{{this.item.icon}}"></mat-icon>
+  {{this.item.title}}
+</div>
+
+<mat-menu #subNavItemsMenu="matMenu" class="rounded-sm">
+  <div *ngFor="let subItems of item.children">
+    <span (click)="onItemClicked(subItems.link)" routerLink="{{this.item.link}}" mat-menu-item>{{subItems.title}}</span>
+  </div>
+</mat-menu>

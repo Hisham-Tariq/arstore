@@ -1,0 +1,15 @@
+<div *ngIf="events.length > 0" class="w-full flex flex-col bg-white">
+  <div>
+    <p class="flex justify-center text-5xl font-extrabold">Events</p>
+  </div>
+  <div *ngFor="let event of events">
+    <div *ngIf="event.eventProducts.length > 0"  class="w-full h-160 md:h-160 flex flex-col bg-white">
+      <div >
+        <p class="flex justify-center mt-12 text-3xl font-extrabold">{{event.name}}&nbsp;&nbsp;({{event.discount}}%)</p>
+      </div>
+      <drag-scroll  class="h-full -mx-px border border-gray-100 mt-8">
+        <product-card class="w-72" drag-scroll-item *ngFor="let product of event.eventProducts" [product]="product"></product-card>
+      </drag-scroll>
+    </div>
+  </div>
+</div>
