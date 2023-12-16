@@ -41,12 +41,12 @@ export class CheckOutComponent implements OnInit {
     private voucherService: VoucherCodeService,
   ) {
 
-    if (this.authService.user === null) {
-      this._router.navigate(['/cart']);
-    }
+    // if (this.authService.user === null) {
+    //   this._router.navigate(['/cart']);
+    // }
 
 
-    const user = this.authService.user!;
+    const user = {};
     this.form = this._formBuilder.group({
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],

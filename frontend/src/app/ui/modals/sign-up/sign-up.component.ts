@@ -31,7 +31,7 @@ export class AuthSignUpComponent implements OnInit {
    * Constructor
    */
   constructor(
-    // private _authService: AuthService,
+    private _authService: AuthService,
     private _formBuilder: FormBuilder,
     private _router: Router,
     public dialog: MatDialog,
@@ -45,9 +45,10 @@ export class AuthSignUpComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
       agreements: false,
     });
-    this.authService.isUserLoggedIn.subscribe(value => {
-      this.isUserLoggedIn = value;
-    });
+    // TODO: check if user is logged in
+    // this.authService.isUserLoggedIn.subscribe(value => {
+    //   this.isUserLoggedIn = value;
+    // });
   }
 
   get firstName(): AbstractControl | null {
@@ -91,40 +92,46 @@ export class AuthSignUpComponent implements OnInit {
   }
 
   async signUp(): Promise<void> {
+    console.log("Form Status: ", this.form.valid)
     if (this.form.valid) {
       // Register the user using AuthService
       this.isRegistering = true;
-
-      let registerTask = this.authService.register({
-        email: this.email?.value,
-        password: this.password?.value,
-        firstName: this.firstName?.value,
-        lastName: this.lastName?.value,
-      });
-
-      registerTask.then(() => {
-        /// show alert with message successfully registered adn we have sent verification email
+      this.authService.register(
+        this.form.value,
+      ).subscribe((response) => {
         this.isRegistering = false;
         this.alert.type = 'success';
         this.alert.message = 'Successfully registered. Please check your email to verify your account.';
         this.showAlert = true;
-        // setTimeout(() => {
-        //   this.closeDialog();
-        //   this._router.navigate(['/']);
-        // }, 1000);
-      })
-        .catch((error) => {
-          this.isRegistering = false;
-          this.alert.type = 'error';
-          // check if email is already in use
-          if (error.code === 'auth/email-already-in-use') {
-            this.alert.message = 'Email is already in use.';
-          } else {
-            this.alert.message = error.message;
-          }
+        setTimeout(() => {
+          this.closeDialog();
+          this._router.navigate(['/']);
+        }, 1000);
+      });
 
-          this.showAlert = true;
-        });
+      // let registerTask = this.authService.register({
+      //   email: this.email?.value,
+      //   password: this.password?.value,
+      //   firstName: this.firstName?.value,
+      //   lastName: this.lastName?.value,
+      // });
+
+      // registerTask.then(() => {
+      //   /// show alert with message successfully registered adn we have sent verification email
+      //
+      // })
+      //   .catch((error: any) => {
+      //     this.isRegistering = false;
+      //     this.alert.type = 'error';
+      //     // check if email is already in use
+      //     if (error.code === 'auth/email-already-in-use') {
+      //       this.alert.message = 'Email is already in use.';
+      //     } else {
+      //       this.alert.message = error.message;
+      //     }
+      //
+      //     this.showAlert = true;
+      //   });
 
     } else {
       this.alert = {

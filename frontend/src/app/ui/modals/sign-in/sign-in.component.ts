@@ -93,47 +93,57 @@ export class AuthSignInComponent implements OnInit {
     if (this.form.valid) {
       this.isLoading = true;
       // Register the user using AuthService
-      this.authService.login({
-        email: this.email?.value,
-        password: this.password?.value,
-      })
-        .then(() => {
-          this.alert.type = 'success';
-          this.alert.message = 'You have successfully Logged In';
-          this.showAlert = true;
-          this.isLoading = false;
-          //check if user email is verified if not show him we have sent a verification email
-          // We have sent a verification email please verify it
-          if (!this.authService.isUserVerified) {
-            this.alert.type = 'warning';
-            this.alert.message = 'We have sent a verification email please verify your email';
-            this.showAlert = true;
-          } else {
-            this.alert.type = 'success';
-            this.alert.message = 'You have successfully Logged In';
-            this.showAlert = true;
-            this.isLoading = false;
-            setTimeout(() => {
-              this.closeDialog();
-              this._router.navigate(['/']);
-            }, 1000);
-          }
-
-        })
-        .catch((error) => {
-          this.isLoading = false;
-          this.alert.type = 'error';
-          // if error message contains wrong-password show invalid credentials
-          // if contains user-not-found show user not found
-          if (error.message.includes('wrong-password')) {
-            this.alert.message = 'Invalid Credentials';
-          } else if (error.message.includes('user-not-found')) {
-            this.alert.message = 'User Not Found';
-          } else {
-            this.alert.message = error.message;
-          }
-          this.showAlert = true;
-        });
+      this.authService.login(this.form.value).subscribe((response) => {
+        this.alert.type = 'success';
+        this.alert.message = 'You have successfully Logged In';
+        this.showAlert = true;
+        this.isLoading = false;
+        setTimeout(() => {
+                  this.closeDialog();
+                  this._router.navigate(['/']);
+                }, 1000);
+      });
+      // this.authService.login({
+      //   email: this.email?.value,
+      //   password: this.password?.value,
+      // })
+      //   .then(() => {
+      //     this.alert.type = 'success';
+      //     this.alert.message = 'You have successfully Logged In';
+      //     this.showAlert = true;
+      //     this.isLoading = false;
+      //     //check if user email is verified if not show him we have sent a verification email
+      //     // We have sent a verification email please verify it
+      //     if (!this.authService.isUserVerified) {
+      //       this.alert.type = 'warning';
+      //       this.alert.message = 'We have sent a verification email please verify your email';
+      //       this.showAlert = true;
+      //     } else {
+      //       this.alert.type = 'success';
+      //       this.alert.message = 'You have successfully Logged In';
+      //       this.showAlert = true;
+      //       this.isLoading = false;
+      //       setTimeout(() => {
+      //         this.closeDialog();
+      //         this._router.navigate(['/']);
+      //       }, 1000);
+      //     }
+      //
+      //   })
+      //   .catch((error: any) => {
+      //     this.isLoading = false;
+      //     this.alert.type = 'error';
+      //     // if error message contains wrong-password show invalid credentials
+      //     // if contains user-not-found show user not found
+      //     if (error.message.includes('wrong-password')) {
+      //       this.alert.message = 'Invalid Credentials';
+      //     } else if (error.message.includes('user-not-found')) {
+      //       this.alert.message = 'User Not Found';
+      //     } else {
+      //       this.alert.message = error.message;
+      //     }
+      //     this.showAlert = true;
+      //   });
     } else {
       this.alert = {
         type: 'error',

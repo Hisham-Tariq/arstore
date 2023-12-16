@@ -1,278 +1,127 @@
 import {Injectable} from '@angular/core';
-import {
-  Auth,
-  createUserWithEmailAndPassword,
-  sendEmailVerification,
-  sendPasswordResetEmail,
-  signInWithEmailAndPassword,
-} from '@angular/fire/auth'
+
 import {LoginData} from './LoginData';
 import {RegisterData} from './RegisterData';
 import {ReflectionSplashScreenService} from '../splash-screen';
-import {doc, DocumentReference, Firestore, getDoc, onSnapshot, serverTimestamp, setDoc} from '@angular/fire/firestore';
 import {ReflectionUser} from "../../interfaces";
-import {DocumentSnapshot} from "@firebase/firestore";
 import {Router} from "@angular/router";
 import {BehaviorSubject, Observable} from "rxjs";
-import {CartService} from "../Cart/cart.service";
-import {map} from "rxjs/operators";
+import {map, tap, catchError} from "rxjs/operators";
+import {ApiService} from "../ApiBaseService/api.service";
 
+
+interface AuthResponse {
+  user: ReflectionUser;
+  token: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private _stateSource: BehaviorSubject<AuthState> = new BehaviorSubject<AuthState>({
-    user: null,
-  });
-  state$ = this._stateSource.asObservable();
-  userDoc: DocumentReference;
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  private authStateSubject = new BehaviorSubject<ReflectionUser | null>(null);
+  authState$: Observable<ReflectionUser | null> = this.authStateSubject.asObservable();
+  private apiUrl = 'auth'; // Assuming 'auth' is the endpoint for registration and login
 
-
-  constructor(private auth: Auth,
-              private readonly splashService: ReflectionSplashScreenService,
-              private readonly firestore: Firestore,
-              private router: Router,
-              private cartService: CartService,
+  constructor(
+    private apiService: ApiService,
+    private splashService: ReflectionSplashScreenService,
   ) {
-    this.listenToAuthStateChanges();
+    // get the current user record if status code is 200 user is logged in else not
+    this.apiService.get<ReflectionUser>('users/me').pipe(
+      tap((response) => {
+        const authResponse = <AuthResponse>{
+          user: response,
+          token: localStorage.getItem('token') || '',
+        };
+        this.handleAuthentication(authResponse);
+      }),
+      catchError((error) => this.handleError(error))
+    ).subscribe();
+    this.updateAuthState();
   }
 
-  get isUserLoggedIn(): Observable<boolean> {
-    return this.state$.pipe(
-      map(state => !!state.user)
+
+  register(data: RegisterUserData): Observable<AuthResponse> {
+    // const data = { firstName, lastName, email, password };
+    return this.apiService.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
+      tap((response) => this.handleAuthentication(response)),
+      catchError((error) => this.handleError(error))
     );
   }
 
-  get isUserVerified(): boolean {
-
-    return !!this._getCurrentState.user && (this.auth.currentUser?.emailVerified || false);
+  login(data: LoginUserData): Observable<AuthResponse> {
+    return this.apiService.post<AuthResponse>(`${this.apiUrl}/login`, data).pipe(
+      tap((response) => this.handleAuthentication(response)),
+      catchError((error) => this.handleError(error))
+    );
   }
 
-  private get _getCurrentState(): AuthState {
-    return this._stateSource.value;
+  isAuthenticated(): Observable<boolean> {
+    return this.isAuthenticatedSubject.asObservable();
   }
 
+  getUser(): any {
+    return this.authStateSubject.getValue();
+  }
 
-  listenToAuthStateChanges(): void {
-    this.auth.onAuthStateChanged(async (value) => {
-      if (value != null && AuthService._getUserFromSession == null) {
-        const user = this.userFromDocument((await this.getUserDataFromFirestore()));
-        this._stateSource.next({
-          user: user,
-        });
-        AuthService._setUserSession = user;
-        if (!this.isUserVerified) {
-          await sendEmailVerification(this.auth.currentUser!);
-        }
-        this.cartService.initializeCartDetails(user.id);
-        this.userDoc = doc(this.firestore, `users/${user.id}`);
-        this.listenToUserDocChanges();
-      } else if (value != null && AuthService._getUserFromSession != null) {
-        this._stateSource.next({
-          user: AuthService._getUserFromSession,
-        });
-        this.userDoc = doc(this.firestore, `users/${AuthService._getUserFromSession.id}`);
-        this.listenToUserDocChanges();
-        this.cartService.initializeCartDetails(AuthService._getUserFromSession.id);
+  logout(): void {
+    localStorage.removeItem('token');
+    this.isAuthenticatedSubject.next(false);
+    this.authStateSubject.next(null);
+  }
+
+  private handleAuthentication(response: AuthResponse): void {
+    const {user, token} = response;
+    if (user && token) {
+      localStorage.setItem('token', token);
+      this.isAuthenticatedSubject.next(true);
+      this.authStateSubject.next(user);
+    }
+  }
+
+  private updateAuthState(): void {
+    this.isAuthenticated().subscribe((authenticated) => {
+      if (authenticated) {
+        this.authStateSubject.next(this.getUser());
       } else {
-        AuthService._clearUserSession();
+        this.authStateSubject.next(null);
+        this.splashService.hide();
       }
-      this.splashService.hide();
-    })
-  }
-
-  private static get _getUserFromSession(): ReflectionUser | null {
-    const sessionUser = sessionStorage.getItem('user');
-    return sessionUser ? JSON.parse(sessionUser) : null;
-  }
-
-  private static set _setUserSession(user: ReflectionUser) {
-    sessionStorage.setItem('user', JSON.stringify(user));
-  }
-
-  private static _clearUserSession() {
-    sessionStorage.removeItem('user');
-  }
-
-  // function to check isUserAdmin as observable
-  get isUserAdmin(): Observable<boolean> {
-    return this.state$.pipe(
-      map(state => state.user ? state.user.type === 'admin' : false)
-    );
-  }
-
-  get isNormalUser(): Observable<boolean> {
-    return this.state$.pipe(
-      map(state => state.user ? state.user.type === 'user' : false)
-    );
-  }
-
-
-  async login(loginData: LoginData) {
-    let userCredentials = await signInWithEmailAndPassword(this.auth, loginData.email, loginData.password);
-    this.userDoc = doc(this.firestore, `users/${userCredentials.user.uid}`);
-    this.userFromDocument(await getDoc(this.userDoc));
-    this.listenToUserDocChanges();
-  }
-
-
-  async register(registerData: RegisterData): Promise<Promise<any>> {
-    let userCredentials = await createUserWithEmailAndPassword(this.auth, registerData.email, registerData.password);
-    this.userDoc = doc(this.firestore, `users/${userCredentials.user.uid}`);
-    this.listenToUserDocChanges();
-    return setDoc(this.userDoc, {
-      email: registerData.email,
-      firstName: registerData.firstName,
-      lastName: registerData.lastName,
-      userId: userCredentials.user.uid,
-      type: 'user',
-      createdAt: serverTimestamp(),
     });
   }
 
-  listenToUserDocChanges() {
-    onSnapshot(this.userDoc, (snapshot) => {
-      if (snapshot.data() != undefined) {
-        this._stateSource.next({
-          user: this.userFromDocument(snapshot),
-        });
-        AuthService._setUserSession = this.userFromDocument(snapshot);
-      } else {
-        this._stateSource.next({
-          user: null,
-        });
-        AuthService._clearUserSession();
+  private handleError(error: any): Observable<never> {
+    // You can customize this function based on your error handling requirements
+    console.error('Error:', error);
+
+    if (error.status === 400) {
+      if (error.error.message === 'Invalid email or password') {
+        // Handle invalid credentials error
+        // For example, you can display a message to the user
+      } else if (error.error.message === 'Email is already registered') {
+        // Handle email already exists error
+        // For example, you can display a message to the user
+      } else if (error.error.message === 'The user is not authorized') {
+        this.isAuthenticatedSubject.next(false);
+        this.authStateSubject.next(null);
       }
-    })
-  }
-
-  getUserDataFromFirestore(): Promise<DocumentSnapshot> {
-    this.userDoc = doc(this.firestore, `users/${this.auth.currentUser?.uid}`);
-    return getDoc(this.userDoc);
-  }
-
-  userFromDocument(doc: DocumentSnapshot): ReflectionUser {
-    return {
-      email: doc.data()!['email'],
-      firstName: doc.data()!['firstName'],
-      lastName: doc.data()!['lastName'],
-      id: doc.id,
-      type: doc.data()!['type'],
-      createdAt: doc.data()!['createdAt'],
-      zip: doc.data()!['zip'] || '',
-      phone: doc.data()!['phone'] || '',
-      address: doc.data()!['address'] || '',
-      city: doc.data()!['city'] || '',
-      state: doc.data()!['state'] || '',
-    };
-  }
-
-  // Logout User
-  logout() {
-    this.auth.signOut();
-    sessionStorage.removeItem('user');
-    window.location.replace("/");
-  }
-
-  sendResetPasswordLink(email: string) {
-    // check before that if the email is associated with a user
-    // if not then return an error
-    console.log(email);
-    return sendPasswordResetEmail(this.auth, email);
-  }
-
-  async sendVerificationEmail(): Promise<any> {
-    if(this.auth.currentUser && this.isEligibleForEmailVerification()) {
-      await sendEmailVerification(this.auth.currentUser);
-      this.addVerificationSendCountInSession();
-    } else if(this.auth.currentUser && !this.isEligibleForEmailVerification()){
-      console.log('You have already sent verification email');
-      throw new Error('not eligible');
-    } else {
-      throw new Error('No user logged in');
-    }
-  }
-
-
-
-
-  addVerificationSendCountInSession() {
-    // get the current count from session if exit
-    // then increment the count by 1 else set the count to 1
-    // also set the session to expire in 5 minutes
-    let count = sessionStorage.getItem('verificationSendCount');
-    let newCount = count ? parseInt(count) + 1 : 1;
-    sessionStorage.setItem('verificationSendCount', newCount.toString());
-    // if count == 3 set the expiration time of 24 hours
-    // else set the expiration time to 5 minutes
-    let currentTime = new Date();
-    let expirationTime = newCount == 3 ? currentTime.setHours(currentTime.getHours() + 24) : currentTime.setMinutes(currentTime.getMinutes() + 5);
-    sessionStorage.setItem('verificationSendCountExpirationTime', expirationTime.toString());
-  }
-
-  isEligibleForEmailVerification(): boolean {
-    if(this.auth.currentUser) {
-      if(this.auth.currentUser.emailVerified) {
-        return false;
-      } else {
-        let count = sessionStorage.getItem('verificationSendCount');
-        let currentTime = new Date();
-        let expirationTime = sessionStorage.getItem('verificationSendCountExpirationTime');
-        if(count && expirationTime) {
-          let count = parseInt(sessionStorage.getItem('verificationSendCount') as string);
-          let expirationTime = parseInt(sessionStorage.getItem('verificationSendCountExpirationTime') as string);
-          console.log(count, expirationTime);
-          return currentTime.getTime() > expirationTime;
-          // return count < 3 && currentTime.getTime() < expirationTime;
-        } else {
-          return true;
-        }
-      }
-    } else {
-      return false;
-    }
-  }
-
-  get emailVerificationEligibleTime(): Date {
-    let expirationTime = parseInt(sessionStorage.getItem('verificationSendCountExpirationTime') as string);
-    return new Date(expirationTime);
-  }
-
-  async checkCurrentUserIsAdminForAccess(): Promise<boolean> {
-    if (this.auth.currentUser != null) {
-      const data = await getDoc(this.userDoc);
-      if (data.get("type") == "admin") {
-        return true;
-      } else {
-        this.router.navigate(['/']);
-        return false;
-      }
-    } else {
-      this.router.navigate(['/']);
-      return false;
     }
 
+    // Rethrow the error to propagate it to the subscriber
+    throw error;
   }
-
-  async getCurrentUserType(): Promise<string> {
-    let userData = await getDoc(this.userDoc);
-    return userData.get("type");
-  }
-
-  get userId() {
-    return this._stateSource.value.user?.id;
-  }
-
-  get user(){
-    if(this._stateSource.value.user !== null) return this._stateSource.value.user;
-    else if (AuthService._getUserFromSession !== null) return AuthService._getUserFromSession;
-    else return null;
-  }
-
 }
 
+export interface RegisterUserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
 
-export interface AuthState {
-  user: ReflectionUser | null;
+export interface LoginUserData {
+  email: string;
+  password: string;
 }

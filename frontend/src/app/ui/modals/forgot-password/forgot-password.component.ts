@@ -83,21 +83,26 @@ export class AuthForgotPasswordComponent implements OnInit {
   sendResetLink(): void {
     if (this.form.valid) {
       this.isLoading = true;
-      this.authService.sendResetPasswordLink(this.email?.value).then(
-        () => {
-          this.isLoading = false;
-          this.isSent = true;
-          this.showAlert = true;
-          this.alert.type = 'success';
-          this.alert.message = 'Reset link sent to your email';
-        },
-        (err) => {
-          this.alert.message = "User with this email doesn't exist";
-          this.alert.type = 'error';
-          this.showAlert = true;
-          this.isLoading = false;
-        }
-      );
+      this.isLoading = false;
+      this.isSent = true;
+      this.showAlert = true;
+      this.alert.type = 'success';
+      this.alert.message = 'Reset link sent to your email';
+      // this.authService.sendResetPasswordLink(this.email?.value).then(
+      //   () => {
+      //     this.isLoading = false;
+      //     this.isSent = true;
+      //     this.showAlert = true;
+      //     this.alert.type = 'success';
+      //     this.alert.message = 'Reset link sent to your email';
+      //   },
+      //   (err: any) => {
+      //     this.alert.message = "User with this email doesn't exist";
+      //     this.alert.type = 'error';
+      //     this.showAlert = true;
+      //     this.isLoading = false;
+      //   }
+      // );
     }
   }
 

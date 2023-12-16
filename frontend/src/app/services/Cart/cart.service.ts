@@ -1,7 +1,4 @@
 import {Injectable} from '@angular/core';
-import {collection, collectionData, deleteDoc, doc, Firestore, setDoc, updateDoc} from "@angular/fire/firestore";
-import {CollectionReference, DocumentData} from 'firebase/firestore';
-import firebase from "firebase/compat";
 import {BehaviorSubject, combineLatestWith, Observable, zip} from "rxjs";
 import {StockService} from "../Stock/stock.service";
 import {ICartItem, ICartItemWithDetails} from "../../interfaces/i-cart-item";
@@ -17,11 +14,9 @@ export class CartService {
   data: ICartItem[];
   observableDataWithDetails: BehaviorSubject<ICartItemWithDetails[]> = new BehaviorSubject<ICartItemWithDetails[]>([]);
   dataWithDetails: ICartItemWithDetails[] = [];
-  collectionReference: CollectionReference<ICartItem>;
 
 
   constructor(
-    private firestore: Firestore,
     private stockService: StockService,
     private productService: ProductService,
   ) {
@@ -29,7 +24,6 @@ export class CartService {
 
 
   initializeCartDetails(userId: string) {
-    this.collectionReference = collection(this.firestore, `users/${userId}/Cart`).withConverter(new ICartItemConverter());
     this.getAll();
   }
 
@@ -55,8 +49,6 @@ export class CartService {
         message: `Item added to cart`
       }
     } else {
-      let itemDoc = doc(this.collectionReference);
-      await setDoc(itemDoc, item);
       return {
         status: 200,
         message: `Item added to cart`
@@ -65,7 +57,6 @@ export class CartService {
   }
 
   getAll(): Observable<ICartItemWithDetails[]> {
-    this.observableData = collectionData(this.collectionReference);
     this.productService.data.pipe(combineLatestWith(this.stockService.observableData)).pipe(combineLatestWith(this.observableData)).subscribe(([[products, stocks], cartItems]) => {
       this.data = cartItems;
       let itemsWithDetails: ICartItemWithDetails[] = [];
@@ -101,14 +92,11 @@ export class CartService {
 
 
   delete(cartItem: Partial<ICartItem>): Promise<any> {
-    return deleteDoc(doc(this.collectionReference, cartItem.id));
+    return Promise.resolve([]);
   }
 
    update(cartItem: Partial<ICartItem>): Promise<any> {
-    const docRef = doc(this.collectionReference, cartItem.id);
-    return updateDoc(docRef, {
-      quantity: cartItem.quantity
-    });
+    return Promise.resolve([]);
   }
 
 
@@ -135,23 +123,23 @@ export class CartService {
 }
 
 
-class ICartItemConverter implements firebase.firestore.FirestoreDataConverter<ICartItem> {
-  toFirestore(data: ICartItem): DocumentData {
-    return {
-      productId: data.productId,
-      stockId: data.stockId,
-      color: data.color,
-      quantity: data.quantity,
-    }
-  }
-
-  fromFirestore(data: DocumentData): ICartItem {
-    return {
-      id: data['id'],
-      productId: data['get']('productId'),
-      stockId: data['get']('stockId'),
-      color: data['get']('color'),
-      quantity: data['get']('quantity'),
-    }
-  }
-}
+// class ICartItemConverter implements firebase.firestore.FirestoreDataConverter<ICartItem> {
+//   toFirestore(data: ICartItem): DocumentData {
+//     return {
+//       productId: data.productId,
+//       stockId: data.stockId,
+//       color: data.color,
+//       quantity: data.quantity,
+//     }
+//   }
+//
+//   fromFirestore(data: DocumentData): ICartItem {
+//     return {
+//       id: data['id'],
+//       productId: data['get']('productId'),
+//       stockId: data['get']('stockId'),
+//       color: data['get']('color'),
+//       quantity: data['get']('quantity'),
+//     }
+//   }
+// }

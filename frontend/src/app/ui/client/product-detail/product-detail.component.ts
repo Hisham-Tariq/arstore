@@ -11,7 +11,6 @@ import {MainCategoryService} from "../../../services/MainCategory/main-category.
 import {SubCategoryService} from "../../../services/SubCategory/sub-category.service";
 import {TryOnProductComponent} from "../../modals/try-on-product/try-on-product.component";
 import {AuthService} from "../../../services/Authentication";
-import {Auth} from "@angular/fire/auth";
 import {ReviewSectionComponent} from "./review-section/review-section.component";
 import {ReflectionNavigationService} from "../../../services/ReflectionNavigation";
 import {StateChange} from "ng-lazyload-image";
@@ -78,7 +77,6 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     private globalService: GlobalService,
     private mainCategoryService: MainCategoryService,
     private subCategoryService: SubCategoryService,
-    private auth: Auth,
     private navigationService: ReflectionNavigationService,
   ) {
     this.activatedRoute.paramMap.subscribe(params => {
@@ -92,13 +90,13 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
         this.reviewSectionComponent.fetchReviews(params.get('pid')!);
       }
     });
-    this.authService.isUserLoggedIn.subscribe(data => this.isUserLoggedIn = data);
-    this.authService.isUserAdmin.subscribe(data => this.isUserAdmin = data);
-    this.auth.onAuthStateChanged(user => {
-      if (user) {
-        this.isUserVerified = user.emailVerified;
-      }
-    });
+    // this.authService.isUserLoggedIn.subscribe(data => this.isUserLoggedIn = data);
+    // this.authService.isUserAdmin.subscribe(data => this.isUserAdmin = data);
+    // this.auth.onAuthStateChanged(user => {
+    //   if (user) {
+    //     this.isUserVerified = user.emailVerified;
+    //   }
+    // });
   }
 
 
@@ -120,23 +118,23 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
           mainCategoryDetail: mainCategory,
           thumbnail: this.productService.getFirstColorsThumbnail(product.data()!)
         }
-        this.stockService.getProductStock(productId).subscribe((stock) => {
-          stock.forEach((item) => {
-            this.product.stock[item.color] = item;
-          });
-
-          let stockColors = Object.keys(this.product.stock);
-          for(let color of stockColors){
-            if(!this.product.colors.includes(color)){
-              delete this.product.stock[color];
-            }
-          }
-
-          this.product.colors = Object.keys(this.product.stock).sort((a, b) => {
-            return this.product.stock[a].retailerPrice - this.product.stock[b].retailerPrice;
-          });
-          this.setProductDetail();
-        });
+        // this.stockService.getProductStock(productId).subscribe((stock: any) => {
+        //   stock.forEach((item: any) => {
+        //     this.product.stock[item.color] = item;
+        //   });
+        //
+        //   let stockColors = Object.keys(this.product.stock);
+        //   for(let color of stockColors){
+        //     if(!this.product.colors.includes(color)){
+        //       delete this.product.stock[color];
+        //     }
+        //   }
+        //
+        //   this.product.colors = Object.keys(this.product.stock).sort((a, b) => {
+        //     return this.product.stock[a].retailerPrice - this.product.stock[b].retailerPrice;
+        //   });
+        //   this.setProductDetail();
+        // });
         this.productDataFetched = true;
       });
     }
@@ -263,10 +261,11 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     } else if (this.isUserLoggedIn && this.isUserAdmin) {
       this.showNotEligibleModal("Admin cannot add product to cart.");
       return;
-    } else if (this.isUserLoggedIn && !this.authService.isUserVerified) {
-      this.showNotEligibleModal("You are not verified. Please verify your account to continue shopping.");
-      return;
     }
+    // else if (this.isUserLoggedIn && !this.authService.isUserVerified) {
+    //   this.showNotEligibleModal("You are not verified. Please verify your account to continue shopping.");
+    //   return;
+    // }
     let item = <ICartItem>{
       color: this.selectedColor,
       quantity: this.quantity,

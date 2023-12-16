@@ -2,7 +2,6 @@ import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree} from '@angular/router';
 import {Observable} from 'rxjs';
 import {AuthService} from "../services/Authentication";
-import {Auth} from "@angular/fire/auth";
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +9,7 @@ import {Auth} from "@angular/fire/auth";
 export class ReflectionAuthGuard implements CanActivate {
   constructor(
     private authService: AuthService,
-    private auth: Auth,
+//    private auth: Auth,
     private router: Router,
   ) {
   }
@@ -18,11 +17,11 @@ export class ReflectionAuthGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    const isAdmin = this.authService.user != null && this.authService.user.type == 'admin';
-    if(!isAdmin){
-      this.router.navigate(['/']);
-      return false;
-    }
+//    const isAdmin = this.authService.user != null && this.authService.user.type == 'admin';
+//    if(!isAdmin){
+//      this.router.navigate(['/']);
+//      return false;
+//    }
     return true;
     // return new Observable<boolean>(observer => {
     //   this.auth.onAuthStateChanged(async (user) => {

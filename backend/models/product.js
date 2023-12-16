@@ -62,7 +62,7 @@ productSchema.virtual('id').get(function () {
 });
 
 productSchema.set('toJSON', {
-    virtuals:true,
+    virtuals: true,
 });
 
-module.exports= mongoose.model('Product', productSchema);
+module.exports = mongoose.model('Product', productSchema);

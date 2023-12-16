@@ -1,11 +1,10 @@
-import {Component, HostListener, OnInit, ViewChild,} from '@angular/core';
+import {Component, HostListener, OnInit, ViewChild, AfterViewInit} from '@angular/core';
 import {MatDialog} from '@angular/material/dialog';
 import {AuthSignUpComponent} from '../../ui/modals/sign-up/sign-up.component';
 import {NavItem} from '../navigations/navigation.type';
 import {navItems} from './data';
 import {ReflectionDrawerComponent} from "../drawer";
 import {Router} from "@angular/router";
-import {Auth} from '@angular/fire/auth';
 import {AuthService} from "src/app/services/Authentication/auth.service";
 import {AuthSignInComponent} from "../../ui/modals/sign-in/sign-in.component";
 import {CartService} from "../../services/Cart/cart.service";
@@ -18,7 +17,7 @@ import {SearchPaletteComponent} from "../../ui/modals/search-palette/search-pale
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, AfterViewInit {
   @ViewChild('cartDrawer') cartDrawer: any;
   @ViewChild('myHeader') myHeader: any;
   navigations!: NavItem[];
@@ -37,7 +36,6 @@ export class NavbarComponent implements OnInit {
   constructor(
     public dialog: MatDialog,
     private _router: Router,
-    public auth: Auth,
     public authService: AuthService,
     private router: Router,
     private cartService: CartService,
@@ -60,18 +58,26 @@ export class NavbarComponent implements OnInit {
     this.router.events.subscribe(_ => {
       this.isHomePage = this.router.url.includes("home");
     })
-    this.authService.isUserLoggedIn.subscribe(data => {
-      this.isUserLoggedIn = data
+    this.currentUserName = 'Random'
+    // TODO: Firebase
+    this.authService.isAuthenticated().subscribe(authenticated => {
+      this.isUserLoggedIn = authenticated
       if(this.isUserLoggedIn){
-        this.currentUserName = this.authService.user?.firstName!;
-        this.currentUserName = this.currentUserName.charAt(0).toUpperCase() + this.currentUserName.slice(1);
+        console.log("User is logged in");
+        this.authService.authState$.subscribe(user => {
+          this.currentUserName = user?.firstName!;
+          // this.currentUserName = this.currentUserName.charAt(0).toUpperCase() + this.currentUserName.slice(1);
+          this.isUserAdmin = user?.type === "admin";
+        });
       }
     });
-    this.authService.isUserAdmin.subscribe(data => this.isUserAdmin = data);
   }
 
   ngOnInit(): void {
     this.navigations = navItems;
+  }
+
+  ngAfterViewInit() {
     this.headerOffset = this.myHeader.nativeElement!.offsetTop;
   }
 

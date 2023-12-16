@@ -2,7 +2,6 @@ import {NgModule} from '@angular/core';
 import {ExtraOptions, PreloadAllModules, RouterModule, Routes} from '@angular/router';
 import {ClientAppContainerComponent} from "./components/client-app-container/client-app-container.component";
 import {AdminAppContainerComponent} from "./components/admin-app-container/admin-app-container.component";
-import {redirectUnauthorizedTo, AuthGuard} from "@angular/fire/auth-guard"
 import {ReflectionAuthGuard} from "./Guards/reflection-auth.guard";
 
 const routerConfig: ExtraOptions = {
@@ -10,7 +9,6 @@ const routerConfig: ExtraOptions = {
   scrollPositionRestoration: 'enabled'
 };
 
-const redirectUnauthorizedToHome = () => redirectUnauthorizedTo(['']);
 
 const routes: Routes = [
 

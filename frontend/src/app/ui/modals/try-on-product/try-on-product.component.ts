@@ -16,7 +16,6 @@ import {
 import {ProductItem} from "../../../interfaces";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {take} from "lodash-es";
-import {getStorage} from "@angular/fire/storage";
 
 
 @Component({

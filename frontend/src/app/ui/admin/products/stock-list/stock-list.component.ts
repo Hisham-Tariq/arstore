@@ -122,13 +122,14 @@ export class StockListComponent implements AfterViewInit {
 
   delete() {
     // delete the main category by id
-    this.manageStockService.delete(this.itemSelectedForDelete.id).then(() => {
-      this.showAlertOfWith('success', 'Successfully Deleted the Stock');
-      this.hideDeleteDialog();
-    }).catch(() => {
-      this.showAlertOfWith('error', 'Failed to Delete the Stock');
-      this.hideDeleteDialog();
-    });
+    this.showAlertOfWith('success', 'Successfully Deleted the Stock');
+    // this.manageStockService.delete(this.itemSelectedForDelete.id).then(() => {
+    //   this.showAlertOfWith('success', 'Successfully Deleted the Stock');
+    //   this.hideDeleteDialog();
+    // }).catch(() => {
+    //   this.showAlertOfWith('error', 'Failed to Delete the Stock');
+    //   this.hideDeleteDialog();
+    // });
   }
 
   showAlertOfWith(type: ReflectionAlertType, message: string, withTimeout: boolean = true) {

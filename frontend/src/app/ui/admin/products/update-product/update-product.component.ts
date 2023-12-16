@@ -7,7 +7,6 @@ import {colors} from "../../../../interfaces/colors";
 import {MainCategoryService} from "../../../../services/MainCategory/main-category.service";
 import {SubCategoryService} from "../../../../services/SubCategory/sub-category.service";
 import {ProductService} from "../../../../services/Product/product.service";
-import {getDownloadURL, UploadTaskSnapshot} from "@angular/fire/storage";
 import {ActivatedRoute} from "@angular/router";
 
 @Component({
@@ -150,34 +149,34 @@ export class UpdateProductComponent {
       for (const color in this.allImages) {
         let images = this.allImages[color];
         for (const name in images) {
-          this.productService.uploadImage(images[name]!, this.product.id!, color, name).subscribe(
-            value => this.onImageUploaded(value, color, name),
-          );
+          // this.productService.uploadImage(images[name]!, this.product.id!, color, name).subscribe(
+          //   value => this.onImageUploaded(value, color, name),
+          // );
         }
       }
   }
 
-  async onImageUploaded(uploadSnap: UploadTaskSnapshot, selectedColor: string, type: string) {
-    if (uploadSnap.state === "success") {
-      // @ts-ignore
-      if (this.newColors.includes(selectedColor) && typeof this.product.images[selectedColor] == 'undefined') {
-        this.product.images[selectedColor] = {};
-      }
-      this.product.images[selectedColor][type] = await getDownloadURL(uploadSnap.ref);
-      this.imagesUploadCount++;
-      this.product.colors = this.selectedColors;
-      if (this.imagesUploadCount == this.totalImagesChanged) {
-        console.log(this.totalImagesChanged, this.product.images);
-        this.productService.update({
-          ...this.product,
-          ...this.form.value,
-        }, this.deleteColors).then(() => {
-          this.showAlertOfWith('success', 'All Images are uploaded successfully');
-          this.isUpdatingProduct = false;
-        });
-      }
-    }
-  }
+  // async onImageUploaded(uploadSnap: UploadTaskSnapshot, selectedColor: string, type: string) {
+  //   if (uploadSnap.state === "success") {
+  //     // @ts-ignore
+  //     if (this.newColors.includes(selectedColor) && typeof this.product.images[selectedColor] == 'undefined') {
+  //       this.product.images[selectedColor] = {};
+  //     }
+  //     this.product.images[selectedColor][type] = await getDownloadURL(uploadSnap.ref);
+  //     this.imagesUploadCount++;
+  //     this.product.colors = this.selectedColors;
+  //     if (this.imagesUploadCount == this.totalImagesChanged) {
+  //       console.log(this.totalImagesChanged, this.product.images);
+  //       this.productService.update({
+  //         ...this.product,
+  //         ...this.form.value,
+  //       }, this.deleteColors).then(() => {
+  //         this.showAlertOfWith('success', 'All Images are uploaded successfully');
+  //         this.isUpdatingProduct = false;
+  //       });
+  //     }
+  //   }
+  // }
 
 
   checkAllImagesAreChosen(): boolean {

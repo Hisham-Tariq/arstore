@@ -28,18 +28,18 @@ const storage = multer.diskStorage({
     },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({storage: storage});
 
 router.get("/", async (req, res) => {
     let filter = {};
     if (req.query.categories) {
-        filter = { category: req.query.categories.split(",") };
+        filter = {category: req.query.categories.split(",")};
     }
 
     const productList = await Product.find(filter).populate("category");
     // const productList = await Product.find(filter).select('name image');
     if (!productList) {
-        res.status(500), json({ success: false });
+        res.status(500), json({success: false});
     }
     res.status(200).send(productList);
 });
@@ -192,18 +192,18 @@ router.delete("/:id", (req, res) => {
             } else {
                 return res
                     .status(404)
-                    .json({ success: false, message: "Product cannot find" });
+                    .json({success: false, message: "Product cannot find"});
             }
         })
         .catch((err) => {
-            return res.status(400).json({ success: false, error: err });
+            return res.status(400).json({success: false, error: err});
         });
 });
 
 router.get("/get/count", async (req, res) => {
     const productCount = await Product.countDocuments((count) => count);
     if (!productCount) {
-        res.status(500), json({ success: false });
+        res.status(500), json({success: false});
     }
     res.status(200).send({
         productCount: productCount,
@@ -212,9 +212,9 @@ router.get("/get/count", async (req, res) => {
 
 router.get("/get/featured/:count", async (req, res) => {
     const count = req.params.count ? req.params.count : 0;
-    const products = await Product.find({ isFeatured: true }).limit(+count);
+    const products = await Product.find({isFeatured: true}).limit(+count);
     if (!products) {
-        res.status(500), json({ success: false });
+        res.status(500), json({success: false});
     }
     res.status(200).send(products);
 });

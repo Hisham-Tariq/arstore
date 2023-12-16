@@ -32,9 +32,9 @@ export class StockHistoryComponent implements AfterViewInit, OnInit {
 
   ngOnInit(): void{
     this.parameterSubscription = this.activatedRoute.paramMap.subscribe(params => {
-      this.stockService.getStockHistory(params.get('pid') ?? "", `#${params.get('color')}`).subscribe(value => {
-        this.dataSource.data = value;
-      });
+      // this.stockService.getStockHistory(params.get('pid') ?? "", `#${params.get('color')}`).subscribe(value => {
+      //   this.dataSource.data = value;
+      // });
     });
   }
 

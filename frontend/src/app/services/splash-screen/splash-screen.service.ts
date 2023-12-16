@@ -22,6 +22,7 @@ export class ReflectionSplashScreenService {
         take(1)
       )
       .subscribe(() => {
+        console.log("Something happend")
         if(this.hideOnFirstRouteChange){
           this.hide(true);
         }

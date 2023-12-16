@@ -62,10 +62,10 @@ export class OrderDetailComponent implements OnInit {
         this.order = history.state.order;
       }
       // get the products of the order
-      (await this.orderService.getOrderDetail(orderId)).subscribe(order => {
-        this.order = order;
-
-      });
+      // (await this.orderService.getOrderDetail(orderId)).subscribe(order => {
+      //   this.order = order;
+      //
+      // });
 
     });
   }

@@ -8,7 +8,6 @@ import {SubCategoryService} from "src/app/services/SubCategory/sub-category.serv
 import {ProductService} from "src/app/services/Product/product.service";
 import {colors} from 'src/app/interfaces/colors';
 import {randomId} from "../../../../utils";
-import {getDownloadURL, UploadTaskSnapshot} from "@angular/fire/storage";
 
 @Component({
   selector: 'app-add-products',
@@ -129,35 +128,35 @@ export class AddProductsComponent {
         let images = this.allImages.get(selectedColor)!;
         this.imagesUploadCount[selectedColor] = 0;
         this.imagesName.forEach(name => {
-          this.productService.uploadImage(images[name as keyof ProductColorImages]!, productId, selectedColor, name).subscribe(
-            value => this.onImageUploaded(value, selectedColor, name),
-          );
+          // this.productService.uploadImage(images[name as keyof ProductColorImages]!, productId, selectedColor, name).subscribe(
+          //   value => this.onImageUploaded(value, selectedColor, name),
+          // );
         });
       }
       this.showAlertOfWith('success', 'All Images are uploaded successfully');
     });
   }
 
-  async onImageUploaded(uploadSnap: UploadTaskSnapshot, selectedColor: string, type: string) {
-    if (uploadSnap.state === "success") {
-      this.imagesUploadCount[selectedColor]++;
-      console.log(this.imagesUploadCount[selectedColor], selectedColor, this.imagesUploadCount)
-      if (typeof this.productImagesDownloadUrls[selectedColor] === "undefined") {
-        this.productImagesDownloadUrls[selectedColor] = {};
-      }
-      this.productImagesDownloadUrls[selectedColor][type] = await getDownloadURL(uploadSnap.ref);
-      this.checkAllImagesAreUploaded();
-    }
-  }
+  // async onImageUploaded(uploadSnap: UploadTaskSnapshot, selectedColor: string, type: string) {
+  //   if (uploadSnap.state === "success") {
+  //     this.imagesUploadCount[selectedColor]++;
+  //     console.log(this.imagesUploadCount[selectedColor], selectedColor, this.imagesUploadCount)
+  //     if (typeof this.productImagesDownloadUrls[selectedColor] === "undefined") {
+  //       this.productImagesDownloadUrls[selectedColor] = {};
+  //     }
+  //     this.productImagesDownloadUrls[selectedColor][type] = await getDownloadURL(uploadSnap.ref);
+  //     this.checkAllImagesAreUploaded();
+  //   }
+  // }
 
   checkAllImagesAreUploaded(): boolean {
     for (const color in this.selectedColors) {
       if (this.imagesUploadCount[color] < 4) return false;
     }
     this.isAllImagesAreUploaded = true;
-    this.productService.addImagesUrls(this.productImagesDownloadUrls, this.currentProductId).then(value => {
-      console.log(value);
-    })
+    // this.productService.addImagesUrls(this.productImagesDownloadUrls, this.currentProductId).then(value => {
+    //   console.log(value);
+    // })
 
     return true;
   }

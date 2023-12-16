@@ -54,8 +54,8 @@ export class BillingComponent implements OnInit {
       }
     );
 
-    if(this.authService.user == null) this.router.navigate(['']);
-    else this.form.patchValue(this.authService.user);
+    // if(this.authService.user == null) this.router.navigate(['']);
+    // else this.form.patchValue({});
 
   }
 

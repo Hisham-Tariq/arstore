@@ -25,7 +25,7 @@
         </div>
         <div class="mt-3 text-center sm:mt-5">
           <h3 class="text-lg leading-6 font-bold text-gray-900" id="modal-title">Email Verification</h3>
-          <p>A Verification mail has been sent on {{this.authService.user.email}}. Verify your email to continue shopping.</p>
+          <p>A Verification mail has been sent on PutUserEmailHere@Gmail.com. Verify your email to continue shopping.</p>
         </div>
       </div>
       <div class="mt-5 sm:mt-6">
@@ -54,30 +54,30 @@
 
             <div class="sm:col-span-3">
               <label for="first-name" class="block text-sm font-medium text-blue-gray-900"> First name </label>
-              <input type="text" value="{{authService.user.firstName}}" name="first-name" id="first-name" autocomplete="given-name" class="field mt-1 block w-full ">
+              <input type="text" value="FirstNameUserHere" name="first-name" id="first-name" autocomplete="given-name" class="field mt-1 block w-full ">
             </div>
 
             <div class="sm:col-span-3">
               <label for="last-name" class="block text-sm font-medium text-blue-gray-900"> Last name </label>
-              <input type="text" value="{{authService.user.lastName}}" name="last-name" id="last-name" autocomplete="family-name" class="field mt-1 block w-full">
+              <input type="text" value="LastNameUserHere" name="last-name" id="last-name" autocomplete="family-name" class="field mt-1 block w-full">
             </div>
 
             <div class="sm:col-span-6">
               <label for="last-name" class="block text-sm font-medium text-blue-gray-900"> User name </label>
-              <input type="text" value="{{authService.user.firstName}} {{authService.user.lastName}}" name="last-name" id="user-name" autocomplete="family-name"
+              <input type="text" value="FirstNameandLastName Here" name="last-name" id="user-name" autocomplete="family-name"
                      class="field mt-1 block w-full">
             </div>
 
             <div class="sm:col-span-6">
               <label for="email" class="block text-sm font-medium text-blue-gray-900"> User Email </label>
-              <input type="text" value="{{authService.user.email}} " name="email" id="email" autocomplete="email" class="field mt-1 block w-full">
+              <input type="text" value="UserEmailPutHere@Gmail.com" name="email" id="email" autocomplete="email" class="field mt-1 block w-full">
             </div>
 
           </div>
         </form>
 
         <div class="pt-8 flex flex-row">
-          <button (click)="authService.logout()"
+          <button
                   [ngClass]="{
                   'w-1/2':!isUserVerified,
                   'w-full': isUserVerified

@@ -14,7 +14,6 @@ import {filter} from "rxjs";
 import {map} from "rxjs/operators";
 import {ProductInterface} from "../../../interfaces";
 import {randomId} from "../../../utils";
-import {documentId} from "@angular/fire/firestore";
 
 @Component({
   selector: 'app-events',

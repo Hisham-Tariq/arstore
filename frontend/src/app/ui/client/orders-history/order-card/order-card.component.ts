@@ -117,8 +117,8 @@ export class OrderCardComponent implements OnInit {
       rating: this.currentRating,
       comment: this.currentReview,
       orderProductId: this.currentProductForReview?.id,
-      userName: this.authService.user?.firstName + ' ' + this.authService.user?.lastName,
-      userId: this.authService.user?.id,
+      userName:  'FirstNameHere LastNameHere',
+      userId: 'UserIdHere',
       createdAt: 'Nothing',
     };
     this.ratingService.add(ratingItem).then(() => {

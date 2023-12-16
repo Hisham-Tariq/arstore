@@ -25,24 +25,26 @@ export class VerifyEmailComponent implements OnInit {
 
   onSendVerificationEmail(){
     this.isSending = true;
-    this.authService.sendVerificationEmail().then(() => {
-      this.modal.nativeElement.classList.remove('hidden');
-      this.isShowingModal = true;
-      this.modalTitle.nativeElement.innerHTML = 'Verification Email Sent';
-      this.modalMessage.nativeElement.innerHTML = 'Please check your email for a verification link.';
-    }).catch((reason:Error) => {
-      this.modal.nativeElement.classList.remove('hidden');
-      this.isShowingModal = true;
-      if(reason.message == 'not eligible'){
-        this.modalTitle.nativeElement.innerHTML = 'Verification Email Not Sent';
-        this.modalMessage.nativeElement.innerHTML = `You are not eligible till ${this.authService.emailVerificationEligibleTime} to send a verification email.`;
-      } else {
-        this.modalTitle.nativeElement.innerHTML = 'Error Sending Verification Email';
-        this.modalMessage.nativeElement.innerHTML = 'There was an error sending the verification email. Please try again later.';
-      }
-    }).finally(() => {
-      this.isSending = false;
-    });
+    this.isSending = false;
+    // this.authService.sendVerificationEmail().then(() => {
+    //   this.modal.nativeElement.classList.remove('hidden');
+    //   this.isShowingModal = true;
+    //   this.modalTitle.nativeElement.innerHTML = 'Verification Email Sent';
+    //   this.modalMessage.nativeElement.innerHTML = 'Please check your email for a verification link.';
+    // }).catch((reason:Error) => {
+    //   this.modal.nativeElement.classList.remove('hidden');
+    //   this.isShowingModal = true;
+    //   if(reason.message == 'not eligible'){
+    //     this.modalTitle.nativeElement.innerHTML = 'Verification Email Not Sent';
+    //     // this.modalMessage.nativeElement.innerHTML = `You are not eligible till ${this.authService.emailVerificationEligibleTime} to send a verification email.`;
+    //     this.modalMessage.nativeElement.innerHTML = `You are not eligible till Put Time Here to send a verification email.`;
+    //   } else {
+    //     this.modalTitle.nativeElement.innerHTML = 'Error Sending Verification Email';
+    //     this.modalMessage.nativeElement.innerHTML = 'There was an error sending the verification email. Please try again later.';
+    //   }
+    // }).finally(() => {
+    //   this.isSending = false;
+    // });
   }
 
   closeModal() {

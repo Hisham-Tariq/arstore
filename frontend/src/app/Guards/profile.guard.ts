@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import {ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree} from '@angular/router';
 import { Observable } from 'rxjs';
 import {AuthService} from "../services/Authentication";
-import {Auth} from "@angular/fire/auth";
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +9,6 @@ import {Auth} from "@angular/fire/auth";
 export class ProfileGuard implements CanActivate {
   constructor(
     private authService: AuthService,
-    private auth: Auth,
     private router: Router,
   ) {
   }
@@ -18,7 +16,7 @@ export class ProfileGuard implements CanActivate {
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    const isVerified = this.authService.user != null && this.authService.isUserVerified;
+    const isVerified = true;
     if(!isVerified){
       this.router.navigate(['/profile/verify']);
       return false;

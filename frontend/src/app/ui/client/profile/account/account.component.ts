@@ -2,7 +2,6 @@ import {Component, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, Validators} from "@angular/forms";
 import {AuthService} from "../../../../services/Authentication";
 import {Router} from "@angular/router";
-import {Auth, sendEmailVerification} from "@angular/fire/auth";
 
 @Component({
   selector: 'app-account',
@@ -27,11 +26,10 @@ export class AccountComponent implements OnInit {
     public authService: AuthService,
     private fb: FormBuilder,
     private router: Router,
-    private auth: Auth,
   ) {
-    this.auth.onAuthStateChanged(user => {
-      if(user) this.isUserVerified = user.emailVerified
-    });
+    // this.auth.onAuthStateChanged(user => {
+    //   if(user) this.isUserVerified = user.emailVerified
+    // });
   }
 
   ngOnInit(): void {
@@ -40,7 +38,7 @@ export class AccountComponent implements OnInit {
   verifyUser() {
     // toggle hidden class
     this.verificationEmailSendModal.nativeElement.classList.toggle('hidden');
-    sendEmailVerification(this.auth.currentUser!);
+    // sendEmailVerification(this.auth.currentUser!);
   }
 
   closeModal() {

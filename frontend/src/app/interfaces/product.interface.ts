@@ -1,4 +1,3 @@
-import { FieldValue } from "@angular/fire/firestore";
 import {IStock} from "./i-stock";
 import {MainCategoryInterface} from "./main-category.interface";
 import {SubCategoryInterface} from "./sub-category.interface";
@@ -11,7 +10,7 @@ export interface ProductInterface {
   subCategory: string;
   description?: string;
   colors: string[],
-  images: { [key: string]: { [index: string]: string | FieldValue} };
+  images: { [key: string]: { [index: string]: string } };
   // images: {};
   isActive?: boolean;
   createdAt?: Date;

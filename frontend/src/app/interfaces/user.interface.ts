@@ -1,17 +1,15 @@
-// User Interface with id, first name, last name, email, and type['user', 'admin']
 export interface ReflectionUser {
   id: string;
+  _id: string;
   firstName: string;
   lastName: string;
   email: string;
-  type: ReflectionUserType;
+  type: 'admin' | 'user';
   phone?: string;
   address?: string;
   city?: string;
   state?: string;
   zip?: string;
-  createdAt: any;
+  createdAt: string;
 }
-
-type ReflectionUserType = 'user' | 'admin';
 

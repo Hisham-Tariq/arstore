@@ -16,11 +16,7 @@ import {ReflectionSplashScreenModule} from 'src/app/services/splash-screen/splas
 import {ReflectionNavigationModule} from "./services/ReflectionNavigation";
 import {PlatformModule} from "@angular/cdk/platform";
 import {NgSelectModule} from "@ng-select/ng-select";
-import { initializeApp,provideFirebaseApp } from '@angular/fire/app';
 import { environment } from '../environments/environment';
-import { provideAuth,getAuth } from '@angular/fire/auth';
-import { provideFirestore,getFirestore } from '@angular/fire/firestore';
-import {provideStorage, getStorage} from '@angular/fire/storage';
 import {ReflectionAuthenticationModule} from "./services/Authentication";
 import { TFJSModule } from 'ngx-tfjs';
 import { LazyLoadImageModule, LAZYLOAD_IMAGE_HOOKS, ScrollHooks } from 'ng-lazyload-image';
@@ -49,10 +45,6 @@ const appearance: MatFormFieldDefaultOptions = {
     ReflectionAuthenticationModule,
     PlatformModule,
     NgSelectModule,
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore()),
-    provideStorage(() => getStorage()),
     TFJSModule,
     LazyLoadImageModule
   ],

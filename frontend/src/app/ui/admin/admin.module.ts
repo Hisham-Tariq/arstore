@@ -100,7 +100,6 @@ import { ReviewDetailComponent } from './orders/review-detail/review-detail.comp
         NgSelectModule,
         ComponentsModule,
         VirtualScrollerModule,
-        NgApexchartsModule,
         FuseScrollbarModule,
         PerfectScrollbarModule,
         ColorPickerModule,
