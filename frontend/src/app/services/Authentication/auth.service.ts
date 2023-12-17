@@ -1,14 +1,10 @@
-import {Injectable} from '@angular/core';
-
-import {LoginData} from './LoginData';
-import {RegisterData} from './RegisterData';
-import {ReflectionSplashScreenService} from '../splash-screen';
-import {ReflectionUser} from "../../interfaces";
-import {Router} from "@angular/router";
-import {BehaviorSubject, Observable} from "rxjs";
-import {map, tap, catchError} from "rxjs/operators";
-import {ApiService} from "../ApiBaseService/api.service";
-
+import { Injectable } from '@angular/core';
+import { ReflectionSplashScreenService } from '../splash-screen';
+import { ReflectionUser } from '../../interfaces';
+import { Router } from '@angular/router';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
+import { ApiService } from '../ApiBaseService/api.service';
 
 interface AuthResponse {
   user: ReflectionUser;
@@ -16,7 +12,7 @@ interface AuthResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
@@ -26,36 +22,46 @@ export class AuthService {
 
   constructor(
     private apiService: ApiService,
-    private splashService: ReflectionSplashScreenService,
+    private splashService: ReflectionSplashScreenService
   ) {
     // get the current user record if status code is 200 user is logged in else not
-    this.apiService.get<ReflectionUser>('users/me').pipe(
-      tap((response) => {
-        const authResponse = <AuthResponse>{
-          user: response,
-          token: localStorage.getItem('token') || '',
-        };
-        this.handleAuthentication(authResponse);
-      }),
-      catchError((error) => this.handleError(error))
-    ).subscribe();
+    this.apiService.get<ReflectionUser>('users/me')
+      .then(
+        (response) => {
+          const authResponse = <AuthResponse>{
+            user: response,
+            token: localStorage.getItem('token') || '',
+          };
+          this.handleAuthentication(authResponse);
+        },
+      ).catch((err) => {
+        this.isAuthenticatedSubject.next(false);
+        this.authStateSubject.next(null);
+        this.handleError(err)
+    })
     this.updateAuthState();
   }
 
-
-  register(data: RegisterUserData): Observable<AuthResponse> {
-    // const data = { firstName, lastName, email, password };
-    return this.apiService.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
-      tap((response) => this.handleAuthentication(response)),
-      catchError((error) => this.handleError(error))
-    );
+  async register(data: RegisterUserData): Promise<AuthResponse> {
+    try {
+      const response = await this.apiService
+        .post<AuthResponse>(`${this.apiUrl}/register`, data);
+      this.handleAuthentication(response);
+      return response;
+    } catch (error) {
+      return await this.handleError(error);
+    }
   }
 
-  login(data: LoginUserData): Observable<AuthResponse> {
-    return this.apiService.post<AuthResponse>(`${this.apiUrl}/login`, data).pipe(
-      tap((response) => this.handleAuthentication(response)),
-      catchError((error) => this.handleError(error))
-    );
+  async login(data: LoginUserData): Promise<AuthResponse> {
+    try {
+      const response = await this.apiService
+        .post<AuthResponse>(`${this.apiUrl}/login`, data);
+      this.handleAuthentication(response);
+      return response;
+    } catch (error) {
+      return await this.handleError(error);
+    }
   }
 
   isAuthenticated(): Observable<boolean> {
@@ -73,7 +79,7 @@ export class AuthService {
   }
 
   private handleAuthentication(response: AuthResponse): void {
-    const {user, token} = response;
+    const { user, token } = response;
     if (user && token) {
       localStorage.setItem('token', token);
       this.isAuthenticatedSubject.next(true);
@@ -92,8 +98,7 @@ export class AuthService {
     });
   }
 
-  private handleError(error: any): Observable<never> {
-    // You can customize this function based on your error handling requirements
+  private handleError(error: any): Promise<never> {
     console.error('Error:', error);
 
     if (error.status === 400) {

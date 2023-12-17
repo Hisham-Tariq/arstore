@@ -1,5 +1,5 @@
 export interface MainCategoryInterface {
-  id?: string;
+  id: string;
   name: string;
   description: string;
 }

@@ -105,14 +105,12 @@ export class SubCategoryComponent implements AfterViewInit {
   add() {
     if (this.form.valid) {
       const {name, description, mainCategory} = this.form.value;
-      const subCategory: SubCategoryInterface = {
-        name,
-        description,
-        mainCategoryId: mainCategory,
-      };
-      this.subCategoryService.add(subCategory).then(value => {
+      this.subCategoryService.createSubCategory(name, description, mainCategory).then((res) => {
         this.showAlertOfWith('success', 'Successfully Added the Sub Category');
       })
+      //   .then(value => {
+      //   this.showAlertOfWith('success', 'Successfully Added the Sub Category');
+      // })
     } else {
       this.showAlertOfWith('error', 'Please fill all the required fields');
     }
@@ -129,7 +127,11 @@ export class SubCategoryComponent implements AfterViewInit {
     // delete the main category by id
     this.productService.deleteFromSubCategory(this.itemSelectedForDelete.id);
     this.showAlertOfWith('success', 'Successfully Deleted the Sub Category');
-    // this.subCategoryService.delete(this.itemSelectedForDelete.id).then(() => {
+    this.subCategoryService.deleteSubCategory(this.itemSelectedForDelete.id).then((res) => {
+      this.showAlertOfWith('success', 'Successfully Deleted the Sub Category');
+      this.closeDeleteModal();
+    })
+    //   .then(() => {
     //   this.showAlertOfWith('success', 'Successfully Deleted the Sub Category');
     //   this.closeDeleteModal();
     // }).catch(() => {

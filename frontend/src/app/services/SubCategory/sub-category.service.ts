@@ -1,36 +1,57 @@
 import { Injectable } from '@angular/core';
 
 import {ProductInterface, SubCategoryInterface} from "src/app/interfaces";
-import {Observable} from "rxjs";
+import {BehaviorSubject, firstValueFrom, Observable} from "rxjs";
+import {ApiService} from "../ApiBaseService/api.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class SubCategoryService {
-  data: Observable<SubCategoryInterface[]>;
+  private endpoint = 'sub-categories';
+  subCategoriesSubject = new BehaviorSubject<SubCategoryInterface[]>([]);
+  data = this.subCategoriesSubject.asObservable();
 
-  constructor(
-  ) {
-    this.getAll();
+  constructor(private apiService: ApiService) {
+    this.getSubCategories();
   }
 
-  add(item: SubCategoryInterface):Promise<void>{
-    return Promise.resolve();
+  async getSubCategories(): Promise<SubCategoryInterface[]> {
+    const subCategories = await this.apiService.get<SubCategoryInterface[]>(this.endpoint);
+    this.subCategoriesSubject.next(subCategories);
+    return subCategories;
   }
 
-  getAll(): Observable<SubCategoryInterface[]> {
-    return this.data;
+  getSubCategoryById(subCategoryId: string): Promise<SubCategoryInterface> {
+    return this.apiService.get<SubCategoryInterface>(`${this.endpoint}/${subCategoryId}`);
   }
 
-  delete(id: string) {
+  async createSubCategory(name: string, description: string, mainCategoryId: string): Promise<SubCategoryInterface> {
+    const data = { name, description, mainCategoryId };
+    const subCategory = await this.apiService.post<SubCategoryInterface>(this.endpoint, data);
+    const oldData = this.subCategoriesSubject.getValue();
+    oldData.push(subCategory);
+    this.subCategoriesSubject.next(oldData);
+    return subCategory;
   }
 
-  update(item: SubCategoryInterface): Promise<any> {
-    return Promise.resolve();
+  async updateSubCategory(subCategoryId: string, name: string, description: string, mainCategoryId: string): Promise<SubCategoryInterface> {
+    const data = { name, description, mainCategoryId };
+    const subCategory = await this.apiService.put<SubCategoryInterface>(`${this.endpoint}/${subCategoryId}`, data);
+    const oldData = this.subCategoriesSubject.getValue();
+    const index = oldData.findIndex(x => x.id === subCategoryId);
+    oldData[index] = subCategory;
+    this.subCategoriesSubject.next(oldData);
+    return subCategory;
   }
 
-  getById(id: string): Promise<any> {
-    return Promise.resolve();
+  async deleteSubCategory(subCategoryId: string): Promise<{ message: string }> {
+    const deleteResponse = await this.apiService.delete<{ message: string }>(`${this.endpoint}/${subCategoryId}`);
+    const oldData = this.subCategoriesSubject.getValue();
+    const index = oldData.findIndex(x => x.id === subCategoryId);
+    oldData.splice(index, 1);
+    this.subCategoriesSubject.next(oldData);
+    return deleteResponse;
   }
 
   deleteFromMainCategory(mainCategoryId: string) {

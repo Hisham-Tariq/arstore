@@ -49,11 +49,15 @@ export class UpdateMainCategoryDialogComponent implements OnInit {
     if (this.form.valid) {
       const {name, description} = this.form.value;
       const {id} = this.data['mainCategory'];
-      this.mainCategoryService.update({id, name, description}).then(() => {
+      this.mainCategoryService.updateMainCategory(id, name, description).then((res) => {
         this.showAlertOfWith("success", "Successfully Updated the main category");
-      }).catch(() => {
-        this.showAlertOfWith("error", "Failed to Update the Main Category");
-      });
+      })
+
+      //   .then(() => {
+      //   this.showAlertOfWith("success", "Successfully Updated the main category");
+      // }).catch(() => {
+      //   this.showAlertOfWith("error", "Failed to Update the Main Category");
+      // });
     } else {
       this.showAlertOfWith("error", "Please fill all the required fields");
     }

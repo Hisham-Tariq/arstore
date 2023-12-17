@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {firstValueFrom, Observable} from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -24,49 +24,51 @@ export class ApiService {
     return headers;
   }
 
-  get<T>(endpoint: string): Observable<T> {
+  get<T>(endpoint: string): Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
     console.log({headers: this.createHeaders()});
-    return this.http.get<T>(url, {
+    return firstValueFrom(this.http.get<T>(url, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-    });
+    }));
   }
 
-  post<T>(endpoint: string, data: any): Observable<T> {
+
+
+  post<T>(endpoint: string, data: any): Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
-    return this.http.post<T>(url, data, {
+    return firstValueFrom(this.http.post<T>(url, data, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-    });
+    }));
   }
 
-  put<T>(endpoint: string, data: any): Observable<T> {
+  put<T>(endpoint: string, data: any): Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
-    return this.http.put<T>(url, data, {
+    return firstValueFrom(this.http.put<T>(url, data, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-    });
+    }));
   }
 
-  delete<T>(endpoint: string): Observable<T> {
+  delete<T>(endpoint: string): Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
-    return this.http.delete<T>(url, {
+    return firstValueFrom(this.http.delete<T>(url, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-    });
+    }));
   }
 
-  patch<T>(endpoint: string, data: any): Observable<T> {
+  patch<T>(endpoint: string, data: any):  Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
-    return this.http.patch<T>(url, data, {
+    return firstValueFrom(this.http.patch<T>(url, data, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
-    });
+    }));
   }
 }

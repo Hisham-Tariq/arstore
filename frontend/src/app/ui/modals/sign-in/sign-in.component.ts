@@ -93,7 +93,7 @@ export class AuthSignInComponent implements OnInit {
     if (this.form.valid) {
       this.isLoading = true;
       // Register the user using AuthService
-      this.authService.login(this.form.value).subscribe((response) => {
+      this.authService.login(this.form.value).then((response) => {
         this.alert.type = 'success';
         this.alert.message = 'You have successfully Logged In';
         this.showAlert = true;

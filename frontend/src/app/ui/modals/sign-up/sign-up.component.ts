@@ -98,7 +98,7 @@ export class AuthSignUpComponent implements OnInit {
       this.isRegistering = true;
       this.authService.register(
         this.form.value,
-      ).subscribe((response) => {
+      ).then((response) => {
         this.isRegistering = false;
         this.alert.type = 'success';
         this.alert.message = 'Successfully registered. Please check your email to verify your account.';

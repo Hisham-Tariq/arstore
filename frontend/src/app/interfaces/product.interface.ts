@@ -10,16 +10,13 @@ export interface ProductInterface {
   subCategory: string;
   description?: string;
   colors: string[],
-  images: { [key: string]: { [index: string]: string } };
-  // images: {};
+  // images: { [key: string]: { [index: string]: string } };
+  images: ProductImage;
   isActive?: boolean;
   createdAt?: Date;
-  views: number;
   totalRating: number;
   ratedBy: number;
   status: ProductStatus;
-  discount: number,
-  eventId: string | null;
 }
 
 

@@ -49,7 +49,7 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   isDetailSet = false;
   isUserLoggedIn: boolean = false;
   isUserAdmin: boolean = false;
-  isUserVerified: boolean = false;
+  isUserVerified: boolean = true;
   productDataFetched: boolean = false;
   currentProductId: string | null = null;
 
@@ -90,8 +90,15 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
         this.reviewSectionComponent.fetchReviews(params.get('pid')!);
       }
     });
-    // this.authService.isUserLoggedIn.subscribe(data => this.isUserLoggedIn = data);
-    // this.authService.isUserAdmin.subscribe(data => this.isUserAdmin = data);
+    this.authService.isAuthenticated().subscribe(data => {
+      this.isUserLoggedIn = data;
+      if (this.isUserLoggedIn) {
+        this.authService.authState$.subscribe(data => this.isUserAdmin = data?.type === 'admin');
+      } else {
+        this.isUserAdmin = false;
+      }
+
+    });
     // this.auth.onAuthStateChanged(user => {
     //   if (user) {
     //     this.isUserVerified = user.emailVerified;
@@ -109,8 +116,8 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
       this.productDataFetched = true;
     } else {
       this.productService.getProductById(productId).then(async (product) => {
-        let mainCategory = (await this.mainCategoryService.getById(product.data()!.mainCategory)).data()!;
-        let subCategory = (await this.subCategoryService.getById(product.data()!.subCategory)).data()!;
+        let mainCategory = await this.mainCategoryService.getMainCategoryById(product.data()!.mainCategory);
+        let subCategory = await this.subCategoryService.getSubCategoryById(product.data()!.subCategory);
         this.product = {
           ...product.data()!,
           stock: {},

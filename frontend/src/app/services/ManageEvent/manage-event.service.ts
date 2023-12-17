@@ -32,7 +32,7 @@ export class ManageEventService {
 
   async add(item: IEvents): Promise<void>{
     this.sendEventMailToSubscribers(item);
-    let subscription = this.userService.getUsers().subscribe(users => {
+    let subscription = this.userService.getUsers().then(users => {
       console.log(users);
       users.forEach(user => {
         if(user.type != 'admin') {
@@ -58,29 +58,26 @@ export class ManageEventService {
   }
 
   async sendEventMailToSubscribers(item: IEvents){
-    this.userService.getUsers().subscribe(
-      async (users) => {
-        console.log(users.length);
-        let emails = (await this.subsribersService.getSubscribedUsers()) || [];
-        let usersEmail: string[] = [];
-        users.forEach(user => {
-          if(user.type != 'admin') usersEmail.push(user.email);
-        });
+    const users = await this.userService.getUsers();
+    console.log(users.length);
+    let emails = (await this.subsribersService.getSubscribedUsers()) || [];
+    let usersEmail: string[] = [];
+    users.forEach(user => {
+      if(user.type != 'admin') usersEmail.push(user.email);
+    });
 
-        emails = emails.concat(usersEmail);
-        // filter the duplicates
-        emails = emails.filter((item, index) => emails.indexOf(item) === index);
-        if(emails.length == 0) return;
-        let url = this.globalService.backendUrl + '/send-event-mail';
-        this.http.post(url, {
-          "emails": emails,
-          "eventName": item.name,
-          "discount": item.discount,
-        }).subscribe(value => {
-          console.log(value);
-        })
-      }
-    )
+    emails = emails.concat(usersEmail);
+    // filter the duplicates
+    emails = emails.filter((item, index) => emails.indexOf(item) === index);
+    if(emails.length == 0) return;
+    let url = this.globalService.backendUrl + '/send-event-mail';
+    this.http.post(url, {
+      "emails": emails,
+      "eventName": item.name,
+      "discount": item.discount,
+    }).subscribe(value => {
+      console.log(value);
+    })
     // send the item.name and discount on endpoint localhost:3000/api/sendMail
 
   }

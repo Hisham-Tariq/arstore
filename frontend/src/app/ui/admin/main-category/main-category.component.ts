@@ -92,13 +92,18 @@ export class MainCategoryComponent implements AfterViewInit {
     if (this.form.valid) {
       this.showAlert = false;
       const {name, description} = this.form.value;
-      this.mainCategoryService.add({name, description}).then(() => {
+      this.mainCategoryService.createMainCategory(name, description).then((_) => {
         this.showAlertOfWith('success', 'Successfully Added the Main Category');
         this.form.reset();
-      }).catch(() => {
-        this.showAlertOfWith('error', 'Failed to Add the Product');
-        this.startAlertTimeout();
       });
+
+      //   .subscribe(() => {
+      //   this.showAlertOfWith('success', 'Successfully Added the Main Category');
+      //   this.form.reset();
+      // }).catch(() => {
+      //   this.showAlertOfWith('error', 'Failed to Add the Product');
+      //   this.startAlertTimeout();
+      // });
     } else {
       this.showAlertOfWith('error', 'Please fill all the required fields', false);
     }
@@ -109,12 +114,13 @@ export class MainCategoryComponent implements AfterViewInit {
     // delete the main category by id
     this.subCategoryService.deleteFromMainCategory(this.itemSelectedForDelete.id);
     this.productService.deleteFromMainCategory(this.itemSelectedForDelete.id);
-    this.mainCategoryService.delete(this.itemSelectedForDelete.id).then(() => {
+    this.mainCategoryService.deleteMainCategory(this.itemSelectedForDelete.id).then((_) => {
       this.showAlertOfWith('success', 'Successfully Deleted the Main Category');
       this.closeDeleteModal();
-    }).catch(() => {
-      this.showAlertOfWith('error', 'Failed to Delete the Category');
-    });
+    })
+    //   .catch(() => {
+    //   this.showAlertOfWith('error', 'Failed to Delete the Category');
+    // });
   }
 
   openUpdateModal(mainCategory: any): void {

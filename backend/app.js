@@ -24,14 +24,19 @@ app.use(errorHandler);
 
 const api = process.env.API_URL;
 const authRoutes = require('./routes/auth');
+const mainCategoryRoutes = require('./routes/main-category')
+const subCategoryRoutes = require('./routes/sub-category')
 const categoriesRoute = require('./routes/categories');
 const productRoute = require('./routes/products');
 const userRoute = require('./routes/users');
 const orderRoute = require('./routes/orders');
 
+
 // Routes
 
 app.use(`${api}/auth`, authRoutes);
+app.use(`${api}/main-categories`, mainCategoryRoutes);
+app.use(`${api}/sub-categories`, subCategoryRoutes);
 app.use(`${api}/products`, productRoute);
 app.use(`${api}/categories`, categoriesRoute);
 app.use(`${api}/users`, userRoute);

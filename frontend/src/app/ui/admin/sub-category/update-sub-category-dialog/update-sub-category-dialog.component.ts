@@ -47,17 +47,14 @@ export class UpdateSubCategoryDialogComponent implements OnInit {
   update(){
     if(this.form.valid){
       const {name, mainCategory, description} = this.form.value;
-      const subCategory: SubCategoryInterface = {
-        id: this.data['subCategory'].id,
-        name,
-        description,
-        mainCategoryId: mainCategory,
-      };
-      this.subCategoryService.update(subCategory).then(() => {
+      this.subCategoryService.updateSubCategory(this.data['subCategory'].id, name, description, mainCategory).then((res) => {
         this.showAlertOfWith("success", 'Successfully Updated the Sub Category');
-      }).catch(() => {
-        this.showAlertOfWith("error", 'Failed to Update the Sub Category');
       });
+      //   .then(() => {
+      //   this.showAlertOfWith("success", 'Successfully Updated the Sub Category');
+      // }).catch(() => {
+      //   this.showAlertOfWith("error", 'Failed to Update the Sub Category');
+      // });
     } else {
       this.showAlertOfWith('error', 'Please fill all the required fields');
     }
