@@ -32,7 +32,7 @@ export class ManageEventService {
 
   async add(item: IEvents): Promise<void>{
     this.sendEventMailToSubscribers(item);
-    let subscription = this.userService.getAllUsers().subscribe(users => {
+    let subscription = this.userService.getUsers().subscribe(users => {
       console.log(users);
       users.forEach(user => {
         if(user.type != 'admin') {
@@ -58,7 +58,7 @@ export class ManageEventService {
   }
 
   async sendEventMailToSubscribers(item: IEvents){
-    this.userService.getAllUsers().subscribe(
+    this.userService.getUsers().subscribe(
       async (users) => {
         console.log(users.length);
         let emails = (await this.subsribersService.getSubscribedUsers()) || [];

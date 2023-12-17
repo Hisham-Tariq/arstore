@@ -34,8 +34,9 @@ export class CustomersComponent implements AfterViewInit {
   ) {
     this.data = new MatTableDataSource<ICustomers>();
     this._customerService.fetchAllCustomers();
-    this._customerService.observableData.subscribe(data => {
+    this._customerService.customers$.subscribe(data => {
       this.data.data = data;
+      console.log(data)
     });
   }
 
