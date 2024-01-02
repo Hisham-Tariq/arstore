@@ -1,6 +1,5 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {ICartItemWithDetails} from "../../../../interfaces/i-cart-item";
-import {CartService} from "../../../../services/Cart/cart.service";
+import {AddToCartData, CartItem, CartService} from "../../../../services/Cart/cart.service";
 
 @Component({
   selector: 'app-cart-product-card',
@@ -8,7 +7,7 @@ import {CartService} from "../../../../services/Cart/cart.service";
   styleUrls: ['./cart-product-card.component.scss']
 })
 export class CartProductCardComponent implements OnInit {
-  @Input() product: ICartItemWithDetails;
+  @Input() cartItem: CartItem;
   @ViewChild('outStockMessage') outStockMessage: any;
   inStock: boolean = false;
   quantity: number;
@@ -20,18 +19,22 @@ export class CartProductCardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.quantity = this.product.quantity;
-    this.inStock = this.product.quantity <= this.product.inStockQuantity;
-    if(this.product.inStockQuantity == 0){
+    this.quantity = this.cartItem.quantity;
+    this.inStock = this.cartItem.quantity <= this.currentVariant.stock;
+    if(this.currentVariant.stock == 0){
       this.outStockMessage.nativeElement.innerText = 'Out of stock';
     }
-    if(this.product.quantity > this.product.inStockQuantity) {
-      this.outStockMessage.nativeElement.innerText = 'Only ' + this.product.inStockQuantity + ' in stock';
+    if(this.cartItem.quantity > this.currentVariant.stock) {
+      this.outStockMessage.nativeElement.innerText = 'Only ' + this.currentVariant.stock + ' in stock';
     }
   }
 
+  get currentVariant(){
+    return this.cartItem.product.variants.find(value => value.name === this.cartItem.variantName)!
+  }
+
   incrementQuantity() {
-    if(this.quantity < this.product.inStockQuantity) {
+    if(this.quantity < this.currentVariant.stock) {
       this.quantity++;
       this.updateQuantity();
     } else {
@@ -49,8 +52,8 @@ export class CartProductCardComponent implements OnInit {
   }
 
   onQuantityChange() {
-    if(this.quantity > this.product.inStockQuantity) {
-      this.quantity = this.product.inStockQuantity;
+    if(this.quantity > this.currentVariant.stock) {
+      this.quantity = this.currentVariant.stock;
       alert("We don't have enough stock for this product");
     } else if (this.quantity < 1) {
       this.quantity = 1;
@@ -61,11 +64,16 @@ export class CartProductCardComponent implements OnInit {
   }
 
   updateQuantity() {
-    this.cartService.update({quantity: this.quantity, id: this.product.id});
+    const data = <AddToCartData>{
+      productId: this.cartItem.product.id,
+      quantity: this.quantity,
+      variantName: this.currentVariant.name
+    }
+    this.cartService.addToCart(data);
   }
 
   deleteFromCart() {
-    this.cartService.delete({id: this.product.id});
+    this.cartService.removeFromCart(this.cartItem.product.id, this.currentVariant.name);
   }
 
   confirmForDelete() {

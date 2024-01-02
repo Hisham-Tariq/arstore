@@ -4,8 +4,7 @@ import {ReflectionEmailValidator} from "../../../../validators/reflection-email.
 import {AuthService} from "../../../../services/Authentication";
 import {Router} from "@angular/router";
 import {UserService} from "../../../../services/Customer/user.service";
-import {OrderService} from "../../../../services/order/order.service";
-import {IOrder} from "../../../../interfaces/i-order";
+import {Order, OrderService} from "../../../../services/order/order.service";
 
 
 // contains a form with following fields:
@@ -26,7 +25,7 @@ export class BillingComponent implements OnInit {
   isSaving: boolean = false;
   isShowingLoading: boolean = false;
   @ViewChild('savingLoader') savingLoader: any;
-  allOrders: IOrder[];
+  allOrders: Order[];
 
 
   // all fields are required
@@ -48,8 +47,8 @@ export class BillingComponent implements OnInit {
     private userService: UserService,
     private orderService: OrderService,
   ) {
-    this.orderService.getAllCurrentUserOrders().subscribe(
-      (orders: IOrder[]) => {
+    this.orderService.getCurrentUserOrders().then(
+      (orders: Order[]) => {
         this.allOrders = orders;
       }
     );

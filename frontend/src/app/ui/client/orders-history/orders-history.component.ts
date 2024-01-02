@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {OrderService} from "../../../services/order/order.service";
-import {IOrderWithProducts} from "../../../interfaces/i-order";
+import {Order, OrderService} from "../../../services/order/order.service";
 
 @Component({
   selector: 'app-orders-history',
@@ -8,13 +7,13 @@ import {IOrderWithProducts} from "../../../interfaces/i-order";
   styleUrls: ['./orders-history.component.scss']
 })
 export class OrdersHistoryComponent implements OnInit {
-  allOrders: IOrderWithProducts[] = [];
-  filteredOrders: IOrderWithProducts[] = [];
+  allOrders: Order[] = [];
+  filteredOrders: Order[] = [];
   searchKey: string = '';
   constructor(
     private orderService: OrderService,
   ) {
-    this.orderService.observableData.subscribe(data => {
+    this.orderService.orders$.subscribe(data => {
       console.log("Data Changed");
       this.allOrders = data;
       this.applyFilter();

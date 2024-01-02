@@ -1,8 +1,8 @@
 import {Component, ElementRef, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
-import {IOrder, IOrderProduct, IOrderWithProducts} from "../../../../interfaces/i-order";
-import {OrderService} from "../../../../services/order/order.service";
+import {Order, OrderService} from "../../../../services/order/order.service";
 import { HttpClient } from '@angular/common/http';
+import {Product, Variant} from "../../../../interfaces";
 //
 // declare var require: any;
 // import * as pdfMake from "pdfmake/build/pdfmake";
@@ -11,6 +11,7 @@ import { HttpClient } from '@angular/common/http';
 // import html2canvas, {Options} from "html2canvas";
 // const htmlToPdfmake = require("html-to-pdfmake");
 // (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
+
 
 @Component({
   selector: 'app-order-detail',
@@ -22,7 +23,7 @@ export class OrderDetailComponent implements OnInit {
   @ViewChild('invoice') invoiceElement : ElementRef;
   @ViewChild('invoiceLogo') invoiceLogoElement : ElementRef;
 
-  order: IOrderWithProducts;
+  order: Order;
   // products: IOrderProduct[] = [];
   constructor(
     private orderService: OrderService,
@@ -51,22 +52,19 @@ export class OrderDetailComponent implements OnInit {
       });
   }
 
+
+  findVariant(product: Product, variantName: string): Variant {
+    return product.variants.find(variant => variant.name === variantName)!;
+  }
+
   private handleParameters() {
     this.activatedRoute.paramMap.subscribe(async (params) => {
       const orderId =  params.get('id')!;
       if(history.state.hasOwnProperty('order')) {
-        this.order = {
-          ...history.state.order,
-          products: [],
-        }
         this.order = history.state.order;
       }
       // get the products of the order
-      // (await this.orderService.getOrderDetail(orderId)).subscribe(order => {
-      //   this.order = order;
-      //
-      // });
-
+      this.order = await this.orderService.getOrderById(orderId)
     });
   }
 

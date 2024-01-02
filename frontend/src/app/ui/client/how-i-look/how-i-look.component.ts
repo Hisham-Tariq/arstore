@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {ProductInterface, ProductItem} from "../../../interfaces";
+import {Product} from "../../../interfaces";
 
 @Component({
   selector: 'app-how-i-look',
@@ -7,7 +7,7 @@ import {ProductInterface, ProductItem} from "../../../interfaces";
   styleUrls: ['./how-i-look.component.scss']
 })
 export class HowILookComponent implements OnInit {
-  products: ProductItem[] = [];
+  products: Product[] = [];
 
   constructor() { }
 

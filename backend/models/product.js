@@ -1,68 +1,110 @@
 const mongoose = require('mongoose');
 
-const productSchema = mongoose.Schema({
+
+const productSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+    },
+    // type: {
+    //     type: String,
+    //     enum: ['glasses', 'lenses'],
+    //     required: true,
+    // },
+    mainCategory: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'MainCategory',
+        required: true,
+    },
+    subCategory: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'SubCategory',
+        required: true,
     },
     description: {
         type: String,
-        required: true
-    },
-    richDescription: {
-        type: String,
-        default: ''
-    },
-    image: {
-        type: String,
-        default: ''
-    },
-    images: [{
-        type: String
-    }],
-    brand: {
-        type: String,
-        default: ''
-    },
-    price: {
-        type: Number,
-        default: '0'
-    },
-    category: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category',
         required: true,
     },
-    countInStock: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 255
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
     rating: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Rating',
+    },
+    genders: {
         type: String,
-        default: 0
+        enum: ['Male', 'Female', 'Both'],
+        required: true,
     },
-    numReviews: {
-        type: Number,
-        default: 0,
+    status: {
+        type: String,
+        enum: ['active', 'inactive', 'dependent inactive'],
+        default: 'active',
     },
-    isFeatured: {
-        type: Boolean,
-        default: false
-    },
-    dateCreated: {
-        type: Date,
-        default: Date.now
-    }
-})
-
+    variants: [
+        {
+            name: {
+                type: String,
+                required: true,
+            },
+            colorCode: {
+                type: String,
+                required: true,
+            },
+            stock: {
+                type: Number,
+                required: true,
+            },
+            price: {
+                type: Number,
+                required: true,
+            },
+            images: {
+                thumbnail: {
+                    type: String, // URL or file path
+                },
+                left: {
+                    type: String, // URL or file path
+                },
+                right: {
+                    type: String, // URL or file path
+                },
+                model: {
+                    type: String, // URL or file path
+                },
+            },
+        },
+    ],
+}, {
+    minimize: false,
+});
 productSchema.virtual('id').get(function () {
     return this._id.toHexString();
+});
+
+productSchema.virtual('colors').get(function () {
+    return this.variants.map((variant) => variant.colorCode);
+});
+
+productSchema.virtual('images').get(function () {
+    let images = {}
+    for (const variant of this.variants) {
+        images[variant.colorCode] = variant.images
+    }
+    return images;
 });
 
 productSchema.set('toJSON', {
     virtuals: true,
 });
 
-module.exports = mongoose.model('Product', productSchema);
+const ProductModel = mongoose.model('Product', productSchema);
+
+
+module.exports = ProductModel

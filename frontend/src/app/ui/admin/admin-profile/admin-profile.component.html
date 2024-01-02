@@ -15,22 +15,22 @@
 
             <div class="sm:col-span-3">
               <label for="first-name" class="block text-sm font-medium text-blue-gray-900"> First name </label>
-              <input type="text" value="FirstName" name="first-name" id="first-name" autocomplete="given-name" class="field mt-1 block w-full ">
+              <input type="text" value="{{user?.firstName}}" name="first-name" id="first-name" autocomplete="given-name" class="field mt-1 block w-full ">
             </div>
 
             <div class="sm:col-span-3">
               <label for="last-name" class="block text-sm font-medium text-blue-gray-900"> Last name </label>
-              <input type="text"  value="LastName" name="last-name" id="last-name" autocomplete="family-name" class="field mt-1 block w-full">
+              <input type="text" value="{{user?.lastName}}" name="last-name" id="last-name" autocomplete="lastName" class="field mt-1 block w-full">
             </div>
 
-            <div class="sm:col-span-6">
-              <label for="last-name" class="block text-sm font-medium text-blue-gray-900"> Admin name </label>
-              <input type="text" value="FirstName lastName" name="user-name" id="user-name" autocomplete="family-name" class="field mt-1 block w-full">
-            </div>
+<!--            <div class="sm:col-span-6">-->
+<!--              <label for="last-name" class="block text-sm font-medium text-blue-gray-900"> Admin name </label>-->
+<!--              <input type="text" value="FirstName lastName" name="user-name" id="user-name" autocomplete="family-name" class="field mt-1 block w-full">-->
+<!--            </div>-->
 
             <div class="sm:col-span-6">
               <label for="email" class="block text-sm font-medium text-blue-gray-900"> Admin Email </label>
-              <input type="text" value="Email " name="email" id="email" autocomplete="email" class="field mt-1 block w-full">
+              <input type="text" value="{{user?.email}}" name="email" id="email" autocomplete="email" class="field mt-1 block w-full">
             </div>
 
 <!--            <div class="sm:col-span-6">-->
@@ -62,8 +62,7 @@
           </div>
 
           <div class="pt-4">
-            <button
-                    type="button" class="secondary-outlined-button-black w-full">Logout</button>
+            <button (click)="authService.logout()" type="button" class="secondary-outlined-button-black w-full">Logout</button>
           </div>
           <div>
             <button (click)="goToAnaytics()" type="button" class="primary-button w-full ">Check Analytics</button>

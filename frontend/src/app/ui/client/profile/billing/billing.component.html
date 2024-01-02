@@ -162,10 +162,10 @@
               <tbody class="bg-white divide-y divide-gray-200">
               <tr *ngFor="let order of allOrders">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  <time >{{order.date.seconds * 1000 | date:'fullDate'}}</time>
+                  <time >{{order.createdAt | date:'fullDate'}}</time>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{order.id}}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">RS. {{order.totalPrice}}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">RS. {{order.totalAmount}}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium ">
                   <a (click)="showInvoice(order.id)" class="text-black cursor-pointer bg-primary rounded-full px-3 py-2 font-bold">View receipt</a>
                 </td>

@@ -2,6 +2,7 @@ import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {AuthService} from "../../../services/Authentication";
 import {FormBuilder, Validators} from "@angular/forms";
 import {Router} from "@angular/router";
+import {ReflectionUser} from "../../../interfaces";
 
 @Component({
   selector: 'app-admin-profile',
@@ -12,6 +13,7 @@ export class AdminProfileComponent implements OnInit {
   isUserVerified: boolean = false;
   @Output() onImageChange = new EventEmitter<File>();
   dragging: boolean = false;
+  user: ReflectionUser | null = null;
 
   imagePath: string | ArrayBuffer = "";
   imageHovered: boolean = false;
@@ -41,7 +43,11 @@ export class AdminProfileComponent implements OnInit {
     public authService: AuthService,
     private fb: FormBuilder,
     private router: Router,
-  ) { }
+  ) {
+    this.authService.authState$.subscribe((user) => {
+      this.user = user;
+    });
+  }
 
   ngOnInit(): void {
   }

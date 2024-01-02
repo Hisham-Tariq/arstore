@@ -1,11 +1,10 @@
 import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import {MatDialog} from "@angular/material/dialog";
 import {ActivatedRoute, Router} from "@angular/router";
-import {ProductItem} from "../../../interfaces";
+import {Product} from "../../../interfaces";
 import {ProductService} from "../../../services/Product/product.service";
 import {StockService} from "../../../services/Stock/stock.service";
-import {CartService} from "../../../services/Cart/cart.service";
-import {ICartItem} from "../../../interfaces/i-cart-item";
+import {CartService, Cart, AddToCartData, CartItem} from "../../../services/Cart/cart.service";
 import {GlobalService} from "../../../services/global/global.service";
 import {MainCategoryService} from "../../../services/MainCategory/main-category.service";
 import {SubCategoryService} from "../../../services/SubCategory/sub-category.service";
@@ -31,7 +30,8 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   @ViewChild('eligibleModalMessage') eligibleModalMessage: any;
   @ViewChild(ReviewSectionComponent) reviewSectionComponent: ReviewSectionComponent;
 
-  product: ProductItem;
+  isViewInit: boolean = false;
+  product: Product;
   currentProductColors: string[] = []
   selectedColor: string = "";
   imagesKey: string[] = [
@@ -72,23 +72,17 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     public authService: AuthService,
     private activatedRoute: ActivatedRoute,
     private productService: ProductService,
-    private stockService: StockService,
     private cartService: CartService,
     private globalService: GlobalService,
-    private mainCategoryService: MainCategoryService,
-    private subCategoryService: SubCategoryService,
     private navigationService: ReflectionNavigationService,
   ) {
     this.activatedRoute.paramMap.subscribe(params => {
-      this.productService.incrementProductView(params.get('pid')!)
       this.currentProductId = params.get('pid')!;
       this.fetchCurrentProduct(params.get('pid')!);
-      if (this.isDetailSet) {
-        this.isDetailSet = false;
-        console.log(typeof this.product === 'undefined' || Object.keys(this.product.stock).length < 1 || this.isDetailSet)
-        this.setProductDetail();
-        this.reviewSectionComponent.fetchReviews(params.get('pid')!);
-      }
+      // if (!this.isDetailSet) {
+      //   this.isDetailSet = false;
+      //   this.setProductDetail();
+      // }
     });
     this.authService.isAuthenticated().subscribe(data => {
       this.isUserLoggedIn = data;
@@ -107,77 +101,56 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   }
 
 
-  fetchCurrentProduct(productId: string) {
+  async fetchCurrentProduct(productId: string) {
     if (history.state.hasOwnProperty('product')) {
       this.product = history.state.product;
-      this.selectedColor = this.product.colors[0];
-      this.updateProductColorImages();
-      this.currentProductColors = this.product.colors;
-      this.productDataFetched = true;
     } else {
-      this.productService.getProductById(productId).then(async (product) => {
-        let mainCategory = await this.mainCategoryService.getMainCategoryById(product.data()!.mainCategory);
-        let subCategory = await this.subCategoryService.getSubCategoryById(product.data()!.subCategory);
-        this.product = {
-          ...product.data()!,
-          stock: {},
-          subCategoryDetail: subCategory,
-          mainCategoryDetail: mainCategory,
-          thumbnail: this.productService.getFirstColorsThumbnail(product.data()!)
-        }
-        // this.stockService.getProductStock(productId).subscribe((stock: any) => {
-        //   stock.forEach((item: any) => {
-        //     this.product.stock[item.color] = item;
-        //   });
-        //
-        //   let stockColors = Object.keys(this.product.stock);
-        //   for(let color of stockColors){
-        //     if(!this.product.colors.includes(color)){
-        //       delete this.product.stock[color];
-        //     }
-        //   }
-        //
-        //   this.product.colors = Object.keys(this.product.stock).sort((a, b) => {
-        //     return this.product.stock[a].retailerPrice - this.product.stock[b].retailerPrice;
-        //   });
-        //   this.setProductDetail();
-        // });
-        this.productDataFetched = true;
-      });
+      this.product = await this.productService.getProductById(productId);
     }
-
+    this.selectedColor = this.product.colors[0];
+    this.updateProductColorImages();
+    this.currentProductColors = this.product.colors;
+    this.productDataFetched = true;
+    this.setProductDetail();
   }
 
   setProductDetail() {
-    if (typeof this.product === 'undefined' || Object.keys(this.product.stock).length < 1 || this.isDetailSet) return;
+    if (!this.isViewInit) return;
+    if (typeof this.product === 'undefined' || this.product.variants.length < 1 || this.isDetailSet) return;
+    console.log("Setting Product Detail");
     this.selectedColor = this.product.colors[0];
     this.updateProductColorImages();
     this.currentProductColors = this.product.colors;
     this.productNameView.nativeElement.innerText = this.product.name;
+
     this.updateProductPrice();
     this.productDescriptionView.nativeElement.innerText = this.product.description;
     this.isDetailSet = true;
   }
 
   get retailPrice() {
-    return this.product.stock[this.selectedColor].retailerPrice;
+    return this.product.variants.find((value) => value.colorCode == this.selectedColor)!.price;
+    // return this.product.stock[this.selectedColor].retailerPrice;
   }
 
   get discountedPrice() {
-    return this.retailPrice - ((this.retailPrice * this.product.discount) / 100);
+    return this.retailPrice;
   }
 
   updateProductPrice() {
-    if (this.product.discount == 0) {
-      this.productPriceView.nativeElement.innerText = 'RS. ' + this.discountedPrice;
-    } else {
-      this.productPriceView.nativeElement.innerHTML = `<del>RS. ${this.retailPrice}</del> RS. ${this.discountedPrice} `;
-    }
+    this.productPriceView.nativeElement.innerText = 'RS. ' + this.discountedPrice;
+    console.log(this.productPriceView.nativeElement.innerText);
+    // if (this.product.discount == 0) {
+    //   this.productPriceView.nativeElement.innerText = 'RS. ' + this.discountedPrice;
+    // } else {
+    //   this.productPriceView.nativeElement.innerHTML = `<del>RS. ${this.retailPrice}</del> RS. ${this.discountedPrice} `;
+    // }
   }
 
 
   get currentVariantInStock(): number {
-    return this.product.stock[this.selectedColor].totalQuantity;
+    return this.product.variants.find((value) => value.colorCode == this.selectedColor)!.stock;
+    // return this.product.stock[this.selectedColor].totalQuantity;
   }
 
   updateProductColorImages() {
@@ -192,6 +165,8 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    this.isViewInit = true;
+    console.log("After View Init");
     this.setProductDetail();
     // this.c.startCapture()
     // this.c.captureFrame().then(f => {
@@ -273,20 +248,16 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
     //   this.showNotEligibleModal("You are not verified. Please verify your account to continue shopping.");
     //   return;
     // }
-    let item = <ICartItem>{
-      color: this.selectedColor,
-      quantity: this.quantity,
+    const variant = this.product.variants.find((value) => value.colorCode == this.selectedColor)!;
+    let item = <AddToCartData>{
       productId: this.product.id,
-      stockId: this.product.stock[this.selectedColor].id,
+      variantName: variant.name,
+      quantity: this.quantity
     };
     this.isAddingInCart = true;
-    this.cartService.add(item).then((value) => {
-      if (value.status == 400) {
-        this.showNotEligibleModal(value.message);
-      } else {
-        this.globalService.openCartDrawer();
-        this.quantity = 1;
-      }
+    this.cartService.addToCart(item).then((value) => {
+      this.globalService.openCartDrawer();
+      this.quantity = 1;
       this.isAddingInCart = false;
     });
   }
@@ -310,8 +281,9 @@ export class ProductDetailComponent implements OnInit, AfterViewInit {
 
   getAverageRating() {
     if (typeof this.product == 'undefined') return 0;
-    return this.product.totalRating / this.product.ratedBy
+    return this.product.rating.avgRating
   }
+
   imageLoadingState(event: StateChange, img: HTMLImageElement, loading: HTMLDivElement) {
     switch (event.reason) {
       case 'setup':

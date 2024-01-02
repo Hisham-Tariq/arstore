@@ -1,7 +1,8 @@
 import {Component, ElementRef, Input, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {ProductItem} from "../../interfaces";
+import {Product} from "../../interfaces";
 import {StateChange} from "ng-lazyload-image";
+import {prod} from "@tensorflow/tfjs-core";
 
 @Component({
   selector: 'product-card',
@@ -9,7 +10,7 @@ import {StateChange} from "ng-lazyload-image";
   styleUrls: ['./product-card.component.scss']
 })
 export class ProductCardComponent implements OnInit {
-  @Input() product!: ProductItem;
+  @Input() product!: Product;
 
   constructor(
     private _activatedRoute: ActivatedRoute,
@@ -18,6 +19,7 @@ export class ProductCardComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(this.product)
   }
 
   onProductClick(): void {
@@ -33,16 +35,24 @@ export class ProductCardComponent implements OnInit {
     console.log('add to cart');
   }
 
-  getAverageRating(product: ProductItem) : number {
-    return product.totalRating / product.ratedBy
+  getAverageRating(product: Product) : number {
+    return product.rating.avgRating
   }
 
   get retailPrice():number {
-    return this.product.stock[this.product.colors[0]].retailerPrice
+    return this.product.variants.find(value => value.colorCode == this.product.colors[0])!.price
+  }
+
+  get lowestPrice(): number {
+    return Math.min(...this.product.variants.map(value => value.price))
+  }
+
+  get highestPrice(): number {
+    return Math.max(...this.product.variants.map(value => value.price))
   }
 
   get discountedPrice(): number{
-    return this.retailPrice - ((this.product.discount * this.retailPrice) / 100)
+    return this.retailPrice;
   }
 
   imageLoadingState(event: StateChange, img: HTMLImageElement, loading: HTMLDivElement) {
@@ -65,6 +75,4 @@ export class ProductCardComponent implements OnInit {
         break;
     }
   }
-
-
 }

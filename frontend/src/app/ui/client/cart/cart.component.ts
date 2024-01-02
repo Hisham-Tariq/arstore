@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {ICartItemWithDetails} from "../../../interfaces/i-cart-item";
-import {CartService} from "../../../services/Cart/cart.service";
+import {Cart, CartItem, CartService} from "../../../services/Cart/cart.service";
 
 @Component({
     selector: 'app-cart',
@@ -9,7 +8,7 @@ import {CartService} from "../../../services/Cart/cart.service";
     styleUrls: ['./cart.component.scss'],
 })
 export class CartComponent implements OnInit {
-    cartItems: ICartItemWithDetails[] = [];
+    cartItems: CartItem[] = [];
     totalCartPrice: number  = 0;
 
     constructor(
@@ -22,9 +21,9 @@ export class CartComponent implements OnInit {
           this.totalCartPrice = totalPrice;
         }
       );
-      this.cartService.observableDataWithDetails.subscribe(
-        (data: ICartItemWithDetails[]) => {
-          this.cartItems = data;
+      this.cartService.data.subscribe(
+        (data) => {
+          this.cartItems = data!.items;
           console.log(this.cartItems);
         }
       );

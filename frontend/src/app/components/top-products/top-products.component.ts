@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {ProductService} from "../../services/Product/product.service";
-import {ProductItem} from "../../interfaces";
+import {Product} from "../../interfaces";
 
 @Component({
   selector: 'app-top-products',
@@ -8,12 +8,12 @@ import {ProductItem} from "../../interfaces";
   styleUrls: ['./top-products.component.scss']
 })
 export class TopProductsComponent implements OnInit {
-  products: ProductItem[] = [];
+  products: Product[] = [];
 
   constructor(
     private productService: ProductService
   ) {
-    this.productService.getMostSoldProducts.subscribe(products => {
+    this.productService.getMostSoldProducts.then((products: Product[]) => {
       let prods = products.filter(product => product.status == 'active');
       if(prods.length >= 4) {
         this.products = prods.slice(0, 4);

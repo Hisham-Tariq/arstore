@@ -7,7 +7,7 @@ import {StockService} from "../../../../services/Stock/stock.service";
 import {MatDialog} from "@angular/material/dialog";
 import {ReflectionAlertType} from "../../../../components/alert";
 import {reflectionAnimations} from "../../../../animations";
-import {ProductInterface} from "../../../../interfaces";
+import {Product} from "../../../../interfaces";
 import {ProductService} from "../../../../services/Product/product.service";
 import {Router} from "@angular/router";
 
@@ -34,7 +34,7 @@ export class StockListComponent implements AfterViewInit {
   itemSelectedForDelete: any;
 
   allStocks: IStock[] = [];
-  allProducts: ProductInterface[] = [];
+  allProducts: Product[] = [];
   allStockItems: StockItem[] = [];
   selectedProducts: string[] = [];
   minCPriceFilter: number = 0;
@@ -154,5 +154,5 @@ export class StockListComponent implements AfterViewInit {
 }
 
 interface StockItem extends IStock {
-  productData: ProductInterface
+  productData: Product
 }

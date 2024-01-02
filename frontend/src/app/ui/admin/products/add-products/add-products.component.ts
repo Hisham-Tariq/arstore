@@ -1,13 +1,22 @@
-import {Component} from '@angular/core';
-import {FormBuilder, Validators} from '@angular/forms';
-import {MainCategoryInterface, ProductInterface, SubCategoryInterface} from "src/app/interfaces";
-import {ReflectionAlertType} from "src/app/components/alert";
-import {reflectionAnimations} from "src/app/animations";
-import {MainCategoryService} from "src/app/services/MainCategory/main-category.service";
-import {SubCategoryService} from "src/app/services/SubCategory/sub-category.service";
-import {ProductService} from "src/app/services/Product/product.service";
-import {colors} from 'src/app/interfaces/colors';
-import {randomId} from "../../../../utils";
+import { Component } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
+import {
+  MainCategoryInterface,
+  Product,
+  SubCategoryInterface,
+} from 'src/app/interfaces';
+import { ReflectionAlertType } from 'src/app/components/alert';
+import { reflectionAnimations } from 'src/app/animations';
+import { MainCategoryService } from 'src/app/services/MainCategory/main-category.service';
+import { SubCategoryService } from 'src/app/services/SubCategory/sub-category.service';
+import {
+  AddVariantData,
+  CreateProductData,
+  ProductColorImages,
+  ProductService,
+} from 'src/app/services/Product/product.service';
+import { colors } from 'src/app/interfaces/colors';
+import { randomId } from '../../../../utils';
 
 @Component({
   selector: 'app-add-products',
@@ -17,7 +26,7 @@ import {randomId} from "../../../../utils";
 })
 export class AddProductsComponent {
   alert: { type: ReflectionAlertType; message: string } = {
-    type: "info",
+    type: 'info',
     message: '',
   };
   showAlert: boolean = false;
@@ -29,11 +38,14 @@ export class AddProductsComponent {
   mainCategories: MainCategoryInterface[] = [];
   // Gender Data
   readonly genders: string[] = ['Male', 'Female', 'Both'];
-  private imagesName = ["model", "thumbnail", 'left', 'right']
-  allImages: Map<string, ProductColorImages> = new Map<string, ProductColorImages>();
+  private imagesName = ['model', 'thumbnail', 'left', 'right'];
+  allImages: Map<string, ProductColorImages> = new Map<
+    string,
+    ProductColorImages
+  >();
 
-  readonly tagList = ["Newest", "Popular"];
-  color: string = "#ffffff";
+  readonly tagList = ['Newest', 'Popular'];
+  color: string = '#ffffff';
 
   selectedTags: string[] = [];
   selectedColors: string[] = [];
@@ -41,7 +53,9 @@ export class AddProductsComponent {
   isProductDataUploaded = false;
   isAllImagesAreUploaded = false;
   isAddingProduct: boolean = false;
-  productImagesDownloadUrls: { [index: string]: { [imageName: string]: string } } = {};
+  productImagesDownloadUrls: {
+    [index: string]: { [imageName: string]: string };
+  } = {};
   private currentProductId: string;
 
   form = this.fb.group({
@@ -53,16 +67,18 @@ export class AddProductsComponent {
     description: ['', Validators.required],
   });
 
+  variantsData: Partial<AddVariantData>[] = [];
+
   constructor(
     private fb: FormBuilder,
     private mainCategoryService: MainCategoryService,
     private subCategoryService: SubCategoryService,
-    private productService: ProductService,
+    private productService: ProductService
   ) {
-    mainCategoryService.data.subscribe(data => {
+    mainCategoryService.data.subscribe((data) => {
       this.mainCategories = data;
     });
-    subCategoryService.data.subscribe(data => {
+    subCategoryService.data.subscribe((data) => {
       this.allSubCategories = data;
     });
   }
@@ -92,47 +108,140 @@ export class AddProductsComponent {
   // }
 
   get hexColors(): string[] {
-    return this.allColors.map(color => color.hex);
+    return this.allColors.map((color) => color.hex);
   }
 
   onMainCategoryChange() {
-    const {mainCategory} = this.form.value;
-    this.subCategories = this.allSubCategories.filter(value => value.mainCategoryId == mainCategory);
+    const { mainCategory } = this.form.value;
+    this.subCategories = this.allSubCategories.filter(
+      (value) => value.mainCategoryId == mainCategory
+    );
     this.form.get('subCategory')!.setValue(null);
   }
 
+  indexOfVariant(colorCode: string) {
+    return this.variantsData.findIndex((value) => value.colorCode == colorCode);
+  }
+
+  addColor() {
+    if (this.selectedColors.includes(this.color)) {
+      this.showAlertOfWith('error', 'This color is already added');
+      return;
+    }
+    this.selectedColors.push(this.color);
+    const variant = this.variantsData.find(
+      (value) => value.colorCode == this.color
+    );
+    if (typeof variant == 'undefined') {
+      this.variantsData.push({
+        colorCode: this.color,
+        name: '',
+        price: 0,
+        stock: 0,
+      });
+    }
+  }
+
+  onColorNameChange(event: any, colorCode: string) {
+    const colorName = event.target.value;
+    let variantIndex = this.indexOfVariant(colorCode);
+    if (variantIndex == -1) {
+      this.variantsData.push({
+        colorCode: colorCode,
+        name: colorName,
+        price: 0,
+        stock: 0,
+      });
+    } else {
+      this.variantsData[variantIndex].name = colorName;
+    }
+  }
+
+  onColorPriceChange(event: any, colorCode: string) {
+    const price = event.target.value;
+    let variantIndex = this.indexOfVariant(colorCode);
+    if (variantIndex == -1) {
+      this.variantsData.push({
+        colorCode: colorCode,
+        name: '',
+        price: price,
+        stock: 0,
+      });
+    } else {
+      this.variantsData[variantIndex].price = price;
+    }
+  }
+
+  onColorQtyChange(event: any, colorCode: string) {
+    const qty = event.target.value;
+    let variantIndex = this.indexOfVariant(colorCode);
+    if (variantIndex == -1) {
+      this.variantsData.push({
+        colorCode: colorCode,
+        name: '',
+        price: 0,
+        stock: qty,
+      });
+    } else {
+      this.variantsData[variantIndex].stock = qty;
+    }
+  }
+
+  onSelectedColorDelete(event: any, colorCode: any) {
+    this.selectedColors.splice(this.selectedColors.indexOf(colorCode), 1);
+    this.variantsData.splice(
+      this.variantsData.findIndex((value) => value.colorCode == colorCode),
+      1
+    );
+  }
 
   addProduct() {
-    let product: ProductInterface = {
-      ...this.form.value,
-      colors: this.selectedColors,
-      isActive: true,
-    };
+    console.log(
+      this.form.value,
+      this.form.valid,
+      this.selectedColors,
+      this.variantsData
+    );
+
     if (!this.form.valid) {
       this.showAlertOfWith('error', 'Please fill all the required fields');
       return;
     } else if (this.selectedColors.length == 0) {
       this.showAlertOfWith('error', 'Please add at least one color variant');
       return;
+    } else if (!this.validVariantData()) {
+      this.showAlertOfWith(
+        'error',
+        'Please fill all the variant data, price, name and quantity also variant name must be unique as well'
+      );
+      return;
     } else if (!this.checkAllImagesAreChosen()) {
-      this.showAlertOfWith('error', 'Please add all the images of the variants');
+      this.showAlertOfWith(
+        'error',
+        'Please add all the images of the variants'
+      );
       return;
     }
-    let productId = product.name.replace(" ", "") + "_" + randomId(10);
-    this.currentProductId = productId;
+    for (let i = 0; i < this.variantsData.length; i++) {
+      const color = this.variantsData[i].colorCode!;
+      this.variantsData[i].images = this.allImages.get(color)!;
+    }
+    let product: CreateProductData = {
+      ...this.form.value,
+      isActive: true,
+      genders: this.gender?.value,
+      variants: this.variantsData,
+    };
+    // let productId = product.name.replace(" ", "") + "_" + randomId(10);
+    // this.currentProductId = productId;
     this.isAddingProduct = true;
-    this.productService.add(product, productId).then(() => {
-      this.isProductDataUploaded = true;
-      this.showAlertOfWith('info', 'Product Data is Added, Now uploading the images');
-      for (const selectedColor of this.selectedColors) {
-        let images = this.allImages.get(selectedColor)!;
-        this.imagesUploadCount[selectedColor] = 0;
-        this.imagesName.forEach(name => {
-          // this.productService.uploadImage(images[name as keyof ProductColorImages]!, productId, selectedColor, name).subscribe(
-          //   value => this.onImageUploaded(value, selectedColor, name),
-          // );
-        });
-      }
+    this.productService.createProduct(product).then((res) => {
+      console.log(res);
+      this.isAddingProduct = false;
+      this.showAlertOfWith(
+        'info',
+        'Product Data is Added, Now uploading the images'
+      );
       this.showAlertOfWith('success', 'All Images are uploaded successfully');
     });
   }
@@ -161,8 +270,11 @@ export class AddProductsComponent {
     return true;
   }
 
-
-  showAlertOfWith(type: ReflectionAlertType, message: string, withTimeout: boolean = true) {
+  showAlertOfWith(
+    type: ReflectionAlertType,
+    message: string,
+    withTimeout: boolean = true
+  ) {
     this.alert.type = type;
     this.alert.message = message;
     this.showAlert = true;
@@ -181,23 +293,37 @@ export class AddProductsComponent {
     this.showAlert = !e;
   }
 
-
-
   checkAllImagesAreChosen(): boolean {
     for (const selectedColor of this.selectedColors) {
-      if (typeof this.allImages.get(selectedColor) == "undefined") return false;
+      if (typeof this.allImages.get(selectedColor) == 'undefined') return false;
       else {
         const variantImages = this.allImages.get(selectedColor)!;
         for (const name of this.imagesName) {
-          if (typeof variantImages[name as keyof ProductColorImages] == "undefined") return false;
+          if (
+            typeof variantImages[name as keyof ProductColorImages] ==
+            'undefined'
+          )
+            return false;
         }
       }
     }
     return true;
   }
 
+  validVariantData(): boolean {
+    for (const variant of this.variantsData) {
+      if (variant.name == '' || variant.price == 0 || variant.stock == 0)
+        return false;
+    }
+    // also check if the variant name is unique
+    const variantNames = this.variantsData.map((value) => value.name);
+    const uniqueVariantNames = new Set(variantNames);
+    if (variantNames.length != uniqueVariantNames.size) return false;
+    return true;
+  }
+
   onImageChange(image: File | null, colorName: string, type: string) {
-    if (typeof this.allImages.get(colorName) == "undefined")
+    if (typeof this.allImages.get(colorName) == 'undefined')
       this.allImages.set(colorName, {
         model: null,
         thumbnail: null,
@@ -214,27 +340,9 @@ export class AddProductsComponent {
     this.allImages.clear();
     this.selectedColors = [];
     this.selectedTags = [];
-
   }
 
   getColorCodeByName(name: string) {
-    return this.allColors.find(color => color.name == name)!.hex;
+    return this.allColors.find((color) => color.name == name)!.hex;
   }
-
-
-  addColor() {
-    if(this.selectedColors.includes(this.color)){
-      this.showAlertOfWith('error', 'This color is already added');
-      return;
-    }
-    this.selectedColors.push(this.color);
-  }
-}
-
-
-interface ProductColorImages {
-  model: File | null;
-  thumbnail: File | null;
-  left: File | null;
-  right: File | null;
 }

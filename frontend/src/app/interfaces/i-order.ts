@@ -1,3 +1,4 @@
+/*
 import firebase from "firebase/compat";
 import FieldValue = firebase.firestore.FieldValue;
 
@@ -38,3 +39,4 @@ export type OrderStatus = 'pending' | 'approved' | 'rejected' | 'delivered';
 export interface IOrderWithProducts extends IOrder {
   products: IOrderProduct[];
 }
+*/

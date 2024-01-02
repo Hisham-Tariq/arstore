@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import {ProductInterface, SubCategoryInterface} from "src/app/interfaces";
+import {Product, SubCategoryInterface} from "src/app/interfaces";
 import {BehaviorSubject, firstValueFrom, Observable} from "rxjs";
 import {ApiService} from "../ApiBaseService/api.service";
 

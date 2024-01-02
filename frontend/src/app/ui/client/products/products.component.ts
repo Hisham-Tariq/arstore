@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {ProductItem} from "../../../interfaces";
+import {Product} from "../../../interfaces";
 import {ProductService} from '../../../services/Product/product.service';
 import {StockService} from "../../../services/Stock/stock.service";
 import {ActivatedRoute, Router} from "@angular/router";
@@ -15,12 +15,12 @@ import {map} from "rxjs/operators";
   styleUrls: ['./products.component.scss'],
 })
 export class ProductsComponent implements OnInit {
-  products: ProductItem[] = [];
+  products: Product[] = [];
   itemsPerPageOptions: number[] = [10, 25, 50];
-  filteredProducts: ProductItem[];
+  filteredProducts: Product[];
   productCategory = "all"
   priceSort: "asc" | "desc" = "asc";
-  sortBy: "price" | "name" | "newest" | "oldest" | "popular" = "newest";
+  sortBy: "price" | "name" | "newest" | "oldest" = "newest";
   itemsPerPage = 12;
   currentPage = 1;
   maxPage = 0;
@@ -86,15 +86,19 @@ export class ProductsComponent implements OnInit {
   }
 
   fetchProducts() {
-    this.productsService.getAllProductsDetails.pipe(
-      map(products => {
-        return products.filter(product => product.status == 'active');
-      })
-    ).subscribe(value => {
+    this.productsService.data.subscribe(value => {
       this.products = value;
-      // calculate total pages
       this.applyFilter();
     })
+    // this.productsService.getAllProductsDetails.pipe(
+    //   map(products => {
+    //     return products.filter(product => product.status == 'active');
+    //   })
+    // ).subscribe(value => {
+    //   this.products = value;
+    //   // calculate total pages
+    //   this.applyFilter();
+    // })
   }
 
   applyFilter() {
@@ -108,38 +112,40 @@ export class ProductsComponent implements OnInit {
       this.productCategory = this.isCategoryGlasses ? "glasses" : "lenses";
     }
     if (this.productCategory !== 'all') {
-      data = data.filter(value => value.mainCategoryDetail.name.toLowerCase().includes(this.productCategory));
+      data = data.filter(value => value.mainCategory.name.toLowerCase().includes(this.productCategory));
     }
     // filter by gender
     const isMale = this.form.get('male')?.value;
     const isFemale = this.form.get('female')?.value;
     if (isMale && !isFemale) {
-      data = data.filter(value => value.gender == 'Male' || value.gender == 'Both');
+      data = data.filter(value => value.genders == 'Male' || value.genders == 'Both');
     }
     if(!isMale && isFemale){
-      data = data.filter(value => value.gender == 'Female' || value.gender == 'Both');
+      data = data.filter(value => value.genders == 'Female' || value.genders == 'Both');
     }
 
     // filter by price
     const maxPrice = this.form.get('maxPrice')!.value;
     const minPrice = this.form.get('minPrice')!.value;
 
-    data = data.filter(value => {
-      let lowerPrice = value.stock[value.colors[0]].retailerPrice;
-      lowerPrice = lowerPrice - ((value.discount * lowerPrice) / 100);
-      let higherPrice = value.stock[value.colors[value.colors.length - 1]].retailerPrice;
-      higherPrice = higherPrice - ((value.discount * higherPrice) / 100);
-      let lowestPriceResult = lowerPrice >= minPrice && lowerPrice <= maxPrice
-      let highestPriceResult = higherPrice >= minPrice && higherPrice <= maxPrice
-      return lowestPriceResult || highestPriceResult
+    data = data.filter(product => {
+      // check if any variant price is in the range
+      let hasPriceInRange = false;
+      product.variants.forEach(variant => {
+        const price = variant.price;
+        if (price >= minPrice && price <= maxPrice) {
+          hasPriceInRange = true;
+        }
+      });
+      return hasPriceInRange;
     });
     this.filteredProducts = data;
     this.applySorting();
     this.maxPage = Math.ceil(this.filteredProducts.length / this.itemsPerPage);
   }
 
-  getFirstColorPrice(a: ProductItem) {
-    return a.stock[a.colors[0]].retailerPrice;
+  getFirstColorPrice(a: Product) {
+    return a.variants[0].price;
   }
 
   applySorting() {
@@ -149,18 +155,21 @@ export class ProductsComponent implements OnInit {
       this.filteredProducts = this.sortByDate(this.filteredProducts, 'desc');
     } else if (this.sortBy == "oldest") {
       this.filteredProducts = this.sortByDate(this.filteredProducts, 'asc');
-    } else if (this.sortBy == "popular") {
-      this.filteredProducts = this.sortByPopularity(this.filteredProducts);
     }
+    // else if (this.sortBy == "popular") {
+    //   this.filteredProducts = this.sortByPopularity(this.filteredProducts);
+    // }
   }
 
-  sortByDate(items: ProductItem[], order: 'asc' | 'desc' = 'desc'): ProductItem[] {
+  sortByDate(items: Product[], order: 'asc' | 'desc' = 'desc'): Product[] {
     return items.sort((a, b) => {
-      return order == 'asc' ? a.createdAt!.getTime() - b.createdAt!.getTime() : b.createdAt!.getTime() - a.createdAt!.getTime();
+      const a_created_at = new Date(a.createdAt).getTime()
+      const b_created_at = new Date(b.createdAt).getTime()
+        return order == 'asc' ? a_created_at - b_created_at : b_created_at - a_created_at;
     });
   }
 
-  sortByPrice(items: ProductItem[]): ProductItem[] {
+  sortByPrice(items: Product[]): Product[] {
     return items.sort((a, b) => {
       const itemAPrice = this.getFirstColorPrice(a);
       const itemBPrice = this.getFirstColorPrice(b);
@@ -182,10 +191,11 @@ export class ProductsComponent implements OnInit {
   }
 
   // sort the products based on the views
-  sortByPopularity(item: ProductItem[]) {
-    return item.sort((a, b) => {
-      return b.views - a.views;
-    })
+  sortByPopularity(item: Product[]) {
+    return item
+    // return item.sort((a, b) => {
+    //   return b.views - a.views;
+    // })
   }
 
   ngOnInit(): void {

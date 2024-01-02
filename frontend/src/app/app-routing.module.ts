@@ -3,7 +3,7 @@ import {ExtraOptions, PreloadAllModules, RouterModule, Routes} from '@angular/ro
 import {ClientAppContainerComponent} from "./components/client-app-container/client-app-container.component";
 import {AdminAppContainerComponent} from "./components/admin-app-container/admin-app-container.component";
 import {ReflectionAuthGuard} from "./Guards/reflection-auth.guard";
-
+import {PageNotFoundComponent} from "./components/page_not_found/page_not_found.component";
 const routerConfig: ExtraOptions = {
   preloadingStrategy       : PreloadAllModules,
   scrollPositionRestoration: 'enabled'
@@ -11,45 +11,6 @@ const routerConfig: ExtraOptions = {
 
 
 const routes: Routes = [
-
-  // Redirect empty path to '/example'
-  // {path: '', pathMatch: 'full', redirectTo: 'home'},
-  // {path: 'signed-in-redirect', pathMatch: 'full', redirectTo: 'home'},
-
-  // Auth routes for guests
-  // {
-  //     path: '',
-  //     canActivate: [NoAuthGuard],
-  //     canActivateChild: [NoAuthGuard],
-  //     component: LayoutComponent,
-  //     data: {
-  //         layout: 'modern'
-  //     },
-  //     children: [
-  // eslint-disable-next-line max-len
-  //         {path: 'confirmation-req./uired', loadChildren: () => import('app/modules/auth/confirmation-req./uired/confirmation-req./uired.module').then(m => m.AuthConfirmationReq./uiredModule)},
-  //         {path: 'forgot-password', loadChildren: () => import('app/modules/auth/forgot-password/forgot-password.module').then(m => m.AuthForgotPasswordModule)},
-  //         {path: 'reset-password', loadChildren: () => import('app/modules/auth/reset-password/reset-password.module').then(m => m.AuthResetPasswordModule)},
-  //         {path: 'sign-in', loadChildren: () => import('app/modules/pages/sign-in/sign-in.module').then(m => m.AuthSignInModule)},
-  //         {path: 'sign-up', loadChildren: () => import('app/modules/pages/sign-up/sign-up.module').then(m => m.AuthSignUpModule)}
-  //     ]
-  // },
-
-  // Auth routes for authenticated users
-  // {
-  //     path: '',
-  //     canActivate: [AuthGuard],
-  //     canActivateChild: [AuthGuard],
-  //     component: LayoutComponent,
-  //     data: {
-  //         layout: 'empty'
-  //     },
-  //     children: [
-  //         {path: 'sign-out', loadChildren: () => import('app/modules/auth/sign-out/sign-out.module').then(m => m.AuthSignOutModule)},
-  //         {path: 'unlock-session', loadChildren: () => import('app/modules/auth/unlock-session/unlock-session.module').then(m => m.AuthUnlockSessionModule)}
-  //     ]
-  // },
-
   {
     path: '',
     component: ClientAppContainerComponent,
@@ -63,7 +24,7 @@ const routes: Routes = [
       },
     ],
   },
-  // Landing routes
+  // Admin routes
   {
     path: 'admin',
     component: AdminAppContainerComponent,
@@ -78,23 +39,11 @@ const routes: Routes = [
       },
     ],
   },
-  // Admin routes
-  // {
-  //     path       : '',
-  //     canActivate: [AuthGuard],
-  //     canActivateChild: [AuthGuard],
-  //     component  : LayoutComponent,
-  //     data:{
-  //         layout: 'modern'
-  //     },
-  //     resolve    : {
-  //         initialData: InitialDataResolver,
-  //     },
-  //     children   : [
-  //         {path: 'example', loadChildren: () => import('app/modules/admin/example/example.module').then(m => m.ExampleModule)},
-  //     ]
-  // }
-
+  // 404 page route
+  {
+    path: '**', // Catch-all route
+    component: PageNotFoundComponent,
+  },
 ];
 
 @NgModule({

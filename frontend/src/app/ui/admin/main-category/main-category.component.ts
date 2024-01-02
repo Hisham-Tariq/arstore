@@ -113,7 +113,7 @@ export class MainCategoryComponent implements AfterViewInit {
   delete() {
     // delete the main category by id
     this.subCategoryService.deleteFromMainCategory(this.itemSelectedForDelete.id);
-    this.productService.deleteFromMainCategory(this.itemSelectedForDelete.id);
+    // this.productService.deleteFromMainCategory(this.itemSelectedForDelete.id);
     this.mainCategoryService.deleteMainCategory(this.itemSelectedForDelete.id).then((_) => {
       this.showAlertOfWith('success', 'Successfully Deleted the Main Category');
       this.closeDeleteModal();

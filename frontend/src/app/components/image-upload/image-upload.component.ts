@@ -14,6 +14,7 @@ export class ImageUploadComponent implements OnInit {
   imageHovered: boolean = false;
   id!: string;
   currentFile: File | null;
+  fileName: string = '';
 
   onMouseOverImage() {
     if (!this.imageHovered) {
@@ -44,6 +45,7 @@ export class ImageUploadComponent implements OnInit {
 
   onFileChanged(event: any) {
     const files: File[] = event.target!.files;
+    this.fileName = files[0].name;
     this.onImageChange.emit(files[0]);
     if (files.length === 0)
       return;
@@ -67,6 +69,7 @@ export class ImageUploadComponent implements OnInit {
     }
 
     if (file == null) return;
+    this.fileName = file.name;
     this.onImageChange.emit(file);
     const reader = new FileReader();
     reader.readAsDataURL(file);

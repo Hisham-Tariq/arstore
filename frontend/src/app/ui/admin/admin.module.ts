@@ -29,7 +29,7 @@ import {CdkScrollableModule} from "@angular/cdk/scrolling";
 import {MatChipsModule} from "@angular/material/chips";
 import {NgSelectModule} from "@ng-select/ng-select";
 import {ComponentsModule} from "../../components/components.module";
-import {VirtualScrollerModule} from "ngx-virtual-scroller";
+import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {EventsComponent} from './events/events.component';
 import {UpdateEventDialogComponent} from './events/update-event-dialog/update-event-dialog.component';
 import {CustomersComponent} from './customers/customers.component';

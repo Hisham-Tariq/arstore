@@ -1,7 +1,7 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {MatDrawer} from '@angular/material/sidenav';
 import {Router} from '@angular/router';
-import {ProductInterface} from "../../interfaces";
+import {Product} from "../../interfaces";
 import {SubscriberService} from "../../services/Subscribers/subscriber.service";
 
 @Component({
@@ -11,7 +11,7 @@ import {SubscriberService} from "../../services/Subscribers/subscriber.service";
 })
 export class ClientAppContainerComponent implements OnInit {
   navigationDrawer!: MatDrawer;
-  cartProducts!: ProductInterface[];
+  cartProducts!: Product[];
 
   constructor(private _router: Router) {
     this.cartProducts = [];

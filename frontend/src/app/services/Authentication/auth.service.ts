@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
-import { ReflectionSplashScreenService } from '../splash-screen';
-import { ReflectionUser } from '../../interfaces';
-import { Router } from '@angular/router';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
-import { ApiService } from '../ApiBaseService/api.service';
+import {Injectable} from '@angular/core';
+import {ReflectionSplashScreenService} from '../splash-screen';
+import {ReflectionUser} from '../../interfaces';
+import {Router} from '@angular/router';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {map, tap, catchError} from 'rxjs/operators';
+import {ApiService} from '../ApiBaseService/api.service';
 
 interface AuthResponse {
   user: ReflectionUser;
@@ -22,7 +22,8 @@ export class AuthService {
 
   constructor(
     private apiService: ApiService,
-    private splashService: ReflectionSplashScreenService
+    private splashService: ReflectionSplashScreenService,
+    private router: Router,
   ) {
     // get the current user record if status code is 200 user is logged in else not
     this.apiService.get<ReflectionUser>('users/me')
@@ -35,9 +36,9 @@ export class AuthService {
           this.handleAuthentication(authResponse);
         },
       ).catch((err) => {
-        this.isAuthenticatedSubject.next(false);
-        this.authStateSubject.next(null);
-        this.handleError(err)
+      this.isAuthenticatedSubject.next(false);
+      this.authStateSubject.next(null);
+      this.handleError(err)
     })
     this.updateAuthState();
   }
@@ -68,7 +69,7 @@ export class AuthService {
     return this.isAuthenticatedSubject.asObservable();
   }
 
-  getUser(): any {
+  getUser(): ReflectionUser | null {
     return this.authStateSubject.getValue();
   }
 
@@ -76,10 +77,12 @@ export class AuthService {
     localStorage.removeItem('token');
     this.isAuthenticatedSubject.next(false);
     this.authStateSubject.next(null);
+    //   navigate to home page
+    this.router.navigate(['/']);
   }
 
   private handleAuthentication(response: AuthResponse): void {
-    const { user, token } = response;
+    const {user, token} = response;
     if (user && token) {
       localStorage.setItem('token', token);
       this.isAuthenticatedSubject.next(true);

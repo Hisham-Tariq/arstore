@@ -4,8 +4,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTable, MatTableDataSource} from '@angular/material/table';
 import {MatDialog} from "@angular/material/dialog";
 import {Router} from "@angular/router";
-import {OrderService} from "../../../services/order/order.service";
-import {IOrder} from "../../../interfaces/i-order";
+import {Order, OrderService} from "../../../services/order/order.service";
 
 @Component({
   selector: 'app-orders',
@@ -16,21 +15,21 @@ export class OrdersComponent implements AfterViewInit {
   @ViewChild('statusChangeModal') statusChangeModal: any;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatTable) table!: MatTable<IOrder>;
+  @ViewChild(MatTable) table!: MatTable<Order>;
   fromDate: any;
   toDate: any;
   _fromDate: Date = new Date((new Date()).setFullYear((new Date()).getFullYear() - 20));
   _toDate: Date = new Date();
-  data!: MatTableDataSource<IOrder>;
+  data!: MatTableDataSource<Order>;
   searchKey: string = "";
-  allOrders: IOrder[] = [];
+  allOrders: Order[] = [];
 
 
   /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
   displayedColumns = ['orderId', 'name', 'phone', 'odate', 'ddate', 'status', 'bill', 'actions'];
   selectedFilteredOrderStatus: string = "all";
   isAskingForConfirmation: boolean = false;
-  private selectedOrder: IOrder;
+  private selectedOrder: Order;
 
 
   constructor(
@@ -38,11 +37,11 @@ export class OrdersComponent implements AfterViewInit {
     private _router: Router,
     private orderService: OrderService,
   ) {
-    this.data = new MatTableDataSource<IOrder>();
-    this.orderService.observableOrders.subscribe(orders => {
+    this.data = new MatTableDataSource<Order>();
+    this.orderService.getOrders().then(orders => {
       this.data.data = orders;
-      this.allOrders = orders;
-    });
+      this.allOrders = orders
+    })
   }
 
   ngAfterViewInit(): void {
@@ -64,7 +63,7 @@ export class OrdersComponent implements AfterViewInit {
     }
     // filter by _fromDate and _toDate
     data = data.filter(order => {
-      let orderDate = new Date(order.date.seconds * 1000);
+      let orderDate = new Date(order.createdAt);
       return orderDate.getTime() >= this._fromDate.getTime() && orderDate.getTime() <= this._toDate.getTime()
     });
     this.data.data = data;
@@ -91,7 +90,7 @@ export class OrdersComponent implements AfterViewInit {
     this.applyFilter()
   }
 
-  confirmForDelivery(order: IOrder) {
+  confirmForDelivery(order: Order) {
     this.selectedOrder = order;
     this.statusChangeModal.nativeElement.classList.toggle('hidden');
     this.isAskingForConfirmation = true;
@@ -105,7 +104,7 @@ export class OrdersComponent implements AfterViewInit {
   }
 
   updateStatus() {
-    this.orderService.updateOrderStatus(this.selectedOrder, "delivered").then(() => {
+    this.orderService.updateOrderStatus(this.selectedOrder.id,  "delivered").then(() => {
       this.closeConfirmationModal();
     });
   }

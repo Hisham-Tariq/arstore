@@ -42,15 +42,11 @@ export const navItems: NavItem[] = [
     link: "about-us",
     icon: "reflection:aboutus",
     type: "basic",
-  }, {
-    title: "Contact Us",
-    link: "contact-us",
-    icon: "reflection:contactus",
-    type: "basic",
-  }, {
-    title: "How I Look",
-    link: "how-i-look",
-    icon: "reflection:howilook",
-    type: "basic",
   },
+  // {
+  //   title: "Contact Us",
+  //   link: "contact-us",
+  //   icon: "reflection:contactus",
+  //   type: "basic",
+  // },
 ];

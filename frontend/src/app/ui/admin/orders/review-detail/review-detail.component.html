@@ -2,11 +2,11 @@
   <div class="row font-extrabold text-5xl tracking-wide items-center justify-center">
     <span>Customer Review's</span>
   </div>
-  {{reviews.length}}
-  <div *ngIf="reviews.length == 0" class="max-w-screen-xl mt-10">
+  {{ratings.length}}
+  <div *ngIf="ratings.length == 0" class="max-w-screen-xl mt-10">
     <h1 class="text-center font-medium text-lg">There are no reviews for this item yet</h1>
   </div>
-  <div *ngIf="reviews.length != 0" class="max-w-screen-xl mt-10">
+  <div *ngIf="ratings.length != 0" class="max-w-screen-xl mt-10">
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
 
       <!-- reviews - start -->
@@ -17,19 +17,19 @@
 
         <div class="divide-y">
           <!-- review - start -->
-          <div *ngFor="let review of reviews" class="flex flex-col gap-3 py-4 md:py-8">
+          <div *ngFor="let rating of ratings" class="flex flex-col gap-3 py-4 md:py-8">
             <div>
-              <span class="block text-sm font-bold">{{review.userName}}</span>
-              <span class="block text-gray-500 text-sm">{{review.createdAt.seconds * 1000 | date:'fullDate'}}</span>
+              <span class="block text-sm font-bold">{{rating.reviews[0].userName}}</span>
+              <span class="block text-gray-500 text-sm">{{rating.reviews[0].createdAt | date:'fullDate'}}</span>
             </div>
 
             <!-- stars - start -->
             <div class="flex gap-0.5 -ml-1">
-              <i class="fa-solid fa-star text-primary" *ngFor="let i of range(0, review.rating)"></i>
-              <i class="fa-regular fa-star" *ngFor="let i of range(review.rating, 5)"></i>
+              <i class="fa-solid fa-star text-primary" *ngFor="let i of range(0, rating.reviews[0].stars)"></i>
+              <i class="fa-regular fa-star" *ngFor="let i of range(rating.reviews[0].stars, 5)"></i>
             </div>
             <!-- stars - end -->
-            <p class="text-gray-600">{{review.comment}}</p>
+            <p class="text-gray-600">{{rating.reviews[0].comment}}</p>
           </div>
           <!-- review - end -->
 

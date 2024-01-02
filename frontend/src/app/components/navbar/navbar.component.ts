@@ -7,10 +7,10 @@ import {ReflectionDrawerComponent} from "../drawer";
 import {Router} from "@angular/router";
 import {AuthService} from "src/app/services/Authentication/auth.service";
 import {AuthSignInComponent} from "../../ui/modals/sign-in/sign-in.component";
-import {CartService} from "../../services/Cart/cart.service";
-import {ICartItemWithDetails} from "../../interfaces/i-cart-item";
+import {CartItem, CartService} from "../../services/Cart/cart.service";
 import {GlobalService} from "../../services/global/global.service";
 import {SearchPaletteComponent} from "../../ui/modals/search-palette/search-palette.component";
+import {Product} from "../../interfaces";
 
 @Component({
   selector: 'app-navbar',
@@ -23,12 +23,12 @@ export class NavbarComponent implements OnInit, AfterViewInit {
   navigations!: NavItem[];
   activeItem?: NavItem;
   isHomePage: boolean = false;
-  cartProducts!: ICartItemWithDetails[];
+  cartProducts: CartItem[] = [];
   cartTotal: number = 0;
   totalCartPrice: number = 0;
   isCartOpen: boolean = false;
-  isUserLoggedIn :boolean = false;
-  isUserAdmin :boolean = false;
+  isUserLoggedIn: boolean = false;
+  isUserAdmin: boolean = false;
   isCartProductsValid: boolean = false;
   currentUserName: string = "";
   headerOffset: number = 0;
@@ -44,8 +44,8 @@ export class NavbarComponent implements OnInit, AfterViewInit {
     this.globalService.currentCartDrawerState().subscribe(state => {
       this.isCartOpen = state;
     });
-    this.cartService.observableDataWithDetails.subscribe(data => {
-      this.cartProducts = data;
+    this.cartService.data.subscribe(data => {
+      this.cartProducts = data?.items ?? [];
     });
     this.cartService.totalCartPrice().subscribe(data => {
       this.totalCartPrice = data;
@@ -62,7 +62,7 @@ export class NavbarComponent implements OnInit, AfterViewInit {
     // TODO: Firebase
     this.authService.isAuthenticated().subscribe(authenticated => {
       this.isUserLoggedIn = authenticated
-      if(this.isUserLoggedIn){
+      if (this.isUserLoggedIn) {
         console.log("User is logged in");
         this.authService.authState$.subscribe(user => {
           this.currentUserName = user?.firstName!;
@@ -82,13 +82,20 @@ export class NavbarComponent implements OnInit, AfterViewInit {
   }
 
 
+  findVariant(p: Product, variantName: string) {
+    return p.variants.find(value => value.name === variantName)!
+  }
+
   isAllCartItemsStateValid(): boolean {
-    for(let product of this.cartProducts){
-      if(product.status != "active"){
+    for (let cartItem of this.cartProducts) {
+      const currentVariant = this.findVariant(cartItem.product, cartItem.variantName);
+      if (cartItem.product.status != "active") {
         return false;
-      } else if(product.inStockQuantity <= 0){
+      } else if (
+        currentVariant.stock <= 0
+      ) {
         return false;
-      } else if(product.inStockQuantity > 0 && product.quantity > product.inStockQuantity){
+      } else if (currentVariant.stock > 0 && cartItem.quantity > currentVariant.stock) {
         return false;
       }
     }
@@ -98,6 +105,7 @@ export class NavbarComponent implements OnInit, AfterViewInit {
   openSignInDialog(): void {
     this.dialog.open(AuthSignInComponent);
   }
+
   openSignUpDialog(): void {
     this.dialog.open(AuthSignUpComponent);
   }
@@ -106,6 +114,7 @@ export class NavbarComponent implements OnInit, AfterViewInit {
   openSearchDialog(): void {
     this.dialog.open(SearchPaletteComponent);
   }
+
   onCheckoutClicked(cartDrawer: ReflectionDrawerComponent): void {
     cartDrawer.close();
     this._router.navigateByUrl('check-out');
@@ -148,7 +157,7 @@ export class NavbarComponent implements OnInit, AfterViewInit {
   @HostListener('window:scroll', ['$event']) // for window scroll events
   onScroll(event: any) {
     if (window.pageYOffset > this.headerOffset) {
-      if(this.isHomePage){
+      if (this.isHomePage) {
         this.myHeader.nativeElement.classList.add('bg-black');
         this.myHeader.nativeElement.classList.add('bg-opacity-100');
         this.myHeader.nativeElement.classList.remove('bg-opacity-10');
@@ -156,7 +165,7 @@ export class NavbarComponent implements OnInit, AfterViewInit {
       }
       this.myHeader.nativeElement.classList.add('sticky-header');
     } else {
-      if(this.isHomePage){
+      if (this.isHomePage) {
         this.myHeader.nativeElement.classList.remove('bg-black');
         this.myHeader.nativeElement.classList.remove('bg-opacity-100');
         this.myHeader.nativeElement.classList.add('bg-opacity-10');

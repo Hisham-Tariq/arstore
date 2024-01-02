@@ -120,7 +120,7 @@
                   <i class="fa-solid fa-star-half-stroke text-primary"></i>
                 </ng-template>
               </bar-rating>
-              <span class="text-gray-900">({{product?.ratedBy || 0}})</span>
+              <span class="text-gray-900">({{product?.rating.totalReviews || 0}})</span>
             </div>
             <p class="sr-only">{{getAverageRating()}} out of 5 stars</p>
           </div>
@@ -198,8 +198,8 @@
   </div>
 
   <app-top-products></app-top-products>
-  <div *ngIf="currentProductId != null">
-    <app-review-section [productId]="currentProductId!"></app-review-section>
+  <div *ngIf="product">
+    <app-review-section [product]="product" message="sdkjfsdjfsjdhfj"></app-review-section>
   </div>
 </div>
 

@@ -4,7 +4,7 @@ import {ReflectionAlertType} from "../../../../components/alert";
 import {MAT_DIALOG_DATA} from "@angular/material/dialog";
 import {ManageEventService} from "../../../../services/ManageEvent/manage-event.service";
 import {reflectionAnimations} from "../../../../animations";
-import {ProductInterface} from "../../../../interfaces";
+import {Product} from "../../../../interfaces";
 import {ProductService} from "../../../../services/Product/product.service";
 import {map} from "rxjs/operators";
 
@@ -21,7 +21,7 @@ export class UpdateEventDialogComponent implements OnInit {
     message: 'Successfully Added the event',
   };
   showAlert: boolean = false;
-  products: ProductInterface[] = [];
+  products: Product[] = [];
   form!: FormGroup;
   isUpdating: boolean = false;
   oldProducts: string[] = [];
@@ -40,16 +40,16 @@ export class UpdateEventDialogComponent implements OnInit {
       products: [null, Validators.required],
       validUpTo: [eventData.validUpTo, Validators.required],
     });
-    this.productService.data.pipe(map(value => {
-      // return all who have no discount or in the same event
-      return value.filter(product => {
-        return product.discount === 0 || product.eventId === eventData.id;
-      });
-      // return value.filter(product => product.discount === 0  || product.eventId == eventData.id);
-    })).subscribe(data => {
-      this.products = data;
-      this.product?.setValue(eventData.products);
-    });
+    // this.productService.data.pipe(map(value => {
+    //   // return all who have no discount or in the same event
+    //   return value.filter(product => {
+    //     return product.discount === 0 || product.eventId === eventData.id;
+    //   });
+    //   // return value.filter(product => product.discount === 0  || product.eventId == eventData.id);
+    // })).subscribe(data => {
+    //   this.products = data;
+    //   this.product?.setValue(eventData.products);
+    // });
   }
 
   get name() {

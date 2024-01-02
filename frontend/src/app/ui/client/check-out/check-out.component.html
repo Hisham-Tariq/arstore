@@ -272,7 +272,7 @@
           <h3 class="sr-only">Items in your cart</h3>
           <ul role="list" class="divide-y divide-gray-200">
             <li *ngFor="let item of this.cartProducts">
-              <app-item-card [product]="item"></app-item-card>
+              <app-item-card [cartItem]="item"></app-item-card>
             </li>
 
             <!-- More products... -->

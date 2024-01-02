@@ -31,30 +31,30 @@ export class ManageEventService {
   }
 
   async add(item: IEvents): Promise<void>{
-    this.sendEventMailToSubscribers(item);
-    let subscription = this.userService.getUsers().then(users => {
-      console.log(users);
-      users.forEach(user => {
-        if(user.type != 'admin') {
-          let notification = <INotification>{
-            title: item.name,
-            message: `A new event has been started with ${item.discount}% discount`,
-            type: 'event',
-          };
-          this.notificationService.add(notification, user.id);
-        }
-      })
-    })
-    this.productService.addProductsToEvent(item);
+    // this.sendEventMailToSubscribers(item);
+    // let subscription = this.userService.getUsers().then(users => {
+    //   console.log(users);
+    //   users.forEach(user => {
+    //     if(user.type != 'admin') {
+    //       let notification = <INotification>{
+    //         title: item.name,
+    //         message: `A new event has been started with ${item.discount}% discount`,
+    //         type: 'event',
+    //       };
+    //       this.notificationService.add(notification, user.id);
+    //     }
+    //   })
+    // })
+    // this.productService.addProductsToEvent(item);
   }
   getAll(): Observable<IEvents[]> {
     return this.data;
   }
   async delete(item: IEvents): Promise<any>{
-    this.productService.removeFromEvents(item.products);
+    // this.productService.removeFromEvents(item.products);
   }
   async update(item: IEvents, removeProducts: string[]): Promise<any> {
-    this.productService.removeFromEvents(removeProducts)
+    // this.productService.removeFromEvents(removeProducts)
   }
 
   async sendEventMailToSubscribers(item: IEvents){

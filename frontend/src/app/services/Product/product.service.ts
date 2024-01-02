@@ -1,20 +1,19 @@
 import {Injectable} from '@angular/core';
-import {Observable, of, Subscription, zip} from "rxjs";
-import {ProductInterface, ProductItem, ProductStatus} from "src/app/interfaces";
+import {BehaviorSubject} from "rxjs";
+import {Product, Variant} from "src/app/interfaces";
 import {StockService} from "../Stock/stock.service";
-import {map, take} from "rxjs/operators";
 import {MainCategoryService} from "../MainCategory/main-category.service";
 import {SubCategoryService} from "../SubCategory/sub-category.service";
-import {randomId} from "../../utils";
-import {IEvents} from "../../interfaces/IEvents";
+import {ApiService} from "../ApiBaseService/api.service";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-  data: Observable<ProductInterface[]> = of([]);
-  currentProduct: ProductInterface | undefined;
-  currentProductSubscription: Subscription;
+  private endpoint = 'products';
+  productsSubject = new BehaviorSubject<Product[]>([]);
+  data = this.productsSubject.asObservable();
+
   // queue of product images to upload
 
 
@@ -22,221 +21,153 @@ export class ProductService {
     private stockService: StockService,
     private mainCategoryService: MainCategoryService,
     private subCategoryService: SubCategoryService,
+    private apiService: ApiService
   ) {
-    this.getAll();
+    this.getProducts()
   }
 
-  add(item: ProductInterface, id: string): Promise<void> {
-    // this.currentProductSubscription = docSnapshots(itemDoc).subscribe(snapshot => this.currentProduct = snapshot.data());
-    return Promise.resolve();
-  }
-
-  getAll(): Observable<ProductInterface[]> {
-    return this.data;
-  }
-
-  get getAllProductsDetails(): Observable<ProductItem[]> {
-    return of([]);
-    return zip(this.data, this.stockService.observableData, this.mainCategoryService.data, this.subCategoryService.data).pipe(map(([p, s, m, sc]) => {
-      let products: ProductItem[] = [];
-      if (p.length > 0 && s.length > 0) {
-        p.forEach(product => {
-          const mainCategory = m.find((value) => value.id == product.mainCategory)!;
-          const subCategory = sc.find((value) => value.id == product.subCategory)!;
-          let item: ProductItem = {
-            ...product,
-            stock: {},
-            thumbnail: "",
-            mainCategoryDetail: mainCategory,
-            subCategoryDetail: subCategory,
-          };
-          // run through all stocks and find the one that matches the product
-          s.forEach(stock => {
-            if (stock.product === product.id) {
-              stock.discountPrice -= stock.discountPrice * (product.discount / 100);
-              item.stock[stock.color] = stock;
-            }
-          });
-            let stockColors = Object.keys(item.stock);
-            for(let color of stockColors){
-              if(!item.colors.includes(color)){
-                delete item.stock[color];
-              }
-            }
-          // now sort the colors by checking which stock[color] have lowest price
-          item.colors = Object.keys(item.stock).sort((a, b) => {
-            return item.stock[a].retailerPrice - item.stock[b].retailerPrice;
-          });
-          if (Object.keys(item.stock).length > 0) {
-            item.thumbnail = this.getFirstColorsThumbnail(item);
-            products.push(item);
-          }
-        });
-      }
-      return products;
-    }))
-
-  }
-
-  async delete(product: ProductInterface): Promise<any> {
-    const imageNames = ['left', 'right', 'thumbnail', 'model'];
-    // await deleteDoc(doc(this.collectionReference, product.id));
-    // access each color in the product
-    for (let color of product.colors) {
-      // access each image in the color
-      for (const imageName of imageNames) {
-        // deleteObject(ref(getStorage(), `Products/${product.id}/${color}/${imageName}`));
-      }
-    }
-    return;
-  }
-
-  update(item: Partial<ProductInterface>, deleteColors:string[]): Promise<any> {
-    let images : any = {};
-    for(let color of item.colors!) {
-      images[color] = {
-        left: item.images![color]['left'],
-        right: item.images![color]['right'],
-        thumbnail: item.images![color]['thumbnail'],
-        model: item.images![color]['model'],
-      }
-    }
-    for(let color of deleteColors){
-      // images[color] = deleteField();
-    }
-    let updateData = {
-      subCategory: item.subCategory,
-      colors: item.colors?.join(','),
-      mainCategory: item.mainCategory,
-      name: item.name,
-      description: item.description,
-      gender: item.gender,
-      ...images,
-    }
-    if(item.status == 'dependent inactive'){
-      updateData.status = 'active';
-    }
-    return Promise.resolve();
-    // return updateDoc(doc(this.collectionReference, item.id), {
-    //   ...updateData
-    // });
-  }
-
-  // uploadImage(ProductImage: File | ArrayBuffer, productId: string, color: string, name: string): Observable<any> {
-  //   const storageRef = ref(getStorage(), `Products/${productId}/${color}/${randomId()}`);
-  //   const uploadTask = uploadBytesResumable(storageRef, ProductImage);
-  //   return fromTask(uploadTask);
-  // }
-
-  clearCurrentProduct() {
-    this.currentProductSubscription.unsubscribe();
-    this.currentProduct = undefined;
-  }
-
-  addImagesUrls(productImagesDownloadUrls: {}, productId: string) {
-
-  }
-
-  getFirstColorsThumbnail(product: any) {
-    if(product.colors.length == 0) return;
-    return product.images[product.colors[0] as keyof ProductInterface['images']]['thumbnail'];
-  }
-
-  getFirstColorsStockPrice(product: ProductInterface) {
-    return product.images[product.colors[0] as keyof ProductInterface['images']]['thumbnail'];
-  }
-
-  getProductById(productId: string): Promise<any> {
-    return Promise.resolve();
-  }
-
-  get allProductsOrderByDate(): Observable<ProductItem[]> {
-    // sort by date
-    return this.getAllProductsDetails.pipe(map(products => {
-      return products.sort((a, b) => {
-        return a.createdAt!.getSeconds() - b.createdAt!.getSeconds();
-      });
-    }));
-  }
-
-  get getPopularProducts() {
-    return this.getAllProductsDetails.pipe(map(products => {
-      return products.sort((a, b) => {
-        return a.views - b.views;
-      });
-    }));
-  }
-
-  get getMostSoldProducts() {
-    return this.getAllProductsDetails.pipe(map(products => {
-      return products.sort((a, b) => {
-        // Reduce the stock soldQuantity of each color to a single number
-        let aSoldQuantity = 0;
-        let bSoldQuantity = 0;
-        for (let color of a.colors) aSoldQuantity += a.stock[color].soldQuantity;
-        for (let color of b.colors) bSoldQuantity += b.stock[color].soldQuantity;
-        return aSoldQuantity - bSoldQuantity;
-      });
-    }));
-  }
-
-
-  incrementProductView(productId: string) {
-  }
-
-  updateProductRating(id: string, rating: number): Promise<void> {
-    return Promise.resolve();
-  }
-
-  updateProductStatus(id: string, status: ProductStatus, item: any = {}): Promise<void> {
-    return Promise.resolve()
-  }
-
-  deleteFromMainCategory(mainCategoryId: string) {
-    // collectionData(query(this.collectionReference, where('mainCategory', '==', mainCategoryId)))
-    //   .subscribe(data => {
-    //     data.forEach(item => {
-    //       this.updateProductStatus(item.id!, 'dependent inactive', {
-    //         mainCategory: '',
-    //         subCategory: '',
-    //       });
-    //     });
-    //   });
-  }
-
-
-  deleteFromSubCategory(subCategoryId: string) {
-    // collectionData(query(this.collectionReference, where('subCategory', '==', subCategoryId)))
-    //   .subscribe(data => {
-    //     data.forEach(item => {
-    //       this.updateProductStatus(item.id!, 'dependent inactive', {
-    //         subCategory: '',
-    //       });
-    //     });
-    //   });
-  }
-  private setProductDiscount(productId: string, eventId: string, discount:number){
-    // let productDoc = doc(this.collectionReference, productId);
-    // return updateDoc(productDoc, {discount: discount, eventId: eventId});
-  }
-  addProductsToEvent(item: IEvents) {
-    this.data.pipe(take(1)).subscribe(value => {
-      value.forEach(product => {
-        if (item.products.includes(product.id!)) {
-          this.setProductDiscount(product.id!, item.id!, item.discount);
+  async createProduct(productData: CreateProductData): Promise<Product> {
+    const variantsImages: VariantImages[] = [];
+    productData.variants = productData.variants.map((variant) => {
+      // add the variant name to the images object
+      // @ts-ignore
+      const a = <VariantImages>{
+        name: variant.name,
+        images: {
+          ...variant.images
         }
-      });
+      }
+      variantsImages.push(a)
+      variant.images = {}
+      return variant;
+    })
+    console.log(variantsImages)
+
+    const product = await this.apiService.post<Product>(this.endpoint, productData);
+    // add the product images
+    for (const variant of variantsImages){
+      for (const imageType in variant.images) {
+        const image = variant.images[imageType as keyof ProductColorImages];
+        if (image) {
+          await this.uploadProductImage(product.id, variant.name, imageType, image);
+        }
+      }
+    }
+    // for (const variantName in variantsImages) {
+    //   // @ts-ignore
+    //   const variantImages = variantsImages[variantName];
+    //
+    // }
+    this.getProducts();
+    return product;
+  }
+
+  addVariant(productId: string, variantData: AddVariantData): Promise<Product> {
+    return this.apiService.post<Product>(`${this.endpoint}/${productId}/variants`, variantData);
+  }
+
+  uploadProductImage(productId: string, variantName: string, imageType: string, file: File): Promise<{
+    message: string
+  }> {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    return this.apiService.upload(`${this.endpoint}/${productId}/variants/${variantName}/images/${imageType}`, formData);
+  }
+
+  async getProducts(): Promise<Product[]> {
+    const products = await this.apiService.get<Product[]>(this.endpoint);
+    this.productsSubject.next(products);
+    return products;
+  }
+
+  getProductById(productId: string): Promise<Product> {
+    return this.apiService.get<Product>(`${this.endpoint}/${productId}`);
+  }
+
+  async updateProduct(productId: string, productData: UpdateProductData): Promise<Product> {
+    const product = await this.apiService.put<Product>(`${this.endpoint}/${productId}`, productData);
+    const oldProducts = this.productsSubject.value;
+    const productIndex = oldProducts.findIndex((value) => value.id == productId);
+    oldProducts[productIndex] = product;
+    this.productsSubject.next(oldProducts);
+    return product;
+  }
+
+  async deleteProduct(productId: string): Promise<{ message: string }> {
+    const dp = await this.apiService.delete<{ message: string }>(`${this.endpoint}/${productId}`);
+    const oldProducts = this.productsSubject.value;
+    const productIndex = oldProducts.findIndex((value) => value.id == productId);
+    oldProducts.splice(productIndex, 1);
+    this.productsSubject.next(oldProducts);
+    return dp;
+  }
+
+  get getMostSoldProducts(): Promise<Product[]> {
+    return new Promise((resolve, reject) => {
+      resolve([]);
     });
   }
 
-  removeFromEvents(removeProducts: string[]) {
-    this.data.pipe(take(1)).subscribe(value => {
-      value.forEach(product => {
-        if (removeProducts.includes(product.id!)) {
-          this.setProductDiscount(product.id!, '', 0);
-        }
-      });
+  get allProductsOrderByDate(): Promise<Product[]> {
+    return new Promise((resolve, reject) => {
+      resolve([]);
     });
   }
+
 }
+
+
+export interface CreateProductData {
+  name: string;
+  subCategory: string;
+  description: string;
+  genders: 'Male' | 'Female' | 'Both';
+  variants: AddVariantData[];
+}
+
+
+export interface AddVariantData {
+  name: string,
+  colorCode: string,
+  price: number,
+  stock: number,
+  images: Partial<ProductColorImages>,
+}
+
+
+export interface ProductColorImages {
+  model: File | null;
+  thumbnail: File | null;
+  left: File | null;
+  right: File | null;
+}
+
+
+interface VariantImages {
+  name: string,
+  images: ProductColorImages
+}
+
+export interface UpdateVariantColorImages {
+  model: File | String | null;
+  thumbnail: File | String | null;
+  left: File | String | null;
+  right: File | String | null;
+}
+export interface UpdateVariantData {
+  name: string,
+  colorCode: string,
+  price: number,
+  stock: number,
+  images: Partial<UpdateVariantColorImages>,
+}
+export interface UpdateProductData {
+  name: string;
+  subCategory: string;
+  description: string;
+  genders: 'Male' | 'Female' | 'Both';
+  variants: UpdateVariantData[];
+}
+
 

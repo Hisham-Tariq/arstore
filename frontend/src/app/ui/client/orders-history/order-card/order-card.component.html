@@ -74,7 +74,7 @@
 'bg-white': !isOdd
 }" class=" border-t border-b border-gray-200 shadow-sm sm:rounded-lg sm:border my-4">
   <h3 class="sr-only">Order placed on
-    <time>{{order.date.seconds * 1000 | date:'fullDate'}}</time>
+    <time>{{order.createdAt | date:'fullDate'}}</time>
   </h3>
 
   <div class="flex items-center p-4 border-b border-gray-200 sm:p-6 sm:grid sm:grid-cols-4 sm:gap-x-6">
@@ -83,15 +83,15 @@
         <dt class="font-medium text-gray-900">Order number</dt>
         <dd class="mt-1 text-gray-500">{{order.id}}</dd>
       </div>
-      <div class="hidden sm:block">
+      <div class="hidden sm:block ml-4">
         <dt class="font-medium text-gray-900">Date placed</dt>
         <dd class="mt-1 text-gray-500">
-          <time>{{order.date.seconds * 1000 | date:'fullDate'}}</time>
+          <time>{{order.createdAt | date:'fullDate'}}</time>
         </dd>
       </div>
       <div>
         <dt class="font-medium text-gray-900">Total amount</dt>
-        <dd class="mt-1 font-medium text-gray-900">RS. {{order.totalPrice}}.00</dd>
+        <dd class="mt-1 font-medium text-gray-900">RS. {{order.totalAmount}}.00</dd>
       </div>
     </dl>
 
@@ -136,34 +136,34 @@
   <!-- Products -->
   <h4 class="sr-only">Items</h4>
   <ul role="list" class="divide-y divide-gray-200">
-    <li *ngFor="let product of order.products; let i = index" class="p-4 sm:p-6">
+    <li *ngFor="let orderedProduct of order.products; let i = index" class="p-4 sm:p-6">
       <div class="flex items-center sm:items-start">
         <div class="flex-shrink-0 w-20 h-20 bg-gray-200 rounded-lg overflow-hidden sm:w-40 sm:h-40">
-          <img src="{{product.thumbnail}}" alt="" class="w-full h-full object-center object-cover">
+          <img src="{{findVariant(orderedProduct.product, orderedProduct.variantName).images.thumbnail}}" alt="" class="w-full h-full object-center object-cover">
         </div>
         <div class="flex-1 ml-6 text-sm flex flex-col">
           <div>
             <div class="font-medium text-gray-900 sm:flex sm:justify-between">
-              <h5>{{product.name}}</h5>
-              <p class="mt-2 sm:mt-0">{{product.quantity}} x {{product.price}}.00</p>
+              <h5>{{orderedProduct.product.name}}</h5>
+              <p class="mt-2 sm:mt-0">{{orderedProduct.quantity}} x {{findVariant(orderedProduct.product, orderedProduct.variantName).price}}.00</p>
             </div>
             <p class="hidden text-gray-500 sm:block sm:mt-2"></p>
           </div>
           <div class="flex flex-row justify-between">
             <div class="font-medium text-gray-900 flex">
               <h5>Qty: </h5>
-              <p>{{product.quantity}}</p>
+              <p>{{orderedProduct.quantity}}</p>
             </div>
             <p class="font-medium text-gray-900 mt-2">
-              {{product.quantity * product.price}}.00
+              {{orderedProduct.quantity * findVariant(orderedProduct.product, orderedProduct.variantName).price}}.00
             </p>
           </div>
 
         </div>
       </div>
       <div class="mt-6 sm:flex sm:justify-between">
-        <div *ngIf="product.rating == 0 && order.status == 'pending'"></div>
-        <button *ngIf="product.rating == 0 && order.status == 'delivered'" (click)="openReviewModal(product)"
+        <div *ngIf="!orderedProduct.reviewed && order.status == 'pending'"></div>
+        <button *ngIf="!orderedProduct.reviewed && order.status == 'delivered'" (click)="openReviewModal(orderedProduct)"
                 class="flex items-center transition-all rounded-full p-2 bg-gray-50 cursor-pointer">
           <!-- Heroicon name: solid/check-circle -->
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
@@ -173,28 +173,28 @@
           <p class="ml-2 text-sm font-medium text-gray-500">Give Review</p>
         </button>
 
-        <div *ngIf="product.rating != 0" class="flex items-center ">
+        <div *ngIf="orderedProduct.reviewed" class="flex items-center ">
           <!-- Heroicon name: solid/check-circle -->
-          <svg style="fill: #f3cb21" class="h-5 w-5" *ngFor="let i of range(0, product.rating)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+          <svg style="fill: #f3cb21" class="h-5 w-5" *ngFor="let i of range(0, orderedProduct.stars)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
             <path
               d="M381.2 150.3L524.9 171.5C536.8 173.2 546.8 181.6 550.6 193.1C554.4 204.7 551.3 217.3 542.7 225.9L438.5 328.1L463.1 474.7C465.1 486.7 460.2 498.9 450.2 506C440.3 513.1 427.2 514 416.5 508.3L288.1 439.8L159.8 508.3C149 514 135.9 513.1 126 506C116.1 498.9 111.1 486.7 113.2 474.7L137.8 328.1L33.58 225.9C24.97 217.3 21.91 204.7 25.69 193.1C29.46 181.6 39.43 173.2 51.42 171.5L195 150.3L259.4 17.97C264.7 6.954 275.9-.0391 288.1-.0391C300.4-.0391 311.6 6.954 316.9 17.97L381.2 150.3z"/>
           </svg>
-          <svg class="h-5 w-5" *ngFor="let i of range(product.rating, 5)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+          <svg class="h-5 w-5" *ngFor="let i of range(orderedProduct.stars, 5)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
             <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
             <path
               d="M287.9 0C297.1 0 305.5 5.25 309.5 13.52L378.1 154.8L531.4 177.5C540.4 178.8 547.8 185.1 550.7 193.7C553.5 202.4 551.2 211.9 544.8 218.2L433.6 328.4L459.9 483.9C461.4 492.9 457.7 502.1 450.2 507.4C442.8 512.7 432.1 513.4 424.9 509.1L287.9 435.9L150.1 509.1C142.9 513.4 133.1 512.7 125.6 507.4C118.2 502.1 114.5 492.9 115.1 483.9L142.2 328.4L31.11 218.2C24.65 211.9 22.36 202.4 25.2 193.7C28.03 185.1 35.5 178.8 44.49 177.5L197.7 154.8L266.3 13.52C270.4 5.249 278.7 0 287.9 0L287.9 0zM287.9 78.95L235.4 187.2C231.9 194.3 225.1 199.3 217.3 200.5L98.98 217.9L184.9 303C190.4 308.5 192.9 316.4 191.6 324.1L171.4 443.7L276.6 387.5C283.7 383.7 292.2 383.7 299.2 387.5L404.4 443.7L384.2 324.1C382.9 316.4 385.5 308.5 391 303L476.9 217.9L358.6 200.5C350.7 199.3 343.9 194.3 340.5 187.2L287.9 78.95z"/>
           </svg>
-          <span class="ml-1 text-sm font-medium">{{product.rating}}</span>
+          <span class="ml-1 text-sm font-medium">{{orderedProduct.stars}}</span>
           <p class="ml-2 text-sm font-medium text-gray-500">Thanks for review</p>
         </div>
 
         <div class="mt-6 border-t border-gray-200 pt-4 flex items-center space-x-4 divide-x divide-gray-200 text-sm font-medium sm:mt-0 sm:ml-4 sm:border-none sm:pt-0">
           <div class="flex-1 flex justify-center">
-            <a (click)="onViewProduct(product.productId)" class="text-primary-600 whitespace-nowrap hover:text-amber-500 cursor-pointer">View product</a>
+            <a (click)="onViewProduct(orderedProduct.product.id)" class="text-primary-600 whitespace-nowrap hover:text-amber-500 cursor-pointer">View product</a>
           </div>
-          <div class="flex-1 pl-4 flex justify-center">
-            <a (click)="onBugAgain(i)" class="text-primary-600 whitespace-nowrap hover:text-amber-500 cursor-pointer">Buy again</a>
-          </div>
+<!--          <div class="flex-1 pl-4 flex justify-center">-->
+<!--            <a (click)="onBugAgain(i)" class="text-primary-600 whitespace-nowrap hover:text-amber-500 cursor-pointer">Buy again</a>-->
+<!--          </div>-->
         </div>
       </div>
     </li>
@@ -215,7 +215,7 @@
                 clip-rule="evenodd"/>
         </svg>
         <p class="ml-2 text-sm font-medium text-gray-500">Delivered on
-          <time>{{order.deliveryDate.seconds * 1000 | date:'medium'}}</time>
+          <time>{{order.deliveredDate | date:'medium'}}</time>
         </p>
       </div>
     </li>

@@ -1,4 +1,4 @@
-import {ProductItem} from "./product.interface";
+import {Product} from "./product.interface";
 
 export interface IEvents {
   id: string;
@@ -10,5 +10,5 @@ export interface IEvents {
 
 
 export interface IEventWithProducts extends IEvents {
-  eventProducts: ProductItem[];
+  eventProducts: Product[];
 }

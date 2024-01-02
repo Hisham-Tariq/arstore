@@ -6,7 +6,7 @@
     (drop)="onDropped($event)"
     (mouseover)="onMouseOverImage()"
     (mouseleave)="imageHovered = false"
-    alt="Uploaded Image"
+    alt="{{fileName}}"
     class="rounded-md h-full w-full">
   <div  class="bg-warn-800 p-1 flex flex-col justify-center items-center rounded-sm absolute text-white right-0 top-0 mr-2 mt-2">
     <mat-icon (click)="deleteImage()" class="cursor-pointer text-white h-5 w-5" svgIcon="heroicons_outline:trash"></mat-icon>

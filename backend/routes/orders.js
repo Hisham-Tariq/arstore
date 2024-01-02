@@ -1,135 +1,139 @@
 const express = require('express');
-const router = express();
+const router = express.Router();
+const OrderModel = require('../models/order');
+const roleAuth = require("../helpers/role-auth");
 
-const Order = require('../models/order');
-const OrderItem = require('../models/order-item');
-
-router.get('/', async (req, res) => {
-    const orderList = await Order.find()
-    .populate('user' ,'name').sort({'dateOrdered':-1})
-    .populate({ 
-        path: 'orderItems', populate: { 
-            path: 'product', populate: 'category'}
-    });
-
-    if (!orderList) {
-        res.status(500).json({ success: false })
-    }
-    res.send(orderList)
-})
-
-router.get('/:id', async (req, res) => {
-    const order = await Order.findById(req.params.id).populate('name', 'user');
-
-    if (!order) {
-        res.status(500).json({ success: false })
-    }
-    res.send(order)
-})
-
+// Create a new order
 router.post('/', async (req, res) => {
-   
-    const orderItemsIds = Promise.all(req.body.orderItems.map( async (orderItem) => {
-        let newOrderItem = new OrderItem({
-            quantity: orderItem.quantity,
-            product: orderItem.product
-        })
+    try {
+        const {userId, products} = req.body;
 
-        newOrderItem = await newOrderItem.save();
-
-        return newOrderItem._id;
-    }))
-
-    const orderItemsIdsResolved = await orderItemsIds;
-
-    const totalPrices = await Promise.all(orderItemsIdsResolved.map(async (orderItemId) => {
-        const orderItem = await OrderItem.findById(orderItemId).populate('product', 'price')
-        const totalPrice = orderItem.product.price * orderItem.quantity;
-        return totalPrice
-    }))
-
-    const totalPrice = totalPrices.reduce((a, b) => a+ b , 0 );
-
-    let order = new Order({
-        orderItems: orderItemsIdsResolved,
-        shippingAddress1: req.body.shippingAddress1,
-        shippingAddress2: req.body.shippingAddress2,
-        city: req.body.city,
-        zip: req.body.zip,
-        country: req.body.country,
-        phone: req.body.phone,
-        status: req.body.status,
-        totalPrice: totalPrice,
-        user: req.body.user,
-    })
-
-    order = await order.save();
-
-    if (!order)
-        return res.status(404).send('Order cannot be created')
-    res.send(order);
-})
-
-router.put('/:id', async (req, res) => {
-    const order = await Order.findByIdAndUpdate(req.params.id, {
-        status: req.body.status,
-    }, {
-        new: true
-    })
-
-    if (!order)
-        return res.status(404).send('Order cannot be created')
-    res.send(order);
-})
-
-router.delete('/:id', (req, res) => {
-    Order.findByIdAndRemove(req.params.id).then(async order => {
-        if (order) {
-            await order.orderItems.map(async orderItem =>{
-                await OrderItem.findByIdAndRemove(orderItem)
-            })
-            return res.status(200).json({ success: true, message: 'Order deleted successfully' })
-        } else {
-            return res.status(404).json({ success: false, message: 'Order cannot find' })
+        if (products.length === 0) {
+            return res.status(400).json({message: 'Products cannot be empty'});
         }
-    }).catch(err => {
-        return res.status(400).json({ success: false, error: err })
-    })
-})
-
-router.get('/get/count', async (req, res) => {
-    const orderCount = await Order.countDocuments((count) => count);
-    if (!orderCount) {
-        res.status(500), json({ success: false })
+        let totalAmount = 0;
+        for (const product of products) {
+            totalAmount += product.pricePerQty * product.quantity;
+        }
+        const newOrder = new OrderModel({
+            user: userId,
+            products,
+            totalAmount
+        });
+        const savedOrder = await newOrder.save();
+        res.json(savedOrder);
+    } catch (error) {
+        res.status(500).json({error: error.message});
     }
-    res.status(200).send({
-        orderCount: orderCount
-    });
-})
+});
 
-router.get('/get/totalsales', async (req, res) => {
-    const totalSales = await Order.aggregate([
-        { $group: {_id: null, totalsales:{ $sum :'$totalPrice'}}}
-    ])
-
-    if (!totalSales){
-        return res.status(400).send('the order sales cannot be generated')
+// Get all orders
+router.get('/', roleAuth(['admin']), async (req, res) => {
+    try {
+        const orders = await OrderModel.find().populate('user').populate('products.product');
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({error: error.message});
     }
-    res.send({ totalsales: totalSales.pop().totalsales})
-})
+});
 
-router.get('/get/usersorders/:userid', async (req, res) => {
-    const userOrderList = await Order.find({user: req.params.userid})
-        .populate({
-            path: 'orderItems', populate: {
-                path: 'product', populate: 'category'
-            }
-        }).sort({ 'dateOrdered': -1 });
+// Get a specific order by ID
+router.get('/:orderId', async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const order = await OrderModel.findById(orderId).populate('user').populate('products.product');
 
-    if (!userOrderList) {
-        res.status(500).json({ success: false })
+        if (!order) {
+            return res.status(404).json({message: 'Order not found'});
+        }
+
+        res.json(order);
+    } catch (error) {
+        res.status(500).json({error: error.message});
     }
-    res.send(userOrderList)
-})
+});
+
+// Update an order by ID
+router.put('/:orderId', async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const {products, totalAmount, status} = req.body;
+
+        const order = await OrderModel.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({message: 'Order not found'});
+        }
+
+        order.products = products;
+        order.totalAmount = totalAmount;
+        order.status = status;
+
+        const updatedOrder = await order.save();
+
+        res.json(updatedOrder);
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+
+
+// Update a order Status
+router.put('/:orderId/status', async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const {status} = req.body;
+        if (!status) {
+            return res.status(404).json({message: 'Status not found'});
+        }
+        const validStatus = ['pending', 'processing', 'shipped', 'delivered'];
+        if (!validStatus.includes(status)) {
+            return res.status(404).json({message: 'Invalid Status'});
+        }
+
+        const order = await OrderModel.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({message: 'Order not found'});
+        }
+        order.addStatusChangeHistory(order.status, status);
+        order.status = status;
+        order.updateDeliveryDate();
+        await order.save();
+        const updatedOrder = await OrderModel.findById(orderId).populate('user').populate('products.product');
+        res.json(updatedOrder);
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+
+// Delete an order by ID
+router.delete('/:orderId', roleAuth(['admin']), async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const order = await OrderModel.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({message: 'Order not found'});
+        }
+
+        await order.remove();
+
+        res.json({message: 'Order deleted successfully'});
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
+
+// Get all orders of a specific user
+router.get('/user/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const orders = await OrderModel.find({user: userId}).populate('user').populate('products.product');
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({error: error.message});
+    }
+});
 
 module.exports = router;

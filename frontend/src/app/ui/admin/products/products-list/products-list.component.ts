@@ -6,7 +6,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {ReflectionAlertType} from "../../../../components/alert";
 import {reflectionAnimations} from "../../../../animations";
 import {Router} from "@angular/router";
-import {MainCategoryInterface, ProductInterface, ProductStatus} from "../../../../interfaces";
+import {MainCategoryInterface, Product, ProductStatus} from "../../../../interfaces";
 import {MainCategoryService} from "../../../../services/MainCategory/main-category.service";
 import {ProductService} from "../../../../services/Product/product.service";
 
@@ -19,20 +19,20 @@ import {ProductService} from "../../../../services/Product/product.service";
 export class ProductsListComponent implements AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatTable) table!: MatTable<ProductInterface>;
+  @ViewChild(MatTable) table!: MatTable<Product>;
   alert: { type: ReflectionAlertType; message: string } = {
     type: 'success',
     message: 'Successfully Added the Product',
   };
   @ViewChild('deleteConfirmationModal') deleteConfirmationModal: any;
   isAskingForConfirmation: boolean = false;
-  currentProductToDelete: ProductInterface;
+  currentProductToDelete: Product;
 
   showAlert: boolean = false;
-  data!: MatTableDataSource<ProductInterface>;
+  data!: MatTableDataSource<Product>;
   searchKey: string = "";
   mainCategories: MainCategoryInterface[] = [];
-  allProducts: ProductInterface[] = [];
+  allProducts: Product[] = [];
 
   selectedMainCategory: string = "null";
 
@@ -71,7 +71,8 @@ export class ProductsListComponent implements AfterViewInit {
   }
 
 
-  onUpdateProduct(product: ProductInterface): void{
+  onUpdateProduct(product: Product): void{
+    console.log(product)
     this._router.navigateByUrl(`/admin/update-product/${product.id}`, {
       state: {
         product: product,
@@ -80,21 +81,21 @@ export class ProductsListComponent implements AfterViewInit {
   }
 
   applyFilter(): void{
-    let products : ProductInterface[] = this.allProducts;
+    let products : Product[] = this.allProducts;
     // filter products which are isActive
     if(this.activeFilter){
       products = products.filter(product => product.status === 'active');
     }
     if(this.selectedMainCategory != 'null'){
       // all products where mainCategory == selectedMainCategory
-      products = products.filter(product => product.mainCategory == this.selectedMainCategory);
+      products = products.filter(product => product.mainCategory.id == this.selectedMainCategory);
     }
 
     this.data.data = products;
     this.data.filter = this.searchKey.trim().toLowerCase();
   }
 
-  getProductFirstColorThumbnail(product: ProductInterface): string{
+  getProductFirstColorThumbnail(product: Product): string{
     if(product.colors.length > 0){
       // @ts-ignore
       return product.images[product.colors[0]]["thumbnail"];
@@ -104,12 +105,12 @@ export class ProductsListComponent implements AfterViewInit {
 
 
   onDeleteProduct() {
-    this.productService.delete(this.currentProductToDelete).then(() => {
+    this.productService.deleteProduct(this.currentProductToDelete.id).then(() => {
       this.applyFilter();
       console.log("deleted");
     });
   }
-  confirmForDelete(product: ProductInterface) {
+  confirmForDelete(product: Product) {
     this.currentProductToDelete = product;
     this.deleteConfirmationModal.nativeElement.classList.toggle('hidden');
     this.isAskingForConfirmation = true;
@@ -126,9 +127,9 @@ export class ProductsListComponent implements AfterViewInit {
     let status: ProductStatus;
     if(value) status = 'active';
     else status = 'inactive';
-    this.productService.updateProductStatus(product.id, status).then(() => {
-
-    });
+    // this.productService.updateProductStatus(product.id, status).then(() => {
+    //
+    // });
   }
 }
 

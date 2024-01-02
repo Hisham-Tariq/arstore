@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {IRating, IRatingWithProduct} from "../../../../interfaces/i-rating";
+import {IRating} from "../../../../interfaces/i-rating";
 import {RatingService} from "../../../../services/rating/rating.service";
 import {ActivatedRoute} from "@angular/router";
 
@@ -10,24 +10,19 @@ import {ActivatedRoute} from "@angular/router";
 })
 export class ReviewDetailComponent implements OnInit {
 
-  productReviews: IRatingWithProduct[] = [];
+  ratings: IRating[] = [];
   constructor(
     ratingService : RatingService,
     activatedRoute : ActivatedRoute,
 
   ) {
     activatedRoute.paramMap.subscribe(value => {
-      ratingService.getReviewsByOrderId(value.get("id")!).subscribe(value1 => {
-        this.productReviews = value1;
+      ratingService.getReviewsByOrderId(value.get("id")!).then(value1 => {
+        this.ratings = value1;
       })
     })
   }
 
-
-  get reviews(): IRatingWithProduct[] {
-
-    return this.productReviews;
-  }
 
   ngOnInit(): void {
   }

@@ -1,123 +1,119 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, combineLatestWith, Observable, zip} from "rxjs";
-import {StockService} from "../Stock/stock.service";
-import {ICartItem, ICartItemWithDetails} from "../../interfaces/i-cart-item";
-import {ProductService} from "../Product/product.service";
-import {map, take} from "rxjs/operators";
-import {takeRightWhile} from "lodash-es";
+import {BehaviorSubject, Observable, firstValueFrom} from "rxjs";
+import {map} from "rxjs/operators";
+import {ApiService} from "../ApiBaseService/api.service";
+import {Product} from "../../interfaces";
+import {AuthService} from "../Authentication";
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
-  observableData: Observable<ICartItem[]>;
-  data: ICartItem[];
-  observableDataWithDetails: BehaviorSubject<ICartItemWithDetails[]> = new BehaviorSubject<ICartItemWithDetails[]>([]);
-  dataWithDetails: ICartItemWithDetails[] = [];
-
+  private endpoint = 'cart';
+  cartSubject = new BehaviorSubject<Cart | null>(null);
+  data = this.cartSubject.asObservable();
 
   constructor(
-    private stockService: StockService,
-    private productService: ProductService,
+    private apiService: ApiService,
+    private authService: AuthService
   ) {
+    this.authService.authState$.subscribe(async (user) => {
+      if (user) {
+        await this.getCart();
+      } else {
+        this.cartSubject.next(null);
+      }
+    });
   }
 
-
-  initializeCartDetails(userId: string) {
-    this.getAll();
-  }
-
-  checkItemAlreadyExistsInCart(item: ICartItem) {
-    const found = this.data.find(x => x.productId === item.productId && x.stockId === item.stockId);
-    return !!found;
-  }
-
-  async add(item: ICartItem): Promise<any> {
-    if(this.checkItemAlreadyExistsInCart(item)){
-      const oldItem = this.data.find(x => x.productId === item.productId && x.stockId === item.stockId)!;
-      let itemWithDetail = this.dataWithDetails.find(x => x.productId === item.productId && x.stockId === item.stockId)!;
-      if(itemWithDetail.quantity + item.quantity > itemWithDetail.inStockQuantity){
-        return {
-          status: 400,
-          message: `You can't add more than ${itemWithDetail.inStockQuantity} items of this product already have ${itemWithDetail.quantity} items in your cart`
-        };
-      }
-      oldItem.quantity += item.quantity;
-      await this.update(oldItem);
-      return {
-        status: 200,
-        message: `Item added to cart`
-      }
-    } else {
-      return {
-        status: 200,
-        message: `Item added to cart`
-      }
+  async getCart(): Promise<Cart | null> {
+    try {
+      const user = await firstValueFrom(this.authService.authState$);
+      const cart = await this.apiService.get<Cart>(`${this.endpoint}/user/${user?._id}`);
+      this.cartSubject.next(cart);
+      return cart;
+    } catch (error) {
+      console.error('Error getting cart:', error);
+      return null;
     }
   }
 
-  getAll(): Observable<ICartItemWithDetails[]> {
-    this.productService.data.pipe(combineLatestWith(this.stockService.observableData)).pipe(combineLatestWith(this.observableData)).subscribe(([[products, stocks], cartItems]) => {
-      this.data = cartItems;
-      let itemsWithDetails: ICartItemWithDetails[] = [];
-      cartItems.forEach(item => {
-        let product = products.find(product => product.id === item.productId)!;
-        if (typeof product === 'undefined') return;
-        let stock = stocks.find(stock => stock.id === item.stockId)!;
-        if (typeof stock === 'undefined') return;
-        let totalPrice = item.quantity * stock.retailerPrice;
-        let discountedPrice = stock.retailerPrice;
-        if(product.discount != 0){
-          totalPrice -= (totalPrice * (product.discount / 100));
-          discountedPrice -= (discountedPrice * (product.discount / 100));
-        }
-        itemsWithDetails.push({
-          ...item,
-          // @ts-ignore
-          thumbnail: product.images[item.color]['thumbnail'],
-          inStockQuantity: stock.totalQuantity,
-          price: stock.retailerPrice,
-          productName: product.name,
-          totalRetailPrice: item.quantity * stock.retailerPrice,
-          totalPrice,
-          discountedPrice,
-          status: product.status,
-        });
+  async addToCart(data: AddToCartData): Promise<Cart | null> {
+    try {
+      const user = await firstValueFrom(this.authService.authState$);
+      const cart = await this.apiService.post<Cart>(`${this.endpoint}/user/${user?._id}/add`, data);
+      this.cartSubject.next(cart);
+      return cart;
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      return null;
+    }
+  }
+
+  // increment or decrement quantity
+  async updateQuantity(productId: string, variantName: string, quantity: number): Promise<Cart | null> {
+
+    try {
+      const user = await firstValueFrom(this.authService.authState$);
+      const cart = await this.apiService.post<Cart>(`${this.endpoint}/user/${user?._id}/update`, {
+        productId,
+        variantName,
+        quantity
       });
-      this.dataWithDetails = itemsWithDetails;
-      this.observableDataWithDetails.next(itemsWithDetails)
-    });
-    return this.observableDataWithDetails;
+      this.cartSubject.next(cart);
+      return cart;
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      return null;
+    }
   }
 
-
-  delete(cartItem: Partial<ICartItem>): Promise<any> {
-    return Promise.resolve([]);
+  async removeFromCart(productId: string, variantName: string): Promise<Cart | null> {
+    try {
+      const user = await firstValueFrom(this.authService.authState$);
+      const cart = await this.apiService.post<Cart>(`${this.endpoint}/user/${user?._id}/remove`, {
+        productId,
+        variantName
+      });
+      this.cartSubject.next(cart);
+      return cart;
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+      return null;
+    }
   }
 
-   update(cartItem: Partial<ICartItem>): Promise<any> {
-    return Promise.resolve([]);
+  async clearCart(): Promise<Cart | null> {
+    try {
+      const user = await firstValueFrom(this.authService.authState$);
+      const cart = await this.apiService.post<Cart>(`${this.endpoint}/user/${user?.id}/clear`, {});
+      this.cartSubject.next(cart);
+      return cart;
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+      return null;
+    }
   }
 
 
   // observable totalItems
   totalItems(): Observable<number> {
-    return this.observableDataWithDetails.pipe(map((state) =>
-      state.reduce((acc, curr) => acc + curr.quantity, 0)
-    ))
+    return this.data.pipe(map((state) => {
+      if (state == null) return 0;
+      return state!.items.reduce((acc, curr) => acc + curr.quantity, 0)
+    }))
   }
 
   // find total cart price with discount
   totalCartPrice(): Observable<number> {
-    return this.observableDataWithDetails.pipe(map((state) =>
-      state.reduce((acc, curr) => acc + curr.totalPrice, 0)
+    return this.data.pipe(map((state) => {
+        if (state == null) return 0;
+        return state!.items.reduce((acc, curr) => {
+          const price = curr.product.variants.find((v) => v.name == curr.variantName)!.price;
+          return acc + price * curr.quantity
+        }, 0)
+      }
     ))
-  }
-
-  clearCart(){
-    this.dataWithDetails.forEach(item => {
-      this.delete(item);
-    });
   }
 
 }
@@ -143,3 +139,23 @@ export class CartService {
 //     }
 //   }
 // }
+
+
+export interface CartItem {
+  product: Product;
+  variantName: string;
+  quantity: number;
+}
+
+export interface Cart {
+  _id: string;
+  userId: string;
+  items: CartItem[];
+  createdAt: Date;
+}
+
+export interface AddToCartData {
+  productId: string;
+  variantName: string;
+  quantity?: number;
+}

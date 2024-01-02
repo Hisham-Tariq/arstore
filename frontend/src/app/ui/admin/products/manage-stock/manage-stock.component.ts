@@ -2,7 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {reflectionAnimations} from "../../../../animations";
 import {ReflectionAlertType} from "../../../../components/alert";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {ProductInterface} from "../../../../interfaces";
+import {Product} from "../../../../interfaces";
 import {IStock} from "../../../../interfaces/i-stock";
 import {ProductService} from "../../../../services/Product/product.service";
 import {StockService} from "../../../../services/Stock/stock.service";
@@ -29,7 +29,7 @@ export class ManageStockComponent implements OnInit {
   existingStockId: string = "";
   itemSelectedForDelete: any | null
 
-  allProducts: ProductInterface[] = [];
+  allProducts: Product[] = [];
   allStocks: IStock[] = [];
 
   form : FormGroup

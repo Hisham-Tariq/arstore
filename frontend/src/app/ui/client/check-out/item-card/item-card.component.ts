@@ -1,6 +1,5 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
-import {ICartItemWithDetails} from "../../../../interfaces/i-cart-item";
-import {CartService} from "../../../../services/Cart/cart.service";
+import {Cart, CartItem, CartService} from "../../../../services/Cart/cart.service";
 
 @Component({
   selector: 'app-item-card',
@@ -8,7 +7,8 @@ import {CartService} from "../../../../services/Cart/cart.service";
   styleUrls: ['./item-card.component.scss']
 })
 export class ItemCardComponent implements OnInit {
-  @Input() product: ICartItemWithDetails;
+  @Input() cartItem: CartItem;
+
   @ViewChild('deleteConfirmationModal') deleteConfirmationModal: any;
   isAskingForConfirmation: boolean = false;
   constructor(
@@ -20,7 +20,7 @@ export class ItemCardComponent implements OnInit {
   }
 
   deleteFromCart() {
-    this.cartService.delete({id: this.product.id});
+    this.cartService.removeFromCart(this.cartItem.product.id, this.cartItem.variantName);
   }
 
   confirmForDelete() {
@@ -35,4 +35,11 @@ export class ItemCardComponent implements OnInit {
     }, 200);
   }
 
+  get currentVariant(){
+    return this.cartItem.product.variants.find(value => value.name === this.cartItem.variantName)!
+  }
+
+  get itemTotalPrice(){
+    return this.cartItem.quantity * this.currentVariant.price;
+  }
 }

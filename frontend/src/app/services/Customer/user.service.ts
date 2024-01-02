@@ -6,6 +6,7 @@ import { ICustomers } from '../../interfaces/i-customers';
 import { AuthService } from '../Authentication';
 import { ApiService } from '../ApiBaseService/api.service';
 import { map } from 'rxjs/operators';
+import {CartService} from "../Cart/cart.service";
 
 @Injectable({
   providedIn: 'root',

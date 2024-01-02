@@ -1,10 +1,9 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {CartService} from "../../../services/Cart/cart.service";
-import {ICartItemWithDetails} from "../../../interfaces/i-cart-item";
+import {CartService, Cart, CartItem} from "../../../services/Cart/cart.service";
 import {AuthService} from "../../../services/Authentication";
-import {OrderService} from "../../../services/order/order.service";
+import {OrderService, UserAddressInfo} from "../../../services/order/order.service";
 import {VoucherCodeService} from "../../../services/VoucherCode/voucher-code.service";
 import {VoucherCodeInterface} from "../../../interfaces/voucher-code.interface";
 
@@ -20,7 +19,7 @@ export class CheckOutComponent implements OnInit {
   form: FormGroup;
   // TODO: Find some way to fix this
   isScreenSmall: boolean = false;
-  cartProducts: ICartItemWithDetails[];
+  cartProducts: CartItem[];
   subTotalPrice: number;
   isPlacingOrder: boolean = false;
   havePlacedOrder: boolean = false;
@@ -40,13 +39,6 @@ export class CheckOutComponent implements OnInit {
     private orderService: OrderService,
     private voucherService: VoucherCodeService,
   ) {
-
-    // if (this.authService.user === null) {
-    //   this._router.navigate(['/cart']);
-    // }
-
-
-    const user = {};
     this.form = this._formBuilder.group({
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
@@ -57,11 +49,17 @@ export class CheckOutComponent implements OnInit {
       state: ['', Validators.required],
       zip: ['', Validators.required],
     });
-    this.form.patchValue(user);
+    this.authService.authState$.subscribe((user) => {
+      if (user === null) {
+        this._router.navigate(['/cart']);
+      } else {
+        this.form.patchValue(user);
+      }
+    });
 
-    this.cartService.observableDataWithDetails.subscribe(
-      (data: ICartItemWithDetails[]) => {
-        this.cartProducts = data;
+    this.cartService.data.subscribe(
+      (data) => {
+        this.cartProducts = data!.items;
       }
     );
 
@@ -135,7 +133,7 @@ export class CheckOutComponent implements OnInit {
   async checkOutOrder() {
     this.isPlacingOrder = true;
     this.checkoutModal.nativeElement.classList.remove('hidden');
-    if(typeof this.voucherCode != 'undefined' && this.voucherCode != null) {
+    if (typeof this.voucherCode != 'undefined' && this.voucherCode != null) {
       let res = await this.voucherService.checkCodeIsValid(this.voucherCode?.voucherCode!);
       if (!res.isValid) {
         this.voucherCode = null;
@@ -145,15 +143,18 @@ export class CheckOutComponent implements OnInit {
         return;
       }
     }
-    this.orderService.add({
-      ...this.form.value,
-      zipCode: this.zip?.value,
-      totalPrice: this.totalPrice,
-    }, this.cartProducts).then(
+    const data = <UserAddressInfo>{
+      phone: this.phone?.value,
+      address: this.address?.value,
+      city: this.city?.value,
+      state: this.state?.value,
+      zip: this.zip?.value,
+    }
+    this.orderService.createOrder(data).then(
       (data: any) => {
-        if (this.isVoucherCodeApplied) {
-          this.voucherService.addUserInVoucherCode(this.voucherCode!);
-        }
+        // if (this.isVoucherCodeApplied) {
+        //   this.voucherService.addUserInVoucherCode(this.voucherCode!);
+        // }
         this.isPlacingOrder = false;
         this.havePlacedOrder = true;
         // this.checkoutModal.nativeElement.classList.add('hidden');

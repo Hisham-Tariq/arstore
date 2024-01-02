@@ -26,9 +26,9 @@
             </svg>
           </div>
           <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Remove {{this.product.productName}} from cart?</h3>
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Remove {{this.cartItem.product.name}} from cart?</h3>
             <div class="mt-2">
-              <p class="text-sm text-gray-500">Are you sure you want to remove {{this.product.productName}} from cart? This action cannot be undone.</p>
+              <p class="text-sm text-gray-500">Are you sure you want to remove {{this.cartItem.product.name}} from cart? This action cannot be undone.</p>
             </div>
           </div>
         </div>
@@ -44,25 +44,24 @@
 
 <div class="flex py-6">
   <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-    <img src="{{this.product.thumbnail}}"
-         alt="{{this.product.productName}} thumbnail" class="h-full w-full object-cover object-center">
+    <img src="{{this.currentVariant.images.thumbnail}}"
+         alt="{{this.cartItem.product.name}} thumbnail" class="h-full w-full object-cover object-center">
   </div>
 
   <div class="ml-4 flex flex-1 flex-col">
     <div>
       <div class="flex justify-between text-base font-medium text-gray-900">
         <h3>
-          {{this.product.productName}}
+          {{this.cartItem.product.name}}
         </h3>
-        <p *ngIf="this.product.price == this.product.discountedPrice" class="ml-4 text-gray-700">RS. {{this.product.price}}.00</p>
-        <p *ngIf="this.product.price != this.product.discountedPrice" class="ml-4 text-gray-700 text-sm">RS.  <del>{{this.product.price}}.00</del> {{this.product.discountedPrice}}.00</p>
+        <p  class="ml-4 text-gray-700">RS. {{this.currentVariant.price}}.00</p>
       </div>
-      <p class="mt-1 text-sm text-gray-700">Total Price: RS. {{this.product.totalPrice}}.00</p>
+      <p class="mt-1 text-sm text-gray-700">Total Price: RS. {{this.currentVariant.price * this.cartItem.quantity}}.00</p>
 <!--      <p *ngIf="this.product.totalPrice == this.product.totalRetailPrice" class="mt-1 text-sm text-gray-700">Total Price: RS. {{this.product.totalPrice}}.00</p>-->
 <!--      <p *ngIf="this.product.totalPrice != this.product.totalRetailPrice" class="mt-1 text-sm text-gray-700">Total Price: <del>RS. {{this.product.totalRetailPrice}}.00</del> RS. {{this.product.totalPrice}}.00</p>-->
       <p *ngIf="this.isCartProductTotallyOutOfStock || !this.isCartProductActive" class="mt-1 text-sm text-red-700">Out of stock</p>
       <p *ngIf="this.isCartProductPartiallyOutOfStock && this.isCartProductActive" class="mt-1 text-sm text-red-700">
-        Only {{this.product.inStockQuantity}} left in stock
+        Only {{this.currentVariant.stock}} left in stock
       </p>
 <!--      <p *ngIf="!this.isCartProductActive" class="mt-1 text-sm text-red-700">-->
 <!--        Out Of Stock-->

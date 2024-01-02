@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import {ProductService} from "../../../../services/Product/product.service";
-import {ProductItem} from "../../../../interfaces";
+import {Product} from "../../../../interfaces";
 
 @Component({
   selector: 'home-new-product-carousel',
@@ -8,12 +8,12 @@ import {ProductItem} from "../../../../interfaces";
   styleUrls: ['./new-product-carousel.component.scss']
 })
 export class NewProductCarouselComponent implements OnInit {
-  products: ProductItem[]; // 10 maximum
+  products: Product[]; // 10 maximum
 
   constructor(
     private productService: ProductService
   ) {
-    this.productService.allProductsOrderByDate.subscribe(value => {
+    this.productService.allProductsOrderByDate.then(value => {
       this.products = value.filter(product => product.status == 'active').slice(0, 10);
     });
   }

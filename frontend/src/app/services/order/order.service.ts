@@ -1,107 +1,94 @@
 import {Injectable} from '@angular/core';
 
-import {IOrder, IOrderProduct, IOrderWithProducts, OrderStatus} from 'src/app/interfaces/i-order';
-import {BehaviorSubject, combineLatestWith, forkJoin, Observable, zip} from "rxjs";
-import {StockService} from "../Stock/stock.service";
-import {ProductService} from "../Product/product.service";
-import {AuthService} from "../Authentication";
-import {ICartItemWithDetails} from "../../interfaces/i-cart-item";
+import {BehaviorSubject, firstValueFrom} from "rxjs";
+import {Product, ReflectionUser} from "../../interfaces";
+import {ApiService} from "../ApiBaseService/api.service";
 import {CartService} from "../Cart/cart.service";
-import {map} from "rxjs/operators";
-import {NotificationService} from "../Notification/notification.service";
-import {INotification} from "../../interfaces/i-notification";
+import {AuthService} from "../Authentication";
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
-  observableData: BehaviorSubject<IOrderWithProducts[]>;
-  observableOrders: BehaviorSubject<IOrder[]> = new BehaviorSubject<IOrder[]>([]);
-  data: IOrderWithProducts[];
-  private allOrders: Observable<IOrder[]>;
-  private allOrderProducts: Observable<IOrderProduct[]>;
+  ordersSubject = new BehaviorSubject<Order[]>([]);
+  orders$ = this.ordersSubject.asObservable();
 
+  private endpoint = 'orders';
 
   constructor(
-    private stockService: StockService,
-    private productService: ProductService,
-    private auth: AuthService,
+    private apiService: ApiService,
     private cartService: CartService,
-    private notificationService: NotificationService
+    private authService: AuthService
   ) {
-    this.observableData = new BehaviorSubject<IOrderWithProducts[]>([]);
-    // authState(getAuth()).subscribe(user => {
-    //   if (user) {
-    //     this.getAllCurrentUserOrders();
-    //     if (this.auth.user?.type == 'admin') {
-    //       this.getAll().subscribe(orders => {
-    //         this.observableOrders.next(orders);
-    //       })
-    //     }
-    //   } else {
-    //     this.observableData.next([]);
-    //   }
-    // });
-  }
-
-
-  async add(item: Partial<IOrder>, products: ICartItemWithDetails[]): Promise<void> {
-    console.log('add order');
-    item.id = this.generateRandomOrderId();
-    // item.userId = this.auth.userId;
-    item.status = 'pending';
-    this.addProductInOrders(item.id, products);
-  }
-
-  private addProductInOrders(id: string, products: ICartItemWithDetails[]) {
-    console.log('add product in order');
-    products.forEach(async (product) => {
-      let orderProduct = <IOrderProduct>{
-        color: product.color,
-        orderId: id,
-        productId: product.productId,
-        quantity: product.quantity,
-        price: product.price,
-        thumbnail: product.thumbnail,
-        userId: '',
-        name: product.productName,
-        consumerPrice: product.price,
-      };
-
-      this.stockService.updateStockQuantity(product.stockId, product.quantity);
+    this.authService.authState$.subscribe(async (user) => {
+      if (user === null) {
+        this.ordersSubject.next([]);
+      } else {
+        if (user.type == 'admin'){
+         this.getOrders()
+        } else {
+          this.getOrdersByUserId(user.id);
+        }
+      }
     });
-    this.cartService.clearCart();
+
   }
 
+  async createOrder(userAddressInfo: UserAddressInfo): Promise<Order | void> {
+    const cart = await this.cartService.getCart()
+    if (!cart || cart.items.length == 0){
+      alert("Cart is empty")
+      return
+    }
+    const user = await firstValueFrom(this.authService.authState$)
+    if (!user){
+      alert("User is not logged in")
+      return
+    }
+    const createOrderData: CreateOrderData = {
+      userId: user.id,
+      products: cart.items.map<CreateOrderProduct>(item => {
+        return {
+          product: item.product.id,
+          quantity: item.quantity,
+          variantName: item.variantName,
+          pricePerQty: item.product.variants.find(variant => variant.name === item.variantName)!.price,
+        }
+      })
+    }
+    const order = await this.apiService.post<Order>(this.endpoint, createOrderData);
+    await this.cartService.clearCart();
+    return order;
+  }
 
-  getAllCurrentUserOrders(): Observable<IOrder[]> {
-    // const userId = this.auth.user!.id;
-    // if (this.auth.user?.type == 'admin') {
-    //   this.allOrders = collectionData(query(this.collectionReference, orderBy("date", "desc",)))
-    //   this.allOrderProducts = collectionData(this.orderProductCollection);
-    // } else {
-    //   this.allOrders = collectionData(query(this.collectionReference, where('userId', '==', userId), orderBy("date", "desc",)))
-    //   this.allOrderProducts = collectionData(query(this.orderProductCollection, where('userId', '==', userId)))
-    // }
-    // // this.allOrderProducts.subscribe(o => {console.log("sdkj sdkjfds dfjkdsmf")})
-    // // this.allOrders.pipe(combineLatestWith(this.allOrderProducts)).subscribe()
-    // this.allOrders.pipe(combineLatestWith(this.allOrderProducts)).subscribe(([orders, orderProducts]) => {
-    //   this.data = [];
-    //   orders.forEach((order) => {
-    //     let orderWithProducts = <IOrderWithProducts>{
-    //       ...order,
-    //       products: []
-    //     };
-    //     orderProducts.forEach((orderProduct) => {
-    //       if (orderProduct.orderId === order.id) {
-    //         orderWithProducts.products.push(orderProduct);
-    //       }
-    //     });
-    //     this.data.push(orderWithProducts);
-    //   });
-    //   this.observableData.next(this.data);
-    // });
-    return this.observableData;
+  async getOrders(): Promise<Order[]> {
+    const orders = await this.apiService.get<Order[]>(this.endpoint);
+    this.ordersSubject.next(orders);
+    return orders;
+  }
+
+  getOrderById(orderId: string): Promise<Order> {
+    return this.apiService.get<Order>(`${this.endpoint}/${orderId}`);
+  }
+
+  updateOrder(orderId: string, orderData: any): Promise<Order> {
+    return this.apiService.put<Order>(`${this.endpoint}/${orderId}`, orderData);
+  }
+
+  deleteOrder(orderId: string): Promise<{ message: string }> {
+    return this.apiService.delete<{ message: string }>(`${this.endpoint}/${orderId}`);
+  }
+
+  async getOrdersByUserId(userId: string): Promise<Order[]> {
+    const orders = await this.apiService.get<Order[]>(`${this.endpoint}/user/${userId}`);
+    this.ordersSubject.next(orders)
+    return orders;
+  }
+
+  async getCurrentUserOrders(): Promise<Order[]> {
+    const user = await firstValueFrom(this.authService.authState$)
+    if (!user) return []
+    return this.getOrdersByUserId(user.id!);
   }
 
 
@@ -114,44 +101,20 @@ export class OrderService {
     return "REF-" + Math.floor(Math.random() * 1000000);
   }
 
-  async updateOrderStatus(item: IOrder, status: OrderStatus): Promise<void> {
-    // await updateDoc(doc(this.collectionReference, item.id), {
-    //   status: status,
-    //   deliveryDate: serverTimestamp(),
-    // });
-    if(status == 'delivered'){
-      let notification = <INotification>{
-        type: 'order',
-        title: 'Order Delivered',
-        message: `Your order with id ${item.id} has successfully been delivered.`,
-      }
-      return this.notificationService.add(notification, item.userId);
-    }
-  }
+  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
+    // if(status == 'delivered'){
+    //   let notification = <INotification>{
+    //     type: 'order',
+    //     title: 'Order Delivered',
+    //     message: `Your order with id ${item.id} has successfully been delivered.`,
+    //   }
+    //   return this.notificationService.add(notification, item.userId);
+    // }
 
-  private getAll(): Observable<IOrder[]> {
-    // this.allOrders = collectionData(query(this.collectionReference, orderBy("date", "desc")));
-    return this.allOrders;
+    const response = await this.apiService.put<Order>(`${this.endpoint}/${orderId}/status`, {
+      status: status,
+    });
   }
-
-  async getOrderDetail(orderId: string): Promise<any> {
-    // const order = await getDoc(doc(this.collectionReference, orderId));
-    // return collectionData(query(this.orderProductCollection, where('orderId', '==', orderId))).pipe(map((orderProducts) => {
-    //   return <IOrderWithProducts><unknown>{
-    //     ...order.data(),
-    //     products: orderProducts
-    //   };
-    // }));
-    return Promise.resolve();
-  }
-
-  setProductAsReviewed(orderProductId: string, rating: number): Promise<any> {
-    // return updateDoc(doc(this.orderProductCollection, orderProductId), {
-    //   rating: rating,
-    // });
-    return Promise.resolve();
-  }
-
 }
 
 
@@ -164,4 +127,55 @@ function formatDate(date: Date) {
   const strMinutes = minutes < 10 ? '0' + minutes : minutes;
   let strTime = hours + ':' + strMinutes + ' ' + ampm;
   return (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear() + "  " + strTime;
+}
+
+
+// order.interface.ts
+type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered';
+
+export interface OrderStatusChangedHistory {
+  from: OrderStatus,
+  to: OrderStatus,
+  date: Date,
+}
+
+export interface Order {
+  id: string;
+  user: ReflectionUser;
+  products: OrderProduct[];
+  totalAmount: number;
+  status: OrderStatus;
+  createdAt: Date;
+  statusChangedHistory: OrderStatusChangedHistory[],
+  deliveredDate?: Date,
+}
+
+
+export interface OrderProduct {
+  product: Product;
+  quantity: number;
+  variantName: string;
+  reviewed: Boolean,
+  stars: number,
+}
+
+export interface CreateOrderProduct {
+  product: string,
+  quantity: number,
+  variantName: string,
+  pricePerQty: number,
+}
+
+
+export interface CreateOrderData{
+  products: CreateOrderProduct[],
+  userId: string,
+}
+
+export interface UserAddressInfo {
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
 }

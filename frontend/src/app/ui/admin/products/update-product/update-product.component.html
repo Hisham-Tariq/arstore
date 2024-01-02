@@ -9,7 +9,7 @@
                     [dismissed]="!showAlert" (dismissedChanged)="onDismissedChanged($event)"
                     [appearance]="'outline'" [showIcon]="true"
                     [type]="alert.type" [@shake]="alert.type === 'error'" dismissible>
-    {{alert.message}}
+    {{ alert.message }}
   </reflection-alert>
   <form action="" class="form w-full h-full flex flex-col">
     <div class="h-full flex flex-row justify-between">
@@ -56,25 +56,25 @@
 
     <!--  Product Price Field  -->
     <!-- Tag Selection Field -->
-<!--    <div class="col-span-5 flex flex-col">-->
-<!--      <span class="label">Tags</span>-->
-<!--      <ng-select [searchable]="true" [multiple]="true"-->
-<!--                 dropdownPosition="bottom"-->
-<!--                 [virtualScroll]="true" appendTo="body"-->
-<!--                 [formControlName]="'tags'"-->
-<!--                 class="col-span-full">-->
-<!--        <ng-option *ngFor="let tag of this.tagList" [value]="tag">{{tag}}</ng-option>-->
-<!--      </ng-select>-->
-<!--      <span class="field-error" *ngIf="tags.hasError('required') && tags.touched">-->
-<!--        Tag is required-->
-<!--      </span>-->
-<!--    </div>-->
+    <!--    <div class="col-span-5 flex flex-col">-->
+    <!--      <span class="label">Tags</span>-->
+    <!--      <ng-select [searchable]="true" [multiple]="true"-->
+    <!--                 dropdownPosition="bottom"-->
+    <!--                 [virtualScroll]="true" appendTo="body"-->
+    <!--                 [formControlName]="'tags'"-->
+    <!--                 class="col-span-full">-->
+    <!--        <ng-option *ngFor="let tag of this.tagList" [value]="tag">{{tag}}</ng-option>-->
+    <!--      </ng-select>-->
+    <!--      <span class="field-error" *ngIf="tags.hasError('required') && tags.touched">-->
+    <!--        Tag is required-->
+    <!--      </span>-->
+    <!--    </div>-->
 
     <!--Select Gender Field-->
     <div class="col-span-full flex flex-col">
       <span class="label">Gender</span>
       <ng-select dropdownPosition="auto" [formControlName]="'gender'">
-        <ng-option *ngFor="let gender of genders" [value]="gender">{{gender}}</ng-option>
+        <ng-option *ngFor="let gender of genders" [value]="gender">{{ gender }}</ng-option>
       </ng-select>
       <span class="field-error" *ngIf="gender.hasError('required') && gender.touched">
         Gender is required
@@ -85,7 +85,7 @@
     <div class="col-span-5 flex flex-col">
       <span class="label">Main Category</span>
       <ng-select dropdownPosition="auto" (change)="onMainCategoryChange()" [formControlName]="'mainCategory'">
-        <ng-option *ngFor="let category of this.mainCategories" [value]="category.id">{{category.name}}</ng-option>
+        <ng-option *ngFor="let category of this.mainCategories" [value]="category.id">{{ category.name }}</ng-option>
       </ng-select>
       <span class="field-error" *ngIf="mainCategory.hasError('required') && mainCategory.touched">
         Main Category is required
@@ -96,7 +96,7 @@
     <div class="col-span-6 col-end-13 flex flex-col">
       <span class="label">Sub Category</span>
       <ng-select dropdownPosition="auto" [formControlName]="'subCategory'">
-        <ng-option *ngFor="let category of this.subCategories" [value]="category.id">{{category.name}}</ng-option>
+        <ng-option *ngFor="let category of this.subCategories" [value]="category.id">{{ category.name }}</ng-option>
       </ng-select>
       <span class="field-error" *ngIf="subCategory.hasError('required') && subCategory.touched">
         SubCategory is required
@@ -104,11 +104,11 @@
     </div>
 
 
-
     <!-- Product Description Field -->
     <div class="col-span-full flex flex-col">
       <span class="label">Product Description</span>
-      <textarea style="height: 15rem" maxlength="300" class="field resize-none" [formControlName]="'description'"></textarea>
+      <textarea style="height: 15rem" maxlength="300" class="field resize-none"
+                [formControlName]="'description'"></textarea>
       <span class="hint">Do not exceed 300 characters</span>
     </div>
   </form>
@@ -132,18 +132,32 @@
   <virtual-scroller class="h-full mt-4" #scroll [items]="selectedColors">
     <div *ngFor="let item of selectedColors" class="col-span-full mt-4">
       <div class="flex flex-row justify-between">
-        <span class="font-bold text-lg w-40 inline-block h-12 rounded-lg border" [ngStyle]="{'background-color': item}"></span>
-        <!--        delete button-->
+        <div class="flex flex-row">
+          <span class="font-bold text-lg w-40 inline-block h-12 rounded-lg border"
+                [ngStyle]="{'background-color': item}"></span>
+          <input class="field" type="text" value="{{getVariantName(item)}}" placeholder="Color Name" (change)="onColorNameChange($event, item)">
+          <!-- delete button-->
+        </div>
         <button mat-icon-button class="ml-4" (click)="deleteColor(item)">
           <mat-icon color="warn">delete</mat-icon>
         </button>
       </div>
+      <div class="flex flex-row justify-between mt-2">
+        <input class="field" type="number" placeholder="Price" value="{{getVariantPrice(item)}}" (change)="onColorPriceChange($event, item)">
+        <input class="field" type="number" placeholder="Quantity" value="{{getVariantQty(item)}}" (change)="onColorQtyChange($event, item)">
+      </div>
       <div class="col-span-full grid grid-cols-12 gap-x-2 h-56">
-        <app-image-upload initialImage="{{getInitialImage(item, 'model')}}" (onImageChange)="onImageChange($event, item,'model')" class="col-span-4 h-56"></app-image-upload>
-        <app-image-upload initialImage="{{getInitialImage(item, 'thumbnail')}}" (onImageChange)="onImageChange($event, item,'thumbnail')" class="col-span-4 h-56"></app-image-upload>
+        <app-image-upload initialImage="{{getInitialImage(item, 'model')}}"
+                          (onImageChange)="onImageChange($event, item,'model')"
+                          class="col-span-4 h-56"></app-image-upload>
+        <app-image-upload initialImage="{{getInitialImage(item, 'thumbnail')}}"
+                          (onImageChange)="onImageChange($event, item,'thumbnail')"
+                          class="col-span-4 h-56"></app-image-upload>
         <div class="col-span-4 space-y-2 grid grid-rows-2 h-56">
-          <app-image-upload initialImage="{{getInitialImage(item, 'left')}}" class="row-span-1" (onImageChange)="onImageChange($event, item,'left')"></app-image-upload>
-          <app-image-upload initialImage="{{getInitialImage(item, 'right')}}" class="row-span-1 text-sm" (onImageChange)="onImageChange($event, item,'right')"></app-image-upload>
+          <app-image-upload initialImage="{{getInitialImage(item, 'left')}}" class="row-span-1"
+                            (onImageChange)="onImageChange($event, item,'left')"></app-image-upload>
+          <app-image-upload initialImage="{{getInitialImage(item, 'right')}}" class="row-span-1 text-sm"
+                            (onImageChange)="onImageChange($event, item,'right')"></app-image-upload>
         </div>
       </div>
       <div class="h-4"></div>

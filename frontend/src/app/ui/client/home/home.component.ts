@@ -1,5 +1,5 @@
 import {Component, OnInit, ViewEncapsulation} from '@angular/core';
-import {ProductInterface} from "../../../interfaces";
+import {Product} from "../../../interfaces";
 import {Router} from "@angular/router";
 
 @Component({
@@ -10,7 +10,7 @@ import {Router} from "@angular/router";
 export class LandingHomeComponent implements OnInit{
     slider: any;
     defaultTransform: any;
-    products: ProductInterface[] = [];
+    products: Product[] = [];
 
     constructor(
       private _router: Router,

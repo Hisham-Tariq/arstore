@@ -19,7 +19,7 @@
           <div class="font-medium tracking-tight text-secondary text-lg uppercase">Order</div>
           <div class="font-medium text-lg">{{order?.id}}</div>
           <div class="font-medium tracking-tight text-secondary text-lg">ORDER DATE</div>
-          <div class="font-medium text-lg">Jul 19, 2022</div>
+          <div class="font-medium text-lg">{{order.createdAt | date:'medium' }}</div>
           <!--          <div class="font-medium tracking-tight text-secondary">DUE DATE</div>-->
           <!--          <div class="font-medium">Aug 19, 2022</div>-->
           <!--          <div class="font-medium tracking-tight text-secondary">TOTAL DUE</div>-->
@@ -33,21 +33,21 @@
               src="">
           </div>
           <div class="pl-10 border-l text-md">
-            <div class="font-medium">Reflection Inc.</div>
+            <div class="font-medium">AR Inc.</div>
             <div>Address: Street XYZ</div>
-            <div>City XYZ, Pakistan</div>
-            <div>+923208041633</div>
-            <div>reflectionstore.rs@gmail.com</div>
-            <div>www.reflection.store</div>
+            <div>City XYZ, UK</div>
+            <div>+4488282828</div>
+            <div>nayab@gmail.com</div>
+            <div>www.ar.store</div>
           </div>
         </div>
       </div>
 
       <div class="text-md">
-        <div class="text-xl font-medium">{{order?.firstName}} {{order?.lastName}}</div>
-        <div>{{order?.address}}</div>
+        <div class="text-xl font-medium">{{order?.user.firstName}} {{order?.user.firstName}}</div>
+        <div>{{order?.user.address}}</div>
 <!--        <div>{{order?.firstName}}@company.com</div>-->
-        <div>{{order?.phone}}</div>
+        <div>{{order?.user.phone}}</div>
       </div>
 
       <div class="grid grid-cols-12 gap-x-1 mt-12">
@@ -65,12 +65,12 @@
         <!-- Item -->
         <div *ngFor="let p of order?.products; index as i" class="text-sm col-span-12 grid grid-cols-12 gap-x-1 invoice-row">
           <div class="col-span-8 text-sm font-medium flex items-center">
-            <img src="{{p.thumbnail}}" alt="{{p.name}} thumbnail" class="print:hidden h-8">
-            <span>{{p.name}}</span>
+            <img src="{{findVariant(p.product, p.variantName).images.thumbnail}}" alt="{{p.product.name}} thumbnail" class="print:hidden h-8">
+            <span>{{p.product.name}}</span>
           </div>
-          <div class="self-center text-right">RS. {{p.price}}</div>
+          <div class="self-center text-right">RS. {{findVariant(p.product, p.variantName).price}}</div>
           <div class="self-center text-right">{{p.quantity}}</div>
-          <div class="col-span-2 self-center text-right">RS. {{p.price * p.quantity}}.00</div>
+          <div class="col-span-2 self-center text-right">RS. {{findVariant(p.product, p.variantName).price * p.quantity}}.00</div>
           <!-- Divider -->
           <div *ngIf="i !== order?.products.length -1" class="col-span-12 my-4 border-b"></div>
         </div>
@@ -134,7 +134,7 @@
         <!-- Subtotal -->
         <div class="col-span-12 grid grid-cols-12 gap-x-1 invoice-row">
           <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SUBTOTAL</div>
-          <div class="col-span-2 text-right text-lg">${{order?.totalPrice}}.00</div>
+          <div class="col-span-2 text-right text-lg">RS. {{order?.totalAmount}}.00</div>
         </div>
 <!--        <div class="col-span-10 self-center font-medium tracking-tight text-secondary">SUBTOTAL</div>-->
 <!--        <div class="col-span-2 text-right text-lg">${{order?.totalBill}}.00</div>-->
@@ -145,7 +145,7 @@
         <!-- Tax -->
         <div class="col-span-12 grid grid-cols-12 gap-x-1 invoice-row">
           <div class="col-span-10 self-center font-medium tracking-tight text-secondary">TAX</div>
-          <div class="col-span-2 text-right text-lg">$0.00</div>
+          <div class="col-span-2 text-right text-lg">RS. 0.00</div>
         </div>
 
         <!-- Divider -->
@@ -154,7 +154,7 @@
         <!-- Discount -->
         <div class="col-span-12 grid grid-cols-12 gap-x-1 invoice-row">
           <div class="col-span-10 self-center font-medium tracking-tight text-secondary">DISCOUNT</div>
-          <div class="col-span-2 text-right text-lg">$0.00</div>
+          <div class="col-span-2 text-right text-lg">RS. 0.00</div>
         </div>
 
 
@@ -165,7 +165,7 @@
         <!-- Total -->
         <div class="col-span-12 grid grid-cols-12 gap-x-1 invoice-row">
           <div class="col-span-10 self-center font-medium tracking-tight text-secondary">TOTAL</div>
-          <div class="col-span-2 text-right text-lg">${{order?.totalPrice}}.00</div>
+          <div class="col-span-2 text-right text-lg">RS. {{order?.totalAmount}}.00</div>
         </div>
       </div>
 

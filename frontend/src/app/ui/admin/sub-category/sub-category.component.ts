@@ -125,7 +125,7 @@ export class SubCategoryComponent implements AfterViewInit {
 
   delete() {
     // delete the main category by id
-    this.productService.deleteFromSubCategory(this.itemSelectedForDelete.id);
+    // this.productService.deleteFromSubCategory(this.itemSelectedForDelete.id);
     this.showAlertOfWith('success', 'Successfully Deleted the Sub Category');
     this.subCategoryService.deleteSubCategory(this.itemSelectedForDelete.id).then((res) => {
       this.showAlertOfWith('success', 'Successfully Deleted the Sub Category');

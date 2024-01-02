@@ -12,7 +12,7 @@ import {IEvents} from "../../../interfaces/IEvents";
 import {ProductService} from "../../../services/Product/product.service";
 import {filter} from "rxjs";
 import {map} from "rxjs/operators";
-import {ProductInterface} from "../../../interfaces";
+import {Product} from "../../../interfaces";
 import {randomId} from "../../../utils";
 
 @Component({
@@ -31,7 +31,7 @@ export class EventsComponent implements AfterViewInit {
   };
   showAlert: boolean = false;
 
-  products: ProductInterface[] = [];
+  products: Product[] = [];
 
   @ViewChild('deleteConfirmationModal') deleteConfirmationModal: any;
   isAskingForConfirmation: boolean = false;
@@ -63,12 +63,12 @@ export class EventsComponent implements AfterViewInit {
   ) {
    // this.data = new MatTableDataSource<any>(this.allEvents);
     this.dataSource = new MatTableDataSource<IEvents>();
-    this.productService.data.pipe(map(value => {
-      // return all who have no discount
-      return value.filter(product => product.discount === 0);
-    })).subscribe(data => {
-      this.products = data;
-    });
+    // this.productService.data.pipe(map(value => {
+    //   // return all who have no discount
+    //   return value.filter(product => product.discount === 0);
+    // })).subscribe(data => {
+    //   this.products = data;
+    // });
 
     manageEventService.data.subscribe(value => {
       this.dataSource.data = value;

@@ -6,7 +6,7 @@ import {firstValueFrom, Observable} from 'rxjs';
   providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000/api/v1'; // Replace with your actual API URL
+  private apiUrl = 'https://localhost:3000/api/v1'; // Replace with your actual API URL
 
   constructor(private http: HttpClient) {
   }
@@ -66,6 +66,15 @@ export class ApiService {
   patch<T>(endpoint: string, data: any):  Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
     return firstValueFrom(this.http.patch<T>(url, data, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    }));
+  }
+
+  upload<T>(endpoint: string, data: any): Promise<T> {
+    const url = `${this.apiUrl}/${endpoint}`;
+    return firstValueFrom(this.http.post<T>(url, data, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }

@@ -18,7 +18,8 @@ function authJwt(req, res, next) {
             {url: /\/api\/v1\/products(.*)/, methods: ['GET', 'OPTIONS']},
             {url: /\/api\/v1\/categories(.*)/, methods: ['GET', 'OPTIONS']},
             `${api}/auth/register`,
-            `${api}/auth/login`
+            `${api}/auth/login`,
+            `${api}/csrf-token`,
         ]
     })
 

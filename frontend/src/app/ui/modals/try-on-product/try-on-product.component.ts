@@ -2,8 +2,6 @@ import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from
 import {Platform} from "@angular/cdk/platform";
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import { Inject } from '@angular/core';
-import {getBlob, ref} from "@firebase/storage"
-
 // import * as faceLandmarksDetection from "@tensorflow-models/face-landmarks-detection";
 import {
   createDetector,
@@ -13,7 +11,7 @@ import {
   MediaPipeFaceMeshTfjsEstimationConfig,
   SupportedModels,
 } from '@tensorflow-models/face-landmarks-detection';
-import {ProductItem} from "../../../interfaces";
+import {Product} from "../../../interfaces";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {take} from "lodash-es";
 
@@ -36,6 +34,7 @@ export class TryOnProductComponent implements OnInit, AfterViewInit,OnDestroy {
   stream: MediaStream;
   isWebcamAccessAllowed: boolean = false;
   predictedFace: Face;
+  modelElement: HTMLImageElement;
 
   get videoHeight() {
     return this.tryOnWebCam.nativeElement.videoHeight;
@@ -82,19 +81,20 @@ export class TryOnProductComponent implements OnInit, AfterViewInit,OnDestroy {
   }
 
   get retailPrice() {
-    return this.product.stock[this.selectedColor].retailerPrice;
+    return this.product.variants.find((value) => value.colorCode == this.selectedColor)!.price;
   }
 
   get discountedPrice() {
-    return this.retailPrice - ((this.retailPrice * this.product.discount) / 100);
+    return this.retailPrice;
   }
 
   updateProductPrice() {
-    if (this.product.discount == 0) {
-      this.productPriceView.nativeElement.innerText = 'RS. ' + this.discountedPrice;
-    } else {
-      this.productPriceView.nativeElement.innerHTML = `<del>RS. ${this.retailPrice}</del> RS. ${this.discountedPrice} `;
-    }
+    this.productPriceView.nativeElement.innerText = 'RS. ' + this.retailPrice;
+    // if (this.product.discount == 0) {
+    //
+    // } else {
+    //   this.productPriceView.nativeElement.innerHTML = `<del>RS. ${this.retailPrice}</del> RS. ${this.discountedPrice} `;
+    // }
   }
 
 
@@ -103,7 +103,7 @@ export class TryOnProductComponent implements OnInit, AfterViewInit,OnDestroy {
     private _platform: Platform,
     private http: HttpClient,
     public dialogRef: MatDialogRef<TryOnProductComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: {product: ProductItem, selectedColor: string, addToCart: Function}
+    @Inject(MAT_DIALOG_DATA) public data: {product: Product, selectedColor: string, addToCart: Function}
   ) {
     this.isMobile = this._platform.ANDROID || this._platform.IOS || false;
 
@@ -116,24 +116,6 @@ export class TryOnProductComponent implements OnInit, AfterViewInit,OnDestroy {
     this.updateProductPrice();
     await this.setupCamera();
     this.model = await this.loadFaceLandmarkDetectionModel();
-    // let httpOptions = {
-    //   headers: new HttpHeaders()
-    // };
-    //
-    // httpOptions.headers.append('Access-Control-Allow-Origin', '*');
-    // this.http.request('GET', this.modelImageUrl, httpOptions).subscribe(res => {
-    //   console.log(res);
-    // });
-    // this.http.request('POST', this.modelImageUrl).subscribe(res => {
-    //   // @ts-ignore
-    //   let imagePath = res['name'];
-    //   console.log(res);
-    //   let imageRef = ref(getStorage(), imagePath);
-    //   getBlob(imageRef).then(blob => {
-    //     console.log(blob);
-    //   });
-    //
-    // });
     this.renderPrediction();
   }
 
@@ -182,9 +164,9 @@ export class TryOnProductComponent implements OnInit, AfterViewInit,OnDestroy {
     this.video.crossOrigin = 'anonymous';
     this.ctx.drawImage(this.video, 0, 0, this.video.width, this.video.height, 0, 0, this.canvas.width, this.canvas.height);
 
-    if(this.product.mainCategoryDetail.name.toLowerCase() == "glasses"){
+    if(this.product.mainCategory.name.toLowerCase() == "glasses"){
       this.drawGlasses()
-    } else if(this.product.mainCategoryDetail.name.toLowerCase() == "lenses") {
+    } else if(this.product.mainCategory.name.toLowerCase() == "lenses") {
       this.drawLens();
     } else{
       alert("Not Supported yet");
@@ -201,7 +183,7 @@ export class TryOnProductComponent implements OnInit, AfterViewInit,OnDestroy {
     // this.drawPointOnCanvasAt(keyPoints[123]);
     // this.drawPointOnCanvasAt(keyPoints[276]);
     // this.drawPointOnCanvasAt(keyPoints[352]);
-    //
+    // //
     // this.drawLineFromToKeypoint(keyPoints[70], keyPoints[123]);
     // this.drawLineFromToKeypoint(keyPoints[70], keyPoints[276]);
     // this.drawLineFromToKeypoint(keyPoints[276], keyPoints[352]);
@@ -257,18 +239,12 @@ export class TryOnProductComponent implements OnInit, AfterViewInit,OnDestroy {
   // }
 
   get modelImageElement(): HTMLImageElement {
+    if (this.modelElement) return this.modelElement;
     let img = document.createElement("img");
     // get the image using https://www.flaticon.com/free-icon/glasses_16087
     img.src=this.modelImageUrl;
     img.crossOrigin = "anonymous";
-    // let httpOptions = {
-    //   headers: new HttpHeaders()
-    // };
-    //
-    // httpOptions.headers.append('Access-Control-Allow-Origin', '*');
-    // this.http.request('POST', this.modelImageUrl, httpOptions).subscribe(res => {
-    //   console.log(res);
-    // });
+    this.modelElement = img;
     return img;
   }
 
@@ -367,5 +343,4 @@ const ImageDataToBlob = function(imageData: ImageData) {
     canvas.toBlob(resolve); // implied image/png format
   })
 }
-
 
