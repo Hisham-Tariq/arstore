@@ -76,12 +76,7 @@ const appearance: MatFormFieldDefaultOptions = {
     {
       provide: LAZYLOAD_IMAGE_HOOKS,
       useClass: ScrollHooks,
-    },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: CSRFInterceptor,
-      multi: true,
-    },
+    }
   ],
   bootstrap: [AppComponent],
 })

@@ -1,6 +1,6 @@
-import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {firstValueFrom, Observable} from 'rxjs';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { firstValueFrom, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -8,8 +8,7 @@ import {firstValueFrom, Observable} from 'rxjs';
 export class ApiService {
   private apiUrl = 'https://localhost:3000/api/v1'; // Replace with your actual API URL
 
-  constructor(private http: HttpClient) {
-  }
+  constructor(private http: HttpClient) {}
 
   private createHeaders(): HttpHeaders {
     const headers = new HttpHeaders({
@@ -26,58 +25,73 @@ export class ApiService {
 
   get<T>(endpoint: string): Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
-    console.log({headers: this.createHeaders()});
-    return firstValueFrom(this.http.get<T>(url, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    }));
+    return firstValueFrom(
+      this.http.get<T>(url, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true,
+      })
+    );
   }
-
-
 
   post<T>(endpoint: string, data: any): Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
-    return firstValueFrom(this.http.post<T>(url, data, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    }));
+    return firstValueFrom(
+      this.http.post<T>(url, data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true,
+      })
+    );
   }
 
   put<T>(endpoint: string, data: any): Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
-    return firstValueFrom(this.http.put<T>(url, data, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    }));
+    return firstValueFrom(
+      this.http.put<T>(url, data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true,
+      })
+    );
   }
 
   delete<T>(endpoint: string): Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
-    return firstValueFrom(this.http.delete<T>(url, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    }));
+    return firstValueFrom(
+      this.http.delete<T>(url, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true,
+      })
+    );
   }
 
-  patch<T>(endpoint: string, data: any):  Promise<T> {
+  patch<T>(endpoint: string, data: any): Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
-    return firstValueFrom(this.http.patch<T>(url, data, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    }));
+    return firstValueFrom(
+      this.http.patch<T>(url, data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true,
+      })
+    );
   }
 
   upload<T>(endpoint: string, data: any): Promise<T> {
     const url = `${this.apiUrl}/${endpoint}`;
-    return firstValueFrom(this.http.post<T>(url, data, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      }
-    }));
+    return firstValueFrom(
+      this.http.post<T>(url, data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        withCredentials: true,
+      })
+    );
   }
 }

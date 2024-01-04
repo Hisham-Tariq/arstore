@@ -1,14 +1,13 @@
-import {Injectable} from '@angular/core';
-import {ReflectionSplashScreenService} from '../splash-screen';
-import {ReflectionUser} from '../../interfaces';
-import {Router} from '@angular/router';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {map, tap, catchError} from 'rxjs/operators';
-import {ApiService} from '../ApiBaseService/api.service';
+import { Injectable } from '@angular/core';
+import { ReflectionSplashScreenService } from '../splash-screen';
+import { ReflectionUser } from '../../interfaces';
+import { Router } from '@angular/router';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, tap, catchError } from 'rxjs/operators';
+import { ApiService } from '../ApiBaseService/api.service';
 
 interface AuthResponse {
   user: ReflectionUser;
-  token: string;
 }
 
 @Injectable({
@@ -17,36 +16,38 @@ interface AuthResponse {
 export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   private authStateSubject = new BehaviorSubject<ReflectionUser | null>(null);
-  authState$: Observable<ReflectionUser | null> = this.authStateSubject.asObservable();
+  authState$: Observable<ReflectionUser | null> =
+    this.authStateSubject.asObservable();
   private apiUrl = 'auth'; // Assuming 'auth' is the endpoint for registration and login
 
   constructor(
     private apiService: ApiService,
     private splashService: ReflectionSplashScreenService,
-    private router: Router,
+    private router: Router
   ) {
     // get the current user record if status code is 200 user is logged in else not
-    this.apiService.get<ReflectionUser>('users/me')
-      .then(
-        (response) => {
-          const authResponse = <AuthResponse>{
-            user: response,
-            token: localStorage.getItem('token') || '',
-          };
-          this.handleAuthentication(authResponse);
-        },
-      ).catch((err) => {
-      this.isAuthenticatedSubject.next(false);
-      this.authStateSubject.next(null);
-      this.handleError(err)
-    })
+    this.apiService
+      .get<ReflectionUser>('users/me')
+      .then((response) => {
+        const authResponse = <AuthResponse>{
+          user: response,
+        };
+        this.handleAuthentication(authResponse);
+      })
+      .catch((err) => {
+        this.isAuthenticatedSubject.next(false);
+        this.authStateSubject.next(null);
+        this.handleError(err);
+      });
     this.updateAuthState();
   }
 
   async register(data: RegisterUserData): Promise<AuthResponse> {
     try {
-      const response = await this.apiService
-        .post<AuthResponse>(`${this.apiUrl}/register`, data);
+      const response = await this.apiService.post<AuthResponse>(
+        `${this.apiUrl}/register`,
+        data
+      );
       this.handleAuthentication(response);
       return response;
     } catch (error) {
@@ -56,8 +57,10 @@ export class AuthService {
 
   async login(data: LoginUserData): Promise<AuthResponse> {
     try {
-      const response = await this.apiService
-        .post<AuthResponse>(`${this.apiUrl}/login`, data);
+      const response = await this.apiService.post<AuthResponse>(
+        `${this.apiUrl}/login`,
+        data
+      );
       this.handleAuthentication(response);
       return response;
     } catch (error) {
@@ -74,7 +77,6 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
     this.isAuthenticatedSubject.next(false);
     this.authStateSubject.next(null);
     //   navigate to home page
@@ -82,9 +84,9 @@ export class AuthService {
   }
 
   private handleAuthentication(response: AuthResponse): void {
-    const {user, token} = response;
-    if (user && token) {
-      localStorage.setItem('token', token);
+    // Read the token from the cookie
+    const { user } = response;
+    if (user) {
       this.isAuthenticatedSubject.next(true);
       this.authStateSubject.next(user);
     }

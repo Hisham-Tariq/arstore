@@ -4,6 +4,7 @@ const morgan = require("morgan");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
+const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 const fs = require("fs");
 const path = require("path");
@@ -22,13 +23,17 @@ const authJwt = require("./helpers/jwt");
 const errorHandler = require("./helpers/error-handler");
 const api = process.env.API_URL;
 
-app.use(cors());
+app.use(cors({
+    origin: "https://localhost:4200",
+    credentials: true,
+}));
 app.options("*", cors());
 
 // Middlewares
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "50mb" }));
 app.use(morgan("tiny"));
+app.use(cookieParser());
 app.use(authJwt());
 app.use(
     cookieSession({

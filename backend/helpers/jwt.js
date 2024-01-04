@@ -5,7 +5,9 @@ function authJwt(req, res, next) {
     const secret = process.env.secret;
     const api = process.env.API_URL;
     const tempMiddle = (req, res, next) => {
-        console.log(req.headers)
+        console.log("Cookies", req.cookies);
+        console.log("header-Cookies", req.headers.cookie);
+        req.headers['authorization'] = 'Bearer ' + req.cookies.token;
         next()
     };
     const jwtMiddleware = jwt({
@@ -46,15 +48,6 @@ function authJwt(req, res, next) {
         }
     };
 
-    return [jwtMiddleware, fetchUserDetails];
+    return [tempMiddle, jwtMiddleware, fetchUserDetails];
 }
-
-async function isRevoked(req, payload, done) {
-    if (!payload.isAdmin) {
-        done(null, true)
-    }
-
-    done();
-}
-
 module.exports = authJwt;
